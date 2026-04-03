@@ -1,0 +1,36 @@
+# GIOE - Sistema de Avaliação de Pedidos de Apoio
+
+## TODO
+
+### Backend
+- [x] Schema da base de dados (tabelas: users, evaluations)
+- [x] Migração e aplicação do schema
+- [x] Helpers de DB para avaliações e utilizadores
+- [x] Router: registo com validação @gnr.pt
+- [x] Router: login com email/password
+- [x] Router: CRUD de avaliações
+- [x] Router: estatísticas (total, média, por NEOP, por intervalo de pontuação)
+- [x] Router: gestão de utilizadores (listar, eliminar)
+- [x] Testes Vitest para routers principais
+
+### Frontend
+- [x] Tema verde militar (CSS variables, gradiente #1a472a → #2d5a3d)
+- [x] Upload e integração do logo GNR/GIOE
+- [x] Página de autenticação (login + registo com toggle)
+- [x] Validação de email @gnr.pt no registo
+- [x] Layout principal com header e tabs de navegação
+- [x] Formulário de avaliação com cálculo automático de pontuação
+  - [x] Secção POC e Despacho
+  - [x] Secção Suspeitos (mandados, quantidade)
+  - [x] Secção Atividade Criminal (modalidade, tipo, antecedentes, FSS)
+  - [x] Secção Meios (posse e uso de arma)
+  - [x] Secção Local (tipologia, contexto, segurança)
+  - [x] Secção Avaliação (avaliador, data, parecer)
+  - [x] Display de pontuação total e classificação NEOP
+- [x] Diálogo de confirmação antes de guardar avaliação
+- [x] Dashboard com tabela de avaliações
+- [x] Filtros por NEOP e por avaliador no dashboard
+- [x] Exportação para Excel
+- [x] Página de estatísticas com cartões e gráficos
+- [x] Gestão de utilizadores com listagem e eliminação
+- [x] Responsividade mobile

@@ -1,28 +1,183 @@
+import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import {
+  createEvaluation,
+  deleteEvaluation,
+  deleteUser,
+  getAllUsers,
+  getEvaluations,
+  getStatistics,
+} from "./db";
 
+// ─── Scoring helper ───────────────────────────────────────────────────────────
+const TIPO_SCORES: Record<string, number> = {
+  trafico: 7,
+  assalto: 6,
+  homicidio: 10,
+  sequestro: 9,
+  violencia: 8,
+  outro: 4,
+};
+const POSSE_SCORES: Record<string, number> = { registada: 8, provavel: 6, improvavel: 2 };
+const USO_SCORES: Record<string, number> = { haRegisto: 10, naoHaRegisto: 3 };
+const QTD_SCORES: Record<string, number> = { "1": 1, "2": 2, "3": 4, "4+": 6 };
+
+function calcScore(d: {
+  mandadoDetencao?: number | null;
+  mandadoBusca?: number | null;
+  quantidadeSuspeitos?: string | null;
+  modalidadeIsolado?: number | null;
+  modalidadeAssociacao?: number | null;
+  tipoCriminal?: string | null;
+  antecedentesContraPessoas?: number | null;
+  antecedentesContraPatrimonio?: number | null;
+  antecedentesOutros?: number | null;
+  antecedentesFSS?: string | null;
+  posseArma?: string | null;
+  usoArma?: string | null;
+  tipologiaApartamento?: number | null;
+  tipologiaMoradia?: number | null;
+  tipologiaOutro?: number | null;
+  contextoIsolado?: number | null;
+  contextoBairroSocial?: number | null;
+  contextoMeioUrbano?: number | null;
+  contextoMeioRural?: number | null;
+  segurancaCaes?: number | null;
+  segurancaPortaBlindada?: number | null;
+  segurancaOutrasMedidas?: number | null;
+}): { pontuacao: number; neop: string } {
+  let s = 0;
+  if (d.mandadoDetencao) s += 5;
+  if (d.mandadoBusca) s += 3;
+  s += QTD_SCORES[d.quantidadeSuspeitos ?? "1"] ?? 1;
+  if (d.modalidadeIsolado) s += 2;
+  if (d.modalidadeAssociacao) s += 8;
+  s += TIPO_SCORES[d.tipoCriminal ?? "outro"] ?? 4;
+  if (d.antecedentesContraPessoas) s += 8;
+  if (d.antecedentesContraPatrimonio) s += 5;
+  if (d.antecedentesOutros) s += 3;
+  if (d.antecedentesFSS === "sim") s += 9;
+  s += POSSE_SCORES[d.posseArma ?? "improvavel"] ?? 2;
+  s += USO_SCORES[d.usoArma ?? "naoHaRegisto"] ?? 3;
+
+  // Tipologia: apenas o máximo
+  const tipScores = [];
+  if (d.tipologiaApartamento) tipScores.push(3);
+  if (d.tipologiaMoradia) tipScores.push(4);
+  if (d.tipologiaOutro) tipScores.push(5);
+  if (tipScores.length > 0) s += Math.max(...tipScores);
+
+  // Contexto: apenas o máximo
+  const ctxScores = [];
+  if (d.contextoIsolado) ctxScores.push(2);
+  if (d.contextoBairroSocial) ctxScores.push(7);
+  if (d.contextoMeioUrbano) ctxScores.push(5);
+  if (d.contextoMeioRural) ctxScores.push(3);
+  if (ctxScores.length > 0) s += Math.max(...ctxScores);
+
+  if (d.segurancaCaes) s += 4;
+  if (d.segurancaPortaBlindada) s += 6;
+  if (d.segurancaOutrasMedidas) s += 5;
+
+  const pontuacao = Math.min(s, 100);
+  const neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 50 ? "3º NEOP" : "4º NEOP";
+  return { pontuacao, neop };
+}
+
+// ─── Zod schemas ──────────────────────────────────────────────────────────────
+const EvaluationInput = z.object({
+  pocPosto: z.string().optional(),
+  pocNome: z.string().optional(),
+  pocContacto: z.string().optional(),
+  despacho: z.string().optional(),
+  mandadoDetencao: z.number().int().default(0),
+  mandadoBusca: z.number().int().default(0),
+  quantidadeSuspeitos: z.string().default("1"),
+  modalidadeIsolado: z.number().int().default(0),
+  modalidadeAssociacao: z.number().int().default(0),
+  tipoCriminal: z.string().default("outro"),
+  antecedentesContraPessoas: z.number().int().default(0),
+  antecedentesContraPatrimonio: z.number().int().default(0),
+  antecedentesOutros: z.number().int().default(0),
+  antecedentesFSS: z.string().default("nao"),
+  posseArma: z.string().default("improvavel"),
+  usoArma: z.string().default("naoHaRegisto"),
+  tipologiaApartamento: z.number().int().default(0),
+  tipologiaMoradia: z.number().int().default(0),
+  tipologiaOutro: z.number().int().default(0),
+  contextoIsolado: z.number().int().default(0),
+  contextoBairroSocial: z.number().int().default(0),
+  contextoMeioUrbano: z.number().int().default(0),
+  contextoMeioRural: z.number().int().default(0),
+  segurancaCaes: z.number().int().default(0),
+  segurancaPortaBlindada: z.number().int().default(0),
+  segurancaOutrasMedidas: z.number().int().default(0),
+  avaliador: z.string().optional(),
+  dataAvaliacao: z.string().optional(),
+  parecer: z.string().optional(),
+});
+
+// ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
+
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  evaluations: router({
+    list: protectedProcedure
+      .input(z.object({ neop: z.string().optional(), avaliador: z.string().optional() }))
+      .query(async ({ input }) => {
+        const rows = await getEvaluations(input);
+        return rows;
+      }),
+
+    create: protectedProcedure.input(EvaluationInput).mutation(async ({ input, ctx }) => {
+      const { pontuacao, neop } = calcScore(input);
+      await createEvaluation({ ...input, userId: ctx.user.id, pontuacao, neop });
+      return { success: true, pontuacao, neop };
+    }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ input }) => {
+        await deleteEvaluation(input.id);
+        return { success: true };
+      }),
+
+    preview: protectedProcedure.input(EvaluationInput).query(async ({ input }) => {
+      return calcScore(input);
+    }),
+  }),
+
+  statistics: router({
+    get: protectedProcedure.query(async () => {
+      const stats = await getStatistics();
+      return stats;
+    }),
+  }),
+
+  users: router({
+    list: protectedProcedure.query(async () => {
+      return getAllUsers();
+    }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ input }) => {
+        await deleteUser(input.id);
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

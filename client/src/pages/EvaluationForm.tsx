@@ -1,0 +1,384 @@
+import { useState, useCallback } from "react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Save, User, AlertTriangle, Crosshair, MapPin, ClipboardList } from "lucide-react";
+
+// ─── Scoring ─────────────────────────────────────────────────────────────────
+const TIPO_SCORES: Record<string, number> = {
+  trafico: 7, assalto: 6, homicidio: 10, sequestro: 9, violencia: 8, outro: 4,
+};
+const POSSE_SCORES: Record<string, number> = { registada: 8, provavel: 6, improvavel: 2 };
+const USO_SCORES: Record<string, number> = { haRegisto: 10, naoHaRegisto: 3 };
+const QTD_SCORES: Record<string, number> = { "1": 1, "2": 2, "3": 4, "4+": 6 };
+
+type FormState = {
+  pocPosto: string; pocNome: string; pocContacto: string; despacho: string;
+  mandadoDetencao: boolean; mandadoBusca: boolean;
+  quantidadeSuspeitos: string;
+  modalidadeIsolado: boolean; modalidadeAssociacao: boolean;
+  tipoCriminal: string;
+  antecedentesContraPessoas: boolean; antecedentesContraPatrimonio: boolean; antecedentesOutros: boolean;
+  antecedentesFSS: string;
+  posseArma: string; usoArma: string;
+  tipologiaApartamento: boolean; tipologiaMoradia: boolean; tipologiaOutro: boolean;
+  contextoIsolado: boolean; contextoBairroSocial: boolean; contextoMeioUrbano: boolean; contextoMeioRural: boolean;
+  segurancaCaes: boolean; segurancaPortaBlindada: boolean; segurancaOutrasMedidas: boolean;
+  avaliador: string; dataAvaliacao: string; parecer: string;
+};
+
+const DEFAULT: FormState = {
+  pocPosto: "", pocNome: "", pocContacto: "", despacho: "",
+  mandadoDetencao: false, mandadoBusca: false, quantidadeSuspeitos: "1",
+  modalidadeIsolado: false, modalidadeAssociacao: false, tipoCriminal: "outro",
+  antecedentesContraPessoas: false, antecedentesContraPatrimonio: false, antecedentesOutros: false,
+  antecedentesFSS: "nao", posseArma: "improvavel", usoArma: "naoHaRegisto",
+  tipologiaApartamento: false, tipologiaMoradia: false, tipologiaOutro: false,
+  contextoIsolado: false, contextoBairroSocial: false, contextoMeioUrbano: false, contextoMeioRural: false,
+  segurancaCaes: false, segurancaPortaBlindada: false, segurancaOutrasMedidas: false,
+  avaliador: "", dataAvaliacao: new Date().toISOString().split("T")[0], parecer: "",
+};
+
+function calcScore(f: FormState): { pontuacao: number; neop: string } {
+  let s = 0;
+  if (f.mandadoDetencao) s += 5;
+  if (f.mandadoBusca) s += 3;
+  s += QTD_SCORES[f.quantidadeSuspeitos] ?? 1;
+  if (f.modalidadeIsolado) s += 2;
+  if (f.modalidadeAssociacao) s += 8;
+  s += TIPO_SCORES[f.tipoCriminal] ?? 4;
+  if (f.antecedentesContraPessoas) s += 8;
+  if (f.antecedentesContraPatrimonio) s += 5;
+  if (f.antecedentesOutros) s += 3;
+  if (f.antecedentesFSS === "sim") s += 9;
+  s += POSSE_SCORES[f.posseArma] ?? 2;
+  s += USO_SCORES[f.usoArma] ?? 3;
+  const tipScores = [f.tipologiaApartamento && 3, f.tipologiaMoradia && 4, f.tipologiaOutro && 5].filter(Boolean) as number[];
+  if (tipScores.length > 0) s += Math.max(...tipScores);
+  const ctxScores = [f.contextoIsolado && 2, f.contextoBairroSocial && 7, f.contextoMeioUrbano && 5, f.contextoMeioRural && 3].filter(Boolean) as number[];
+  if (ctxScores.length > 0) s += Math.max(...ctxScores);
+  if (f.segurancaCaes) s += 4;
+  if (f.segurancaPortaBlindada) s += 6;
+  if (f.segurancaOutrasMedidas) s += 5;
+  const pontuacao = Math.min(s, 100);
+  const neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 50 ? "3º NEOP" : "4º NEOP";
+  return { pontuacao, neop };
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const SectionTitle = ({ icon, title }: { icon: React.ReactNode; title: string }) => (
+  <div className="flex items-center gap-2 mb-4">
+    <span style={{ color: "#1a472a" }}>{icon}</span>
+    <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#1a472a" }}>
+      {title}
+    </h3>
+  </div>
+);
+
+const Section = ({ children }: { children: React.ReactNode }) => (
+  <div className="bg-gray-50 rounded-xl p-5 mb-5 border-l-4" style={{ borderColor: "#1a472a" }}>
+    {children}
+  </div>
+);
+
+const CheckItem = ({
+  id, label, checked, onCheckedChange,
+}: { id: string; label: string; checked: boolean; onCheckedChange: (v: boolean) => void }) => (
+  <div className="flex items-center gap-2 py-1">
+    <Checkbox id={id} checked={checked} onCheckedChange={onCheckedChange}
+      className="data-[state=checked]:bg-[#1a472a] data-[state=checked]:border-[#1a472a]" />
+    <label htmlFor={id} className="text-sm cursor-pointer text-gray-700">{label}</label>
+  </div>
+);
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+export default function EvaluationForm() {
+  const [form, setForm] = useState<FormState>(DEFAULT);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const utils = trpc.useUtils();
+
+  const { pontuacao, neop } = calcScore(form);
+
+  const createMutation = trpc.evaluations.create.useMutation({
+    onSuccess: () => {
+      toast.success("Avaliação guardada com sucesso!");
+      setForm({ ...DEFAULT, dataAvaliacao: new Date().toISOString().split("T")[0] });
+      setShowConfirm(false);
+      utils.evaluations.list.invalidate();
+      utils.statistics.get.invalidate();
+    },
+    onError: (e) => toast.error("Erro ao guardar: " + e.message),
+  });
+
+  const set = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
+  const neopColor = neop === "4º NEOP" ? "#8b0000" : neop === "3º NEOP" ? "#b8860b" : "#1a472a";
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-xl font-bold mb-6" style={{ color: "#1a472a" }}>
+        Novo Formulário de Avaliação
+      </h2>
+
+      {/* POC e Despacho */}
+      <Section>
+        <SectionTitle icon={<User className="w-4 h-4" />} title="POC e Despacho" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Posto/Função</Label>
+            <Input placeholder="Ex: Sargento" value={form.pocPosto} onChange={(e) => set("pocPosto", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Nome</Label>
+            <Input placeholder="Nome completo" value={form.pocNome} onChange={(e) => set("pocNome", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Contacto</Label>
+            <Input placeholder="Telefone/Email" value={form.pocContacto} onChange={(e) => set("pocContacto", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+        </div>
+        <div>
+          <Label className="text-sm font-semibold text-gray-600 mb-1 block">Despacho</Label>
+          <Textarea placeholder="Registo do despacho..." value={form.despacho} onChange={(e) => set("despacho", e.target.value)} className="min-h-[80px] border-2 focus:border-[#1a472a]" />
+        </div>
+      </Section>
+
+      {/* Suspeitos */}
+      <Section>
+        <SectionTitle icon={<AlertTriangle className="w-4 h-4" />} title="Suspeito(s)" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Mandados</Label>
+            <CheckItem id="mandadoDetencao" label="Mandado de detenção (+5)" checked={form.mandadoDetencao} onCheckedChange={(v) => set("mandadoDetencao", v as boolean)} />
+            <CheckItem id="mandadoBusca" label="Mandado de busca (+3)" checked={form.mandadoBusca} onCheckedChange={(v) => set("mandadoBusca", v as boolean)} />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Quantidade de suspeitos</Label>
+            <Select value={form.quantidadeSuspeitos} onValueChange={(v) => set("quantidadeSuspeitos", v)}>
+              <SelectTrigger className="border-2 focus:border-[#1a472a]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 suspeito (+1)</SelectItem>
+                <SelectItem value="2">2 suspeitos (+2)</SelectItem>
+                <SelectItem value="3">3 suspeitos (+4)</SelectItem>
+                <SelectItem value="4+">4+ suspeitos (+6)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </Section>
+
+      {/* Atividade Criminal */}
+      <Section>
+        <SectionTitle icon={<Crosshair className="w-4 h-4" />} title="Atividade Criminal" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Modalidade</Label>
+            <CheckItem id="isolado" label="Isolado (+2)" checked={form.modalidadeIsolado}
+              onCheckedChange={(v) => { set("modalidadeIsolado", v as boolean); if (v) set("modalidadeAssociacao", false); }} />
+            <CheckItem id="associacao" label="Associação criminosa (+8)" checked={form.modalidadeAssociacao}
+              onCheckedChange={(v) => { set("modalidadeAssociacao", v as boolean); if (v) set("modalidadeIsolado", false); }} />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Tipo de atividade</Label>
+            <Select value={form.tipoCriminal} onValueChange={(v) => set("tipoCriminal", v)}>
+              <SelectTrigger className="border-2 focus:border-[#1a472a]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="trafico">Tráfico de droga (+7)</SelectItem>
+                <SelectItem value="assalto">Assalto/Roubo (+6)</SelectItem>
+                <SelectItem value="homicidio">Homicídio (+10)</SelectItem>
+                <SelectItem value="sequestro">Sequestro (+9)</SelectItem>
+                <SelectItem value="violencia">Violência grave (+8)</SelectItem>
+                <SelectItem value="outro">Outro (+4)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Antecedentes criminais</Label>
+            <CheckItem id="contraPessoas" label="Contra pessoas (+8)" checked={form.antecedentesContraPessoas} onCheckedChange={(v) => set("antecedentesContraPessoas", v as boolean)} />
+            <CheckItem id="contraPatrimonio" label="Contra o património (+5)" checked={form.antecedentesContraPatrimonio} onCheckedChange={(v) => set("antecedentesContraPatrimonio", v as boolean)} />
+            <CheckItem id="outrosAntecedentes" label="Outros (+3)" checked={form.antecedentesOutros} onCheckedChange={(v) => set("antecedentesOutros", v as boolean)} />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Antecedentes contra FSS</Label>
+            <RadioGroup value={form.antecedentesFSS} onValueChange={(v) => set("antecedentesFSS", v)} className="gap-2">
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="sim" id="fssSim" className="border-[#1a472a] text-[#1a472a]" />
+                <label htmlFor="fssSim" className="text-sm cursor-pointer text-gray-700">Sim (+9)</label>
+              </div>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value="nao" id="fssNao" className="border-[#1a472a] text-[#1a472a]" />
+                <label htmlFor="fssNao" className="text-sm cursor-pointer text-gray-700">Não</label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+      </Section>
+
+      {/* Meios */}
+      <Section>
+        <SectionTitle icon={<Crosshair className="w-4 h-4" />} title="Meios" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Posse de arma de fogo</Label>
+            <Select value={form.posseArma} onValueChange={(v) => set("posseArma", v)}>
+              <SelectTrigger className="border-2 focus:border-[#1a472a]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="registada">Registada (+8)</SelectItem>
+                <SelectItem value="provavel">Provável (+6)</SelectItem>
+                <SelectItem value="improvavel">Improvável (+2)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Uso efetivo de arma de fogo</Label>
+            <Select value={form.usoArma} onValueChange={(v) => set("usoArma", v)}>
+              <SelectTrigger className="border-2 focus:border-[#1a472a]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="haRegisto">Há registo (+10)</SelectItem>
+                <SelectItem value="naoHaRegisto">Não há registo (+3)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </Section>
+
+      {/* Local */}
+      <Section>
+        <SectionTitle icon={<MapPin className="w-4 h-4" />} title="Local" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Tipologia</Label>
+            <CheckItem id="apartamento" label="Apartamento (+3)" checked={form.tipologiaApartamento}
+              onCheckedChange={(v) => { set("tipologiaApartamento", v as boolean); if (v) { set("tipologiaMoradia", false); set("tipologiaOutro", false); } }} />
+            <CheckItem id="moradia" label="Moradia (+4)" checked={form.tipologiaMoradia}
+              onCheckedChange={(v) => { set("tipologiaMoradia", v as boolean); if (v) { set("tipologiaApartamento", false); set("tipologiaOutro", false); } }} />
+            <CheckItem id="outroLocal" label="Outro (+5)" checked={form.tipologiaOutro}
+              onCheckedChange={(v) => { set("tipologiaOutro", v as boolean); if (v) { set("tipologiaApartamento", false); set("tipologiaMoradia", false); } }} />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Contexto</Label>
+            <CheckItem id="isoladoLocal" label="Isolado (+2)" checked={form.contextoIsolado} onCheckedChange={(v) => set("contextoIsolado", v as boolean)} />
+            <CheckItem id="bairroSocial" label="Bairro social (+7)" checked={form.contextoBairroSocial} onCheckedChange={(v) => set("contextoBairroSocial", v as boolean)} />
+            <CheckItem id="meioUrbano" label="Meio urbano (+5)" checked={form.contextoMeioUrbano} onCheckedChange={(v) => set("contextoMeioUrbano", v as boolean)} />
+            <CheckItem id="meioRural" label="Meio rural (+3)" checked={form.contextoMeioRural} onCheckedChange={(v) => set("contextoMeioRural", v as boolean)} />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Características de segurança</Label>
+            <CheckItem id="caes" label="Cães (+4)" checked={form.segurancaCaes} onCheckedChange={(v) => set("segurancaCaes", v as boolean)} />
+            <CheckItem id="portaBlindada" label="Porta blindada (+6)" checked={form.segurancaPortaBlindada} onCheckedChange={(v) => set("segurancaPortaBlindada", v as boolean)} />
+            <CheckItem id="outrasMedidas" label="Outras medidas (+5)" checked={form.segurancaOutrasMedidas} onCheckedChange={(v) => set("segurancaOutrasMedidas", v as boolean)} />
+          </div>
+        </div>
+      </Section>
+
+      {/* Avaliação */}
+      <Section>
+        <SectionTitle icon={<ClipboardList className="w-4 h-4" />} title="Avaliação" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Avaliador (Posto/Nome)</Label>
+            <Input placeholder="Posto e nome do avaliador" value={form.avaliador} onChange={(e) => set("avaliador", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Data</Label>
+            <Input type="date" value={form.dataAvaliacao} onChange={(e) => set("dataAvaliacao", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+        </div>
+        <div>
+          <Label className="text-sm font-semibold text-gray-600 mb-1 block">Parecer</Label>
+          <Textarea placeholder="Registe aqui o seu parecer..." value={form.parecer} onChange={(e) => set("parecer", e.target.value)} className="min-h-[80px] border-2 focus:border-[#1a472a]" />
+        </div>
+      </Section>
+
+      {/* Score Display */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="text-white text-center py-5 px-4 rounded-xl" style={{ background: "linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%)" }}>
+          <p className="text-xs uppercase tracking-widest opacity-80 mb-1">Pontuação Total</p>
+          <p className="text-4xl font-bold">{pontuacao}<span className="text-xl font-normal opacity-70">/100</span></p>
+        </div>
+        <div className="text-white text-center py-5 px-4 rounded-xl" style={{ background: `linear-gradient(135deg, ${neopColor} 0%, ${neopColor}cc 100%)` }}>
+          <p className="text-xs uppercase tracking-widest opacity-80 mb-1">Classificação Recomendada</p>
+          <p className="text-3xl font-bold">{neop}</p>
+        </div>
+      </div>
+
+      <Button
+        className="w-full py-6 text-base font-bold"
+        style={{ background: "linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%)" }}
+        onClick={() => setShowConfirm(true)}
+      >
+        <Save className="w-5 h-5 mr-2" />
+        Guardar Avaliação
+      </Button>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle style={{ color: "#1a472a" }}>Confirmar Submissão</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600 mb-3">Tem a certeza que deseja guardar esta avaliação?</p>
+          <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1 border border-gray-200">
+            <p><strong>POC:</strong> {form.pocNome || "—"}</p>
+            <p><strong>Avaliador:</strong> {form.avaliador || "—"}</p>
+            <p><strong>Data:</strong> {form.dataAvaliacao}</p>
+            <p><strong>Pontuação:</strong> {pontuacao}/100</p>
+            <p><strong>NEOP:</strong> <span className="font-bold" style={{ color: neopColor }}>{neop}</span></p>
+          </div>
+          <DialogFooter className="gap-2 mt-4">
+            <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancelar</Button>
+            <Button
+              onClick={() => createMutation.mutate({
+                ...form,
+                mandadoDetencao: form.mandadoDetencao ? 1 : 0,
+                mandadoBusca: form.mandadoBusca ? 1 : 0,
+                modalidadeIsolado: form.modalidadeIsolado ? 1 : 0,
+                modalidadeAssociacao: form.modalidadeAssociacao ? 1 : 0,
+                antecedentesContraPessoas: form.antecedentesContraPessoas ? 1 : 0,
+                antecedentesContraPatrimonio: form.antecedentesContraPatrimonio ? 1 : 0,
+                antecedentesOutros: form.antecedentesOutros ? 1 : 0,
+                tipologiaApartamento: form.tipologiaApartamento ? 1 : 0,
+                tipologiaMoradia: form.tipologiaMoradia ? 1 : 0,
+                tipologiaOutro: form.tipologiaOutro ? 1 : 0,
+                contextoIsolado: form.contextoIsolado ? 1 : 0,
+                contextoBairroSocial: form.contextoBairroSocial ? 1 : 0,
+                contextoMeioUrbano: form.contextoMeioUrbano ? 1 : 0,
+                contextoMeioRural: form.contextoMeioRural ? 1 : 0,
+                segurancaCaes: form.segurancaCaes ? 1 : 0,
+                segurancaPortaBlindada: form.segurancaPortaBlindada ? 1 : 0,
+                segurancaOutrasMedidas: form.segurancaOutrasMedidas ? 1 : 0,
+              })}
+              disabled={createMutation.isPending}
+              style={{ background: "#1a472a" }}
+            >
+              {createMutation.isPending ? "A guardar..." : "Confirmar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
