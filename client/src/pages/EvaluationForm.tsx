@@ -58,7 +58,7 @@ const DEFAULT: FormState = {
   avaliador: "", dataAvaliacao: new Date().toISOString().split("T")[0], parecer: "",
 };
 
-function calcScore(f: FormState): { pontuacao: number; neop: string; complexidade: string; descricao: string } {
+function calcScore(f: FormState): { pontuacao: number; neop: string; complexidade: string; descricao: string; neopColor: string } {
   let s = 0;
   if (f.mandadoDetencao) s += 5;
   if (f.mandadoBusca) s += 3;
@@ -82,18 +82,21 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   const pontuacao = Math.min(s, 100);
   const neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 75 ? "3º NEOP" : "4º NEOP";
   
-  // Complexidade
+  // Complexidade e cores
   let complexidade = "Baixa";
   let descricao = "Operação de rotina - Procedimentos padrão";
+  let neopColor = "#22c55e"; // Verde para 2º NEOP
   if (neop === "3º NEOP") {
     complexidade = "Média";
     descricao = "Operação com risco moderado - Requer coordenação";
+    neopColor = "#f97316"; // Laranja para 3º NEOP
   } else if (neop === "4º NEOP") {
     complexidade = "Alta";
     descricao = "Necessita de planeamento especializado";
+    neopColor = "#ef4444"; // Vermelho para 4º NEOP
   }
   
-  return { pontuacao, neop, complexidade, descricao };
+  return { pontuacao, neop, complexidade, descricao, neopColor };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -128,7 +131,7 @@ export default function EvaluationForm() {
   const [showConfirm, setShowConfirm] = useState(false);
   const utils = trpc.useUtils();
 
-  const { pontuacao, neop, complexidade, descricao } = calcScore(form);
+  const { pontuacao, neop, complexidade, descricao, neopColor: neopColorFromCalc } = calcScore(form);
 
   const createMutation = trpc.evaluations.create.useMutation({
     onSuccess: () => {
@@ -145,7 +148,7 @@ export default function EvaluationForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const neopColor = neop === "4º NEOP" ? "#8b0000" : neop === "3º NEOP" ? "#b8860b" : "#1a472a";
+
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -331,7 +334,7 @@ export default function EvaluationForm() {
           <p className="text-xs uppercase tracking-widest opacity-80 mb-1">Pontuação Total</p>
           <p className="text-4xl font-bold">{pontuacao}<span className="text-xl font-normal opacity-70">/100</span></p>
         </div>
-        <div className="text-white text-center py-5 px-4 rounded-xl" style={{ background: `linear-gradient(135deg, ${neopColor} 0%, ${neopColor}cc 100%)` }}>
+        <div className="text-white text-center py-5 px-4 rounded-xl" style={{ background: `linear-gradient(135deg, ${neopColorFromCalc} 0%, ${neopColorFromCalc}cc 100%)` }}>
           <p className="text-xs uppercase tracking-widest opacity-80 mb-1">Classificação Recomendada</p>
           <p className="text-3xl font-bold">{neop}</p>
         </div>
@@ -381,7 +384,7 @@ export default function EvaluationForm() {
             <p><strong>Avaliador:</strong> {form.avaliador || "—"}</p>
             <p><strong>Data:</strong> {form.dataAvaliacao}</p>
             <p><strong>Pontuação:</strong> {pontuacao}/100</p>
-            <p><strong>NEOP:</strong> <span className="font-bold" style={{ color: neopColor }}>{neop}</span></p>
+            <p><strong>NEOP:</strong> <span className="font-bold" style={{ color: neopColorFromCalc }}>{neop}</span></p>
           </div>
           <DialogFooter className="gap-2 mt-4">
             <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancelar</Button>

@@ -59,3 +59,7 @@
 - [x] Promover utilizadores a administrador na página de gestão
 - [x] Barra de complexidade na pontuação (baixa/média/alta)
 - [x] Indicações textuais de complexidade por NEOP
+
+
+### Correções de Cores NEOP
+- [x] Adicionar cores: verde (2º NEOP), laranja (3º NEOP), vermelho (4º NEOP)
