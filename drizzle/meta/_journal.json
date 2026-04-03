@@ -15,6 +15,13 @@
       "when": 1775241981922,
       "tag": "0001_previous_cerebro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1775242856449,
+      "tag": "0002_shallow_joshua_kane",
+      "breakpoints": true
     }
   ]
 }

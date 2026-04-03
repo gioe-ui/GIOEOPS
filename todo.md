@@ -40,3 +40,10 @@
 - [x] Corrigir lógica NEOP: pontuação > 75 = 4º NEOP (não 76)
 - [x] Atualizar nome na página de login para "GRUPO DE INTERVENÇÃO DE OPERAÇÕES ESPECIAIS"
 - [x] Fornecer link público do site
+
+
+### Funcionalidade de Registo (Nova)
+- [x] Criar router de registo com validação @gnr.pt
+- [x] Criar página de registo com toggle login/registo
+- [x] Validar email @gnr.pt no frontend e backend
+- [x] Integrar login local sem OAuth
