@@ -20,13 +20,13 @@ const NEOP_COLORS: Record<string, string> = {
 };
 
 export default function Dashboard() {
-  const [filterNeop, setFilterNeop] = useState("");
+  const [filterNeop, setFilterNeop] = useState("all");
   const [filterAvaliador, setFilterAvaliador] = useState("");
   const [avaliadorInput, setAvaliadorInput] = useState("");
   const utils = trpc.useUtils();
 
   const { data: evaluations, isLoading } = trpc.evaluations.list.useQuery({
-    neop: filterNeop || undefined,
+    neop: filterNeop === "all" ? undefined : filterNeop,
     avaliador: filterAvaliador || undefined,
   });
 
@@ -94,7 +94,7 @@ export default function Dashboard() {
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="2º NEOP">2º NEOP</SelectItem>
                 <SelectItem value="3º NEOP">3º NEOP</SelectItem>
                 <SelectItem value="4º NEOP">4º NEOP</SelectItem>

@@ -67,4 +67,4 @@
 
 ### Bugs Reportados
 - [x] Função de promover administrador não está a funcionar (corrigido: invalidate auth.me)
-- [x] Erro na página dashboard (corrigido: import de useState faltava)
+- [x] Erro na página dashboard (corrigido: SelectItem com value vazio violava Radix Select requirements)
