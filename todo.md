@@ -53,3 +53,9 @@
 - [x] Remover "Made with Manus" do site (não estava visível)
 - [x] Adicionar campo de password no login e registo
 - [x] Corrigir fluxo de autenticação para entrar no site após login (session cookie criado)
+
+
+### Novas Funcionalidades
+- [x] Promover utilizadores a administrador na página de gestão
+- [x] Barra de complexidade na pontuação (baixa/média/alta)
+- [x] Indicações textuais de complexidade por NEOP

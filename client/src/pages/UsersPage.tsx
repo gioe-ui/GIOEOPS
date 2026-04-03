@@ -1,8 +1,9 @@
-import { trpc } from "@/lib/trpc";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Trash2, Users } from "lucide-react";
+import { Trash2, Users, Crown } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
@@ -18,6 +19,14 @@ export default function UsersPage() {
     onError: (e) => toast.error("Erro: " + e.message),
   });
 
+  const promoteToAdminMutation = trpc.users.promoteToAdmin.useMutation({
+    onSuccess: () => {
+      toast.success("Utilizador promovido a administrador.");
+      utils.users.list.invalidate();
+    },
+    onError: (e) => toast.error("Erro: " + e.message),
+  });
+
   const handleDelete = (id: number) => {
     if (currentUser?.id === id) {
       toast.error("Não pode eliminar a sua própria conta.");
@@ -25,6 +34,12 @@ export default function UsersPage() {
     }
     if (confirm("Tem a certeza que deseja eliminar este utilizador?")) {
       deleteMutation.mutate({ id });
+    }
+  };
+
+  const handlePromoteToAdmin = (id: number, name: string) => {
+    if (confirm(`Tem a certeza que deseja promover ${name} a administrador?`)) {
+      promoteToAdminMutation.mutate({ id });
     }
   };
 
@@ -86,7 +101,19 @@ export default function UsersPage() {
                   <td className="px-4 py-3 text-gray-600">
                     {new Date(u.createdAt).toLocaleDateString("pt-PT")}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 flex gap-2">
+                    {u.role !== "admin" && currentUser?.role === "admin" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePromoteToAdmin(u.id, u.name || "Utilizador")}
+                        disabled={promoteToAdminMutation.isPending}
+                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                      >
+                        <Crown className="w-3 h-3 mr-1" />
+                        Promover
+                      </Button>
+                    )}
                     <Button
                       variant="destructive"
                       size="sm"

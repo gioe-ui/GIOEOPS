@@ -58,7 +58,7 @@ const DEFAULT: FormState = {
   avaliador: "", dataAvaliacao: new Date().toISOString().split("T")[0], parecer: "",
 };
 
-function calcScore(f: FormState): { pontuacao: number; neop: string } {
+function calcScore(f: FormState): { pontuacao: number; neop: string; complexidade: string; descricao: string } {
   let s = 0;
   if (f.mandadoDetencao) s += 5;
   if (f.mandadoBusca) s += 3;
@@ -81,7 +81,19 @@ function calcScore(f: FormState): { pontuacao: number; neop: string } {
   if (f.segurancaOutrasMedidas) s += 5;
   const pontuacao = Math.min(s, 100);
   const neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 75 ? "3º NEOP" : "4º NEOP";
-  return { pontuacao, neop };
+  
+  // Complexidade
+  let complexidade = "Baixa";
+  let descricao = "Operação de rotina - Procedimentos padrão";
+  if (neop === "3º NEOP") {
+    complexidade = "Média";
+    descricao = "Operação com risco moderado - Requer coordenação";
+  } else if (neop === "4º NEOP") {
+    complexidade = "Alta";
+    descricao = "Necessita de planeamento especializado";
+  }
+  
+  return { pontuacao, neop, complexidade, descricao };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -116,7 +128,7 @@ export default function EvaluationForm() {
   const [showConfirm, setShowConfirm] = useState(false);
   const utils = trpc.useUtils();
 
-  const { pontuacao, neop } = calcScore(form);
+  const { pontuacao, neop, complexidade, descricao } = calcScore(form);
 
   const createMutation = trpc.evaluations.create.useMutation({
     onSuccess: () => {
@@ -323,6 +335,29 @@ export default function EvaluationForm() {
           <p className="text-xs uppercase tracking-widest opacity-80 mb-1">Classificação Recomendada</p>
           <p className="text-3xl font-bold">{neop}</p>
         </div>
+      </div>
+
+      {/* Complexity Bar */}
+      <div className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold text-gray-700">Grau de Complexidade</p>
+          <span className="text-sm font-bold px-3 py-1 rounded-full" style={{
+            background: neop === "4º NEOP" ? "#fee2e2" : neop === "3º NEOP" ? "#fef3c7" : "#dcfce7",
+            color: neop === "4º NEOP" ? "#991b1b" : neop === "3º NEOP" ? "#92400e" : "#166534"
+          }}>
+            {complexidade}
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-3 overflow-hidden">
+          <div
+            className="h-full transition-all duration-300 rounded-full"
+            style={{
+              width: neop === "4º NEOP" ? "100%" : neop === "3º NEOP" ? "66%" : "33%",
+              background: neop === "4º NEOP" ? "#dc2626" : neop === "3º NEOP" ? "#f59e0b" : "#22c55e"
+            }}
+          />
+        </div>
+        <p className="text-sm text-gray-600">{descricao}</p>
       </div>
 
       <Button

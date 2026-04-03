@@ -11,7 +11,11 @@ import {
   getAllUsers,
   getEvaluations,
   getStatistics,
+  getDb,
 } from "./db";
+import { TRPCError } from "@trpc/server";
+import { users } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 // ─── Scoring helper ───────────────────────────────────────────────────────────
 const TIPO_SCORES: Record<string, number> = {
@@ -169,6 +173,25 @@ export const appRouter = router({
       .input(z.object({ id: z.number().int() }))
       .mutation(async ({ input }) => {
         await deleteUser(input.id);
+        return { success: true };
+      }),
+
+    promoteToAdmin: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+        
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem promover utilizadores" });
+        }
+
+        const userToUpdate = await db.select().from(users).where(eq(users.id, input.id)).limit(1);
+        if (userToUpdate.length === 0) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Utilizador não encontrado" });
+        }
+
+        await db.update(users).set({ role: "admin" }).where(eq(users.id, input.id));
         return { success: true };
       }),
   }),
