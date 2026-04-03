@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { getLoginUrl } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +15,6 @@ export default function Auth() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const loginUrl = getLoginUrl();
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: () => {
@@ -189,18 +187,7 @@ export default function Auth() {
             </div>
           )}
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-3">Ou aceda com conta Manus OAuth:</p>
-            <a href={loginUrl} className="block w-full">
-              <Button
-                variant="outline"
-                className="w-full py-2 text-sm border-[#1a472a] text-[#1a472a] hover:bg-green-50"
-              >
-                <LogIn className="w-4 h-4 mr-2" />
-                Entrar com Manus
-              </Button>
-            </a>
-          </div>
+
         </div>
       </div>
     </div>
