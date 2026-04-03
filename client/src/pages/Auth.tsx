@@ -15,13 +15,17 @@ export default function Auth() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: () => {
-      toast.success("Conta criada com sucesso! Por favor, faça login.");
-      setMode("login");
+      toast.success("Conta criada com sucesso! A fazer login...");
       setEmail("");
       setName("");
+      setPassword("");
+      setConfirmPassword("");
+      setTimeout(() => window.location.reload(), 1000);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -29,13 +33,13 @@ export default function Auth() {
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: () => {
       toast.success("Login realizado com sucesso!");
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 500);
     },
     onError: (e) => toast.error(e.message),
   });
 
   const handleRegister = () => {
-    if (!email || !name) {
+    if (!email || !name || !password || !confirmPassword) {
       toast.error("Preencha todos os campos.");
       return;
     }
@@ -43,19 +47,27 @@ export default function Auth() {
       toast.error("Email deve terminar em @gnr.pt");
       return;
     }
-    registerMutation.mutate({ email, name });
+    if (password !== confirmPassword) {
+      toast.error("As passwords não coincidem.");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    registerMutation.mutate({ email, name, password });
   };
 
   const handleLogin = () => {
-    if (!email) {
-      toast.error("Preencha o email.");
+    if (!email || !password) {
+      toast.error("Preencha o email e password.");
       return;
     }
     if (!email.endsWith("@gnr.pt")) {
       toast.error("Email deve terminar em @gnr.pt");
       return;
     }
-    loginMutation.mutate({ email });
+    loginMutation.mutate({ email, password });
   };
 
   return (
@@ -129,6 +141,18 @@ export default function Auth() {
                   placeholder="seu.email@gnr.pt"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="border-2 focus:border-[#1a472a]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold text-gray-600 mb-1 block">
+                  Password
+                </Label>
+                <Input
+                  type="password"
+                  placeholder="Sua password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                   className="border-2 focus:border-[#1a472a]"
                 />
@@ -172,6 +196,30 @@ export default function Auth() {
                   placeholder="seu.email@gnr.pt"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="border-2 focus:border-[#1a472a]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold text-gray-600 mb-1 block">
+                  Password
+                </Label>
+                <Input
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="border-2 focus:border-[#1a472a]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold text-gray-600 mb-1 block">
+                  Confirmar Password
+                </Label>
+                <Input
+                  type="password"
+                  placeholder="Confirme a password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleRegister()}
                   className="border-2 focus:border-[#1a472a]"
                 />
@@ -186,8 +234,6 @@ export default function Auth() {
               </Button>
             </div>
           )}
-
-
         </div>
       </div>
     </div>

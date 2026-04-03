@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { users } from "../drizzle/schema";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { sdk } from "./_core/sdk";
 
 // ─── Validators ───────────────────────────────────────────────────────────────
 const emailValidator = z.string().email().refine((email) => email.endsWith("@gnr.pt"), {
@@ -15,10 +16,12 @@ const emailValidator = z.string().email().refine((email) => email.endsWith("@gnr
 const registerInput = z.object({
   email: emailValidator,
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  password: z.string().min(6, "Password deve ter pelo menos 6 caracteres"),
 });
 
 const loginInput = z.object({
   email: emailValidator,
+  password: z.string().min(1, "Password é obrigatório"),
 });
 
 // ─── Auth Router ──────────────────────────────────────────────────────────────
@@ -60,10 +63,15 @@ export const authRouter = router({
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Falha ao criar utilizador" });
     }
 
+    // Criar session token e definir cookie
+    const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "" });
+    const cookieOptions = getSessionCookieOptions(ctx.req);
+    ctx.res.cookie(COOKIE_NAME, sessionToken, cookieOptions);
+
     return { success: true, user };
   }),
 
-  login: publicProcedure.input(loginInput).mutation(async ({ input }) => {
+  login: publicProcedure.input(loginInput).mutation(async ({ input, ctx }) => {
     const db = await getDb();
     if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
@@ -77,6 +85,18 @@ export const authRouter = router({
     }
 
     const user = result[0];
+
+    // Criar session token e definir cookie
+    const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "" });
+    const cookieOptions = getSessionCookieOptions(ctx.req);
+    ctx.res.cookie(COOKIE_NAME, sessionToken, cookieOptions);
+
+    // Atualizar lastSignedIn
+    await upsertUser({
+      openId: user.openId,
+      lastSignedIn: new Date(),
+    });
+
     return { success: true, user };
   }),
 });

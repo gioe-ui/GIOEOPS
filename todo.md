@@ -47,3 +47,9 @@
 - [x] Criar página de registo com toggle login/registo
 - [x] Validar email @gnr.pt no frontend e backend
 - [x] Integrar login local sem OAuth
+
+
+### Correções Adicionais
+- [x] Remover "Made with Manus" do site (não estava visível)
+- [x] Adicionar campo de password no login e registo
+- [x] Corrigir fluxo de autenticação para entrar no site após login (session cookie criado)
