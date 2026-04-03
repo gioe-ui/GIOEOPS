@@ -68,3 +68,9 @@
 ### Bugs Reportados
 - [x] Função de promover administrador não está a funcionar (corrigido: invalidate auth.me)
 - [x] Erro na página dashboard (corrigido: SelectItem com value vazio violava Radix Select requirements)
+
+
+### Tarefas Pendentes
+- [x] Promover teixeira.vls@gnr.pt como administrador na base de dados
+- [x] Corrigir a lógica de promoção a administrador (só admins podem promover)
+- [x] Verificar se o botão "Promover" aparece apenas para admins
