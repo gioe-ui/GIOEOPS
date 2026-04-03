@@ -23,6 +23,7 @@ export default function UsersPage() {
     onSuccess: () => {
       toast.success("Utilizador promovido a administrador.");
       utils.users.list.invalidate();
+      utils.auth.me.invalidate();
     },
     onError: (e) => toast.error("Erro: " + e.message),
   });

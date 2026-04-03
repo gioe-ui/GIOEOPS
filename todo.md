@@ -63,3 +63,7 @@
 
 ### Correções de Cores NEOP
 - [x] Adicionar cores: verde (2º NEOP), laranja (3º NEOP), vermelho (4º NEOP)
+
+
+### Bugs Reportados
+- [x] Função de promover administrador não está a funcionar (corrigido: invalidate auth.me)
