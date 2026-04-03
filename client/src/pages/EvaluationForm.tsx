@@ -32,7 +32,7 @@ const USO_SCORES: Record<string, number> = { haRegisto: 10, naoHaRegisto: 3 };
 const QTD_SCORES: Record<string, number> = { "1": 1, "2": 2, "3": 4, "4+": 6 };
 
 type FormState = {
-  pocPosto: string; pocNome: string; pocContacto: string; despacho: string; cterRequerente: string;
+  pocPosto: string; pocNome: string; pocContacto: string; despacho: string; cterRequerente: string; // Armazenado no parecer
   mandadoDetencao: boolean; mandadoBusca: boolean;
   quantidadeSuspeitos: string;
   modalidadeIsolado: boolean; modalidadeAssociacao: boolean;
@@ -416,7 +416,11 @@ export default function EvaluationForm() {
             <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancelar</Button>
             <Button
               onClick={() => createMutation.mutate({
-                ...form,
+                pocPosto: form.pocPosto,
+                pocNome: form.pocNome,
+                pocContacto: form.pocContacto,
+                despacho: form.despacho,
+                parecer: form.cterRequerente ? `[${form.cterRequerente}] ${form.parecer}` : form.parecer,
                 mandadoDetencao: form.mandadoDetencao ? 1 : 0,
                 mandadoBusca: form.mandadoBusca ? 1 : 0,
                 modalidadeIsolado: form.modalidadeIsolado ? 1 : 0,
@@ -434,6 +438,13 @@ export default function EvaluationForm() {
                 segurancaCaes: form.segurancaCaes ? 1 : 0,
                 segurancaPortaBlindada: form.segurancaPortaBlindada ? 1 : 0,
                 segurancaOutrasMedidas: form.segurancaOutrasMedidas ? 1 : 0,
+                quantidadeSuspeitos: form.quantidadeSuspeitos,
+                tipoCriminal: form.tipoCriminal,
+                antecedentesFSS: form.antecedentesFSS,
+                posseArma: form.posseArma,
+                usoArma: form.usoArma,
+                avaliador: form.avaliador,
+                dataAvaliacao: form.dataAvaliacao,
               })}
               disabled={createMutation.isPending}
               style={{ background: "#1a472a" }}

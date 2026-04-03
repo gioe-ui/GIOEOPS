@@ -86,3 +86,7 @@
 - [x] Adicionar campo de seleção para Comando Territorial (CTer) no formulário
 - [x] Atualizar o schema para incluir o campo cterRequerente
 - [x] Atualizar o dashboard para exibir o CTer das avaliações
+
+
+### Bugs Reportados
+- [x] Erro ao guardar o formulário de avaliação com o campo CTer (corrigido: CTer armazenado no parecer)
