@@ -31,6 +31,7 @@ export const evaluations = mysqlTable("evaluations", {
   pocNome: varchar("pocNome", { length: 255 }),
   pocContacto: varchar("pocContacto", { length: 255 }),
   despacho: text("despacho"),
+  cterRequerente: varchar("cterRequerente", { length: 50 }),
   // Suspeitos
   mandadoDetencao: int("mandadoDetencao").default(0),
   mandadoBusca: int("mandadoBusca").default(0),

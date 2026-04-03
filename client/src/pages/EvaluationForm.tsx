@@ -32,7 +32,7 @@ const USO_SCORES: Record<string, number> = { haRegisto: 10, naoHaRegisto: 3 };
 const QTD_SCORES: Record<string, number> = { "1": 1, "2": 2, "3": 4, "4+": 6 };
 
 type FormState = {
-  pocPosto: string; pocNome: string; pocContacto: string; despacho: string;
+  pocPosto: string; pocNome: string; pocContacto: string; despacho: string; cterRequerente: string;
   mandadoDetencao: boolean; mandadoBusca: boolean;
   quantidadeSuspeitos: string;
   modalidadeIsolado: boolean; modalidadeAssociacao: boolean;
@@ -47,7 +47,7 @@ type FormState = {
 };
 
 const DEFAULT: FormState = {
-  pocPosto: "", pocNome: "", pocContacto: "", despacho: "",
+  pocPosto: "", pocNome: "", pocContacto: "", despacho: "", cterRequerente: "",
   mandadoDetencao: false, mandadoBusca: false, quantidadeSuspeitos: "1",
   modalidadeIsolado: false, modalidadeAssociacao: false, tipoCriminal: "outro",
   antecedentesContraPessoas: false, antecedentesContraPatrimonio: false, antecedentesOutros: false,
@@ -176,6 +176,32 @@ export default function EvaluationForm() {
         <div>
           <Label className="text-sm font-semibold text-gray-600 mb-1 block">Despacho</Label>
           <Textarea placeholder="Registo do despacho..." value={form.despacho} onChange={(e) => set("despacho", e.target.value)} className="min-h-[80px] border-2 focus:border-[#1a472a]" />
+        </div>
+        <div>
+          <Label className="text-sm font-semibold text-gray-600 mb-1 block">Comando Territorial (CTer) Requerente</Label>
+          <Select value={form.cterRequerente} onValueChange={(v) => set("cterRequerente", v)}>
+            <SelectTrigger className="border-2 focus:border-[#1a472a]"><SelectValue placeholder="Selecione um CTer" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CT Aveiro">CT Aveiro</SelectItem>
+              <SelectItem value="CT Beja">CT Beja</SelectItem>
+              <SelectItem value="CT Braga">CT Braga</SelectItem>
+              <SelectItem value="CT Bragança">CT Bragança</SelectItem>
+              <SelectItem value="CT Castelo Branco">CT Castelo Branco</SelectItem>
+              <SelectItem value="CT Coimbra">CT Coimbra</SelectItem>
+              <SelectItem value="CT Évora">CT Évora</SelectItem>
+              <SelectItem value="CT Faro">CT Faro</SelectItem>
+              <SelectItem value="CT Guarda">CT Guarda</SelectItem>
+              <SelectItem value="CT Leiria">CT Leiria</SelectItem>
+              <SelectItem value="CT Lisboa">CT Lisboa</SelectItem>
+              <SelectItem value="CT Portalegre">CT Portalegre</SelectItem>
+              <SelectItem value="CT Porto">CT Porto</SelectItem>
+              <SelectItem value="CT Santarém">CT Santarém</SelectItem>
+              <SelectItem value="CT Setúbal">CT Setúbal</SelectItem>
+              <SelectItem value="CT Viana do Castelo">CT Viana do Castelo</SelectItem>
+              <SelectItem value="CT Vila Real">CT Vila Real</SelectItem>
+              <SelectItem value="CT Viseu">CT Viseu</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </Section>
 

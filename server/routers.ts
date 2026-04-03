@@ -98,6 +98,7 @@ const EvaluationInput = z.object({
   pocNome: z.string().optional(),
   pocContacto: z.string().optional(),
   despacho: z.string().optional(),
+  cterRequerente: z.string().optional(),
   mandadoDetencao: z.number().int().default(0),
   mandadoBusca: z.number().int().default(0),
   quantidadeSuspeitos: z.string().default("1"),
