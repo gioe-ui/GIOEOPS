@@ -74,3 +74,9 @@
 - [x] Promover teixeira.vls@gnr.pt como administrador na base de dados
 - [x] Corrigir a lógica de promoção a administrador (só admins podem promover)
 - [x] Verificar se o botão "Promover" aparece apenas para admins
+
+
+### Novas Funcionalidades - Estatísticas
+- [x] Adicionar filtro de intervalo de tempo (data inicial e data final) na página de Estatísticas
+- [x] Atualizar o backend para aceitar filtros de data nas estatísticas
+- [x] Atualizar os gráficos para refletir os dados filtrados por período

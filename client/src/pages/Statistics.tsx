@@ -1,4 +1,8 @@
 import { trpc } from "@/lib/trpc";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   PieChart,
   Pie,
@@ -16,7 +20,13 @@ import {
 const NEOP_COLORS = ["#1a472a", "#b8860b", "#8b0000"];
 
 export default function Statistics() {
-  const { data: stats, isLoading } = trpc.statistics.get.useQuery();
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const { data: stats, isLoading } = trpc.statistics.get.useQuery({
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+  });
 
   if (isLoading) {
     return (
@@ -53,11 +63,47 @@ export default function Statistics() {
     { label: "4º NEOP", value: stats.neop4 },
   ];
 
+  const handleClearFilters = () => {
+    setStartDate("");
+    setEndDate("");
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <h2 className="text-xl font-bold mb-6" style={{ color: "#1a472a" }}>
         Estatísticas
       </h2>
+
+      {/* Date Filters */}
+      <div className="bg-gray-50 rounded-xl p-4 mb-8 border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Data Inicial</Label>
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border-2 focus:border-[#1a472a]"
+            />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Data Final</Label>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border-2 focus:border-[#1a472a]"
+            />
+          </div>
+          <Button
+            onClick={handleClearFilters}
+            variant="outline"
+            className="border-2 border-gray-300 hover:bg-gray-100"
+          >
+            Limpar Filtros
+          </Button>
+        </div>
+      </div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">

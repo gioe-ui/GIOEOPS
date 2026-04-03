@@ -104,11 +104,21 @@ export async function deleteEvaluation(id: number) {
   await db.delete(evaluations).where(eq(evaluations.id, id));
 }
 
-export async function getStatistics() {
+export async function getStatistics(startDate?: Date, endDate?: Date) {
   const db = await getDb();
   if (!db) return null;
 
-  const all = await db.select().from(evaluations);
+  let all = await db.select().from(evaluations);
+  
+  if (startDate || endDate) {
+    all = all.filter((e) => {
+      const evalDate = new Date(e.createdAt);
+      if (startDate && evalDate < startDate) return false;
+      if (endDate && evalDate > endDate) return false;
+      return true;
+    });
+  }
+  
   const total = all.length;
   const avgScore = total > 0 ? all.reduce((s, e) => s + e.pontuacao, 0) / total : 0;
 

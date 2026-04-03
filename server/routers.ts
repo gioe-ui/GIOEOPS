@@ -158,10 +158,14 @@ export const appRouter = router({
   }),
 
   statistics: router({
-    get: protectedProcedure.query(async () => {
-      const stats = await getStatistics();
-      return stats;
-    }),
+    get: protectedProcedure
+      .input(z.object({ startDate: z.string().optional(), endDate: z.string().optional() }))
+      .query(async ({ input }) => {
+        const startDate = input.startDate ? new Date(input.startDate) : undefined;
+        const endDate = input.endDate ? new Date(input.endDate) : undefined;
+        const stats = await getStatistics(startDate, endDate);
+        return stats;
+      }),
   }),
 
   users: router({
