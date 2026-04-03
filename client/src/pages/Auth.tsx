@@ -31,7 +31,7 @@ export default function Auth() {
             style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.3))" }}
           />
           <h1 className="text-2xl font-bold tracking-widest mb-1">GIOE</h1>
-          <p className="text-sm opacity-90">Grupo de Intervenção Operacional Especial</p>
+            <p className="text-sm opacity-90">Grupo de Intervenção de Operações Especiais</p>
         </div>
 
         {/* Content */}

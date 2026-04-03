@@ -34,3 +34,9 @@
 - [x] Página de estatísticas com cartões e gráficos
 - [x] Gestão de utilizadores com listagem e eliminação
 - [x] Responsividade mobile
+
+
+### Correções Solicitadas
+- [x] Corrigir lógica NEOP: pontuação > 75 = 4º NEOP (não 76)
+- [x] Atualizar nome na página de login para "GRUPO DE INTERVENÇÃO DE OPERAÇÕES ESPECIAIS"
+- [x] Fornecer link público do site

@@ -133,7 +133,7 @@ describe("evaluations scoring", () => {
     expect(result.pontuacao).toBeLessThanOrEqual(100);
   });
 
-  it("3º NEOP for score between 26 and 50", async () => {
+  it("3º NEOP for score between 26 and 75", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
     const result = await caller.evaluations.preview({
@@ -145,7 +145,7 @@ describe("evaluations scoring", () => {
       antecedentesContraPessoas: 1,
       posseArma: "provavel",
     });
-    // 5+3+2+6+8+6+3 = 33 → 3º NEOP
+    // 5+3+2+6+8+6+3 = 33 → 3º NEOP (26-75)
     expect(result.neop).toBe("3º NEOP");
   });
 

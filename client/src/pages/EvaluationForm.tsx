@@ -80,7 +80,7 @@ function calcScore(f: FormState): { pontuacao: number; neop: string } {
   if (f.segurancaPortaBlindada) s += 6;
   if (f.segurancaOutrasMedidas) s += 5;
   const pontuacao = Math.min(s, 100);
-  const neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 50 ? "3º NEOP" : "4º NEOP";
+  const neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 75 ? "3º NEOP" : "4º NEOP";
   return { pontuacao, neop };
 }
 
