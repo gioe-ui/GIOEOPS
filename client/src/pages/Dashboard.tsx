@@ -130,7 +130,7 @@ export default function Dashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "#1a472a" }}>
-                {["Data", "POC", "CTer", "Pontuação", "NEOP", "Avaliador", "Ação"].map((h) => (
+                {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "Ação"].map((h) => (
                   <th key={h} className="text-white text-left px-4 py-3 font-semibold">
                     {h}
                   </th>
@@ -149,7 +149,6 @@ export default function Dashboard() {
                     {new Date(e.createdAt).toLocaleDateString("pt-PT")}
                   </td>
                   <td className="px-4 py-3 font-medium text-gray-800">{e.pocNome || "—"}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{e.cterRequerente || "—"}</td>
                   <td className="px-4 py-3">
                     <span className="font-bold" style={{ color: "#1a472a" }}>
                       {e.pontuacao}
