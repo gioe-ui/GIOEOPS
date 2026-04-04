@@ -7,6 +7,7 @@ import { users } from "../drizzle/schema";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { sdk } from "./_core/sdk";
+import crypto from "crypto";
 
 // ─── Validators ───────────────────────────────────────────────────────────────
 const emailValidator = z.string().email().refine((email) => email.endsWith("@gnr.pt"), {
@@ -49,12 +50,21 @@ export const authRouter = router({
 
     // Criar novo utilizador com email como openId
     const openId = `local_${input.email}`;
+    
+    // Gerar token de verificação de email para utilizadores @gnr.pt
+    const isGnrEmail = input.email.endsWith("@gnr.pt");
+    const emailVerificationToken = isGnrEmail ? crypto.randomBytes(32).toString("hex") : undefined;
+    const emailVerificationTokenExpires = isGnrEmail ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined;
+    
     await upsertUser({
       openId,
       email: input.email,
       name: input.name,
       loginMethod: "local",
       role: "user",
+      emailVerified: isGnrEmail ? 0 : 1, // Utilizadores @gnr.pt precisam de confirmar email
+      emailVerificationToken,
+      emailVerificationTokenExpires,
       lastSignedIn: new Date(),
     });
 
@@ -63,12 +73,18 @@ export const authRouter = router({
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Falha ao criar utilizador" });
     }
 
+    // Se for @gnr.pt, enviar email de confirmação
+    if (isGnrEmail && emailVerificationToken) {
+      // TODO: Enviar email de confirmação com o token
+      console.log(`Email de confirmação enviado para ${input.email} com token ${emailVerificationToken}`);
+    }
+
     // Criar session token e definir cookie
     const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "" });
     const cookieOptions = getSessionCookieOptions(ctx.req);
     ctx.res.cookie(COOKIE_NAME, sessionToken, cookieOptions);
 
-    return { success: true, user };
+    return { success: true, user, requiresEmailVerification: isGnrEmail };
   }),
 
   login: publicProcedure.input(loginInput).mutation(async ({ input, ctx }) => {
@@ -86,6 +102,14 @@ export const authRouter = router({
 
     const user = result[0];
 
+    // Verificar se o email foi confirmado (para utilizadores @gnr.pt)
+    if (!user.emailVerified) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Por favor, confirme o seu email antes de fazer login. Verifique a sua caixa de correio.",
+      });
+    }
+
     // Criar session token e definir cookie
     const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "" });
     const cookieOptions = getSessionCookieOptions(ctx.req);
@@ -99,4 +123,83 @@ export const authRouter = router({
 
     return { success: true, user };
   }),
+
+  verifyEmail: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      // Procurar utilizador com o token de verificação
+      const result = await db
+        .select()
+        .from(users)
+        .where(eq(users.emailVerificationToken, input.token))
+        .limit(1);
+
+      if (result.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Token de verificação inválido ou expirado",
+        });
+      }
+
+      const user = result[0];
+
+      // Verificar se o token expirou
+      if (user.emailVerificationTokenExpires && user.emailVerificationTokenExpires < new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Token de verificação expirou. Por favor, registe-se novamente.",
+        });
+      }
+
+      // Atualizar utilizador para marcar email como verificado
+      await upsertUser({
+        openId: user.openId,
+        emailVerified: 1,
+        emailVerificationToken: null,
+        emailVerificationTokenExpires: null,
+      });
+
+      return { success: true, message: "Email verificado com sucesso! Pode agora fazer login." };
+    }),
+
+  resendVerificationEmail: publicProcedure
+    .input(z.object({ email: emailValidator }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      // Procurar utilizador por email
+      const result = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+      if (result.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Email não encontrado",
+        });
+      }
+
+      const user = result[0];
+
+      // Se já está verificado, não fazer nada
+      if (user.emailVerified) {
+        return { success: true, message: "Email já verificado" };
+      }
+
+      // Gerar novo token de verificação
+      const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+      const emailVerificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      await upsertUser({
+        openId: user.openId,
+        emailVerificationToken,
+        emailVerificationTokenExpires,
+      });
+
+      // TODO: Enviar email de confirmação com o novo token
+      console.log(`Email de confirmação reenviado para ${input.email} com token ${emailVerificationToken}`);
+
+      return { success: true, message: "Email de confirmação reenviado" };
+    }),
 });

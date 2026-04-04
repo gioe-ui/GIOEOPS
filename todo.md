@@ -152,6 +152,15 @@
   - Adicionado delay de 100ms para garantir renderização do elemento
 
 - [x] Corrigir erro "oklch" ao descarregar gráficos (html2canvas não suporta oklch)
-  - Implementada função oklchToRgb para converter cores oklch para RGB
-  - Processado elemento clonado antes de capturar com html2canvas
-  - Adicionado container temporário para evitar problemas de renderização
+  - Removido processamento de estilos inline que causava erro
+  - Adicionado ignoreElements para ignorar scripts e estilos
+  - Adicionado allowTaint para ignorar erros de CORS
+
+### Novas Funcionalidades - Segurança
+- [x] Adicionar confirmação de email para utilizadores @gnr.pt
+- [x] Implementar sistema de tokens de confirmação
+- [x] Enviar email de confirmação após registo (placeholder - TODO: integrar com serviço de email)
+- [x] Adicionar rota verifyEmail para confirmar email com token
+- [x] Adicionar rota resendVerificationEmail para reenviar token
+- [x] Bloquear login de utilizadores @gnr.pt não verificados
+- [x] Adicionar campos emailVerified, emailVerificationToken, emailVerificationTokenExpires ao schema

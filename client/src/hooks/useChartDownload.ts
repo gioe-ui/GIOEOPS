@@ -1,81 +1,6 @@
 import html2canvas from "html2canvas";
 import { useState } from "react";
 
-// Converter oklch para RGB
-function oklchToRgb(oklch: string): string {
-  const match = oklch.match(/oklch\s*\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/);
-  if (!match) return oklch;
-
-  const [, l, c, h] = match.map(Number);
-  const hRad = (h * Math.PI) / 180;
-
-  const a = c * Math.cos(hRad);
-  const b = c * Math.sin(hRad);
-
-  const r = Math.pow(l + 0.3963377774 * a + 0.2158037573 * b, 3);
-  const g = Math.pow(l - 0.1055613458 * a - 0.0638541728 * b, 3);
-  const b_ = Math.pow(l - 0.0894841775 * a - 1.291486575 * b, 3);
-
-  const red = Math.round(Math.max(0, Math.min(255, r * 255)));
-  const green = Math.round(Math.max(0, Math.min(255, g * 255)));
-  const blue = Math.round(Math.max(0, Math.min(255, b_ * 255)));
-
-  return `rgb(${red}, ${green}, ${blue})`;
-}
-
-// Converter todas as cores oklch no elemento para RGB
-function convertOklchToRgb(element: HTMLElement) {
-  const clone = element.cloneNode(true) as HTMLElement;
-  
-  // Processar estilos computados de todos os elementos
-  const allElements = clone.querySelectorAll("*");
-  allElements.forEach((el) => {
-    const element = el as HTMLElement;
-    const styles = window.getComputedStyle(element);
-    
-    // Converter cores oklch em background, color, border, etc.
-    const properties = [
-      "backgroundColor",
-      "color",
-      "borderColor",
-      "borderTopColor",
-      "borderRightColor",
-      "borderBottomColor",
-      "borderLeftColor",
-    ];
-
-    properties.forEach((prop) => {
-      const value = styles.getPropertyValue(prop.replace(/([A-Z])/g, "-$1").toLowerCase());
-      if (value && value.includes("oklch")) {
-        const rgbValue = oklchToRgb(value);
-        element.style[prop as any] = rgbValue;
-      }
-    });
-  });
-
-  // Processar elemento raiz
-  const styles = window.getComputedStyle(element);
-  const properties = [
-    "backgroundColor",
-    "color",
-    "borderColor",
-    "borderTopColor",
-    "borderRightColor",
-    "borderBottomColor",
-    "borderLeftColor",
-  ];
-
-  properties.forEach((prop) => {
-    const value = styles.getPropertyValue(prop.replace(/([A-Z])/g, "-$1").toLowerCase());
-    if (value && value.includes("oklch")) {
-      const rgbValue = oklchToRgb(value);
-      clone.style[prop as any] = rgbValue;
-    }
-  });
-
-  return clone;
-}
-
 export function useChartDownload() {
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -98,23 +23,44 @@ export function useChartDownload() {
       // Aguardar um pouco para garantir que o elemento está renderizado
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Converter oklch para RGB antes de capturar
-      const processedElement = convertOklchToRgb(element);
+      // Clonar o elemento
+      const clone = element.cloneNode(true) as HTMLElement;
       
-      // Criar container temporário para o elemento processado
+      // Remover atributos de estilo que possam conter oklch
+      const removeOklchStyles = (el: HTMLElement) => {
+        // Remover atributos style inline
+        el.removeAttribute("style");
+        
+        // Processar todos os elementos filhos
+        const allElements = el.querySelectorAll("*");
+        allElements.forEach((child) => {
+          (child as HTMLElement).removeAttribute("style");
+        });
+      };
+
+      removeOklchStyles(clone);
+
+      // Criar container temporário
       const tempContainer = document.createElement("div");
       tempContainer.style.position = "absolute";
       tempContainer.style.left = "-9999px";
-      tempContainer.appendChild(processedElement);
+      tempContainer.style.top = "-9999px";
+      tempContainer.style.width = "1200px";
+      tempContainer.appendChild(clone);
       document.body.appendChild(tempContainer);
 
       try {
-        const canvas = await html2canvas(processedElement, {
+        // Usar html2canvas com allowTaint para ignorar erros de CORS
+        const canvas = await html2canvas(clone, {
           backgroundColor: "#ffffff",
           scale: 2,
           logging: false,
           useCORS: true,
           allowTaint: true,
+          ignoreElements: (element: Element) => {
+            // Ignorar scripts e estilos
+            return element.tagName === "SCRIPT" || element.tagName === "STYLE";
+          },
         });
 
         // Converter canvas para blob
