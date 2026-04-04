@@ -19,21 +19,33 @@ export const useChartDownload = () => {
       }
 
       // Procurar pelo SVG dentro do elemento (ignorar bandeiras)
-      const svgs = element.querySelectorAll("svg");
+      let svgs = element.querySelectorAll("svg");
+      console.log(`SVGs dentro do elemento: ${svgs.length}`);
+      
+      // Se não encontrar SVGs dentro do elemento, procurar em todo o documento
+      if (svgs.length === 0) {
+        svgs = document.querySelectorAll("svg");
+        console.log(`SVGs no documento: ${svgs.length}`);
+      }
+      
       let targetSvg: SVGElement | null = null;
 
       // Encontrar o SVG mais grande (provavelmente o gráfico)
       let maxArea = 0;
-      svgs.forEach((svg: Element) => {
+      
+      svgs.forEach((svg: Element, index: number) => {
         const rect = (svg as SVGElement).getBoundingClientRect();
         const area = rect.width * rect.height;
+        console.log(`SVG ${index}: ${rect.width}x${rect.height} = ${area}px²`);
         
         // Ignorar SVGs muito pequenos (provavelmente ícones ou bandeiras)
-        if (area > 500 && area > maxArea) {
+        if (area > 50 && area > maxArea) {
           maxArea = area;
           targetSvg = svg as SVGElement;
         }
       });
+      
+      console.log(`SVG selecionado com área: ${maxArea}px²`);
 
       if (!targetSvg) {
         console.error("SVG do gráfico não encontrado");
@@ -58,7 +70,7 @@ export const useChartDownload = () => {
       ctx.fillRect(0, 0, rect.width, rect.height);
       
       // Serializar SVG para string
-      const svgString = new XMLSerializer().serializeToString(targetSvg);
+      const svgString = new XMLSerializer().serializeToString(targetSvg as SVGElement);
       const img = new Image();
       
       img.onload = () => {
@@ -97,7 +109,8 @@ export const useChartDownload = () => {
       };
       
       // Converter para data URL
-      img.src = "data:image/svg+xml;base64," + btoa(svgString);
+      // Usar encodeURIComponent para suportar caracteres acentuados
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString);
     } catch (error) {
       console.error("Erro ao descarregar gráfico:", error);
       alert(`Erro ao descarregar gráfico: ${error instanceof Error ? error.message : "Erro desconhecido"}`);
