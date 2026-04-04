@@ -144,7 +144,9 @@ export default function Statistics() {
                   label={({ cx, cy, midAngle, outerRadius, name, percent, index }) => {
                     if (percent === 0) return "";
                     const RADIAN = Math.PI / 180;
-                    const radius = outerRadius + 80;
+                    // Aumentar o raio para segmentos pequenos para evitar sobreposição
+                    const baseRadius = outerRadius + 60;
+                    const radius = percent < 0.1 ? baseRadius + 40 : baseRadius;
                     const x = cx + radius * Math.cos(-midAngle * RADIAN);
                     const y = cy + radius * Math.sin(-midAngle * RADIAN);
                     return (
@@ -154,7 +156,7 @@ export default function Statistics() {
                         fill={NEOP_COLORS[index]}
                         textAnchor={x > cx ? "start" : "end"}
                         dominantBaseline="central"
-                        fontSize="10"
+                        fontSize="11"
                         fontWeight="bold"
                       >
                         {`${name} ${(percent * 100).toFixed(0)}%`}

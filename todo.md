@@ -99,6 +99,7 @@
 
 ### Bugs Adicionais
 - [x] Descrição do 3º NEOP não se vê no gráfico de Distribuição por NEOP (corrigido: custom label renderer com posicionamento radial)
+- [x] Descrição do 3º NEOP continua a não aparecer para segmentos pequenos (corrigido: aumentar raio para segmentos < 10%)
 
 
 ### Análise de Pontuação - Comparação com Código Referência
