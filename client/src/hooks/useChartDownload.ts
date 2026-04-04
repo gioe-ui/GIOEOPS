@@ -26,36 +26,6 @@ export function useChartDownload() {
       // Clonar o elemento
       const clone = element.cloneNode(true) as HTMLElement;
 
-      // Remover todas as classes que possam conter oklch (apenas de elementos HTML)
-      const removeClasses = (el: HTMLElement) => {
-        // Verificar se é um elemento HTML (não SVG)
-        if (el.namespaceURI === "http://www.w3.org/1999/xhtml" || !el.namespaceURI) {
-          try {
-            el.className = "";
-          } catch (e) {
-            // Ignorar erros ao tentar remover className
-          }
-        }
-
-        const allElements = el.querySelectorAll("*");
-        allElements.forEach((child) => {
-          const htmlChild = child as HTMLElement;
-          // Verificar se é um elemento HTML (não SVG)
-          if (
-            htmlChild.namespaceURI === "http://www.w3.org/1999/xhtml" ||
-            !htmlChild.namespaceURI
-          ) {
-            try {
-              htmlChild.className = "";
-            } catch (e) {
-              // Ignorar erros ao tentar remover className
-            }
-          }
-        });
-      };
-
-      removeClasses(clone);
-
       // Criar container temporário
       const tempContainer = document.createElement("div");
       tempContainer.style.position = "absolute";
@@ -72,8 +42,9 @@ export function useChartDownload() {
           backgroundColor: "#ffffff",
           scale: 2,
           logging: false,
-          useCORS: true,
+          useCORS: false,
           allowTaint: true,
+          imageTimeout: 0,
           ignoreElements: (element: Element) => {
             // Ignorar scripts, estilos e comentários
             return (
@@ -86,6 +57,18 @@ export function useChartDownload() {
             // Remover todas as tags style
             const styles = clonedDocument.querySelectorAll("style");
             styles.forEach((style) => style.remove());
+
+            // Remover todos os atributos style que contenham oklch
+            const allElements = clonedDocument.querySelectorAll("*");
+            allElements.forEach((el) => {
+              const htmlEl = el as HTMLElement;
+              if (htmlEl.style && htmlEl.style.cssText) {
+                // Se o style contém oklch, remover completamente
+                if (htmlEl.style.cssText.includes("oklch")) {
+                  htmlEl.style.cssText = "";
+                }
+              }
+            });
           },
         });
 
