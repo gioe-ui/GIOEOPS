@@ -112,9 +112,10 @@
 
 
 ### Novas Funcionalidades - Mapa de Portugal
-- [x] Adicionar mapa de Portugal continental na página de Estatísticas
-- [x] Criar coordenadas geográficas para cada CTer
-- [x] Implementar pontos vermelhos para registos de 4º NEOP por CTer
-- [x] Integrar mapa com filtros de data já existentes
-- [x] Adicionar rota backend para obter 4º NEOP por CTer
-- [x] Visualizar quantidade de 4º NEOP no mapa com tamanho variável dos pontos
+- [x] Substituir mapa SVG manual por Leaflet com OpenStreetMap
+- [x] Corrigir posicionamento dos pontos vermelhos de 4º NEOP
+- [x] Adicionar tooltips interativos nos pontos do mapa
+- [x] Testar visualização em diferentes resoluções
+- [x] Instalar Leaflet e react-leaflet
+- [x] Criar componente PortugalMap com Leaflet
+- [x] Integrar mapa na página de Estatísticas
