@@ -142,3 +142,11 @@
   - Reduzido gap entre ícone e texto (gap-1 sm:gap-2)
   - Reduzido tamanho do texto em mobile (text-xs sm:text-sm)
   - Adicionado texto abreviado em mobile ("Novo" em vez de "Novo Formulário")
+
+
+### Bugs - Download de Gráficos
+- [x] Corrigir botões de download PNG/JPEG que não estão a funcionar
+  - Reescrito hook useChartDownload com melhor tratamento de erros
+  - Adicionado estado isDownloading para feedback visual
+  - Implementado uso de Blob em vez de DataURL para melhor compatibilidade
+  - Adicionado delay de 100ms para garantir renderização do elemento

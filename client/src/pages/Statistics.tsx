@@ -46,22 +46,23 @@ const CTER_COORDINATES: Record<string, { lat: number; lng: number }> = {
   "CT Viseu": { lat: 40.66, lng: -7.47 },
 };
 
-const DownloadButton = ({ onClick, format }: { onClick: () => void; format: "png" | "jpeg" }) => (
+const DownloadButton = ({ onClick, format, isLoading }: { onClick: () => void; format: "png" | "jpeg"; isLoading?: boolean }) => (
   <button
     onClick={onClick}
-    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-xs font-semibold flex items-center gap-1"
+    disabled={isLoading}
+    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-xs font-semibold flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
     title={`Descarregar como ${format.toUpperCase()}`}
     style={{ color: "#1a472a" }}
   >
-    <Download className="w-4 h-4" />
-    {format.toUpperCase()}
+    <Download className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+    {isLoading ? 'A descarregar...' : format.toUpperCase()}
   </button>
 );
 
 export default function Statistics() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const { downloadChart } = useChartDownload();
+  const { downloadChart, isDownloading } = useChartDownload();
 
   const { data: stats, isLoading } = trpc.statistics.get.useQuery({
     startDate: startDate || undefined,
@@ -175,8 +176,8 @@ export default function Statistics() {
               Distribuição por NEOP
             </h3>
             <div className="flex gap-2">
-              <DownloadButton onClick={() => downloadChart("chart-neop", "distribuicao-neop", "png")} format="png" />
-              <DownloadButton onClick={() => downloadChart("chart-neop", "distribuicao-neop", "jpeg")} format="jpeg" />
+              <DownloadButton onClick={() => downloadChart("chart-neop", "distribuicao-neop", "png")} format="png" isLoading={isDownloading} />
+              <DownloadButton onClick={() => downloadChart("chart-neop", "distribuicao-neop", "jpeg")} format="jpeg" isLoading={isDownloading} />
             </div>
           </div>
           {stats.total === 0 ? (
@@ -237,8 +238,8 @@ export default function Statistics() {
               Distribuição por Pontuação
             </h3>
             <div className="flex gap-2">
-              <DownloadButton onClick={() => downloadChart("chart-score", "distribuicao-pontuacao", "png")} format="png" />
-              <DownloadButton onClick={() => downloadChart("chart-score", "distribuicao-pontuacao", "jpeg")} format="jpeg" />
+              <DownloadButton onClick={() => downloadChart("chart-score", "distribuicao-pontuacao", "png")} format="png" isLoading={isDownloading} />
+              <DownloadButton onClick={() => downloadChart("chart-score", "distribuicao-pontuacao", "jpeg")} format="jpeg" isLoading={isDownloading} />
             </div>
           </div>
           {stats.total === 0 ? (
@@ -263,13 +264,13 @@ export default function Statistics() {
 
       {/* Mapa de Portugal com 4º NEOP por CTer - Aumentado */}
       <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-5 shadow-sm border border-gray-100 mb-8">
-        <div className="flex justify-between items-center mb-3 sm:mb-4">
-          <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider" style={{ color: "#1a472a" }}>
-            Mapa de 4º NEOP por CTer
-          </h3>
-          <div className="flex gap-2">
-            <DownloadButton onClick={() => downloadChart("map-container", "mapa-4neop", "png")} format="png" />
-            <DownloadButton onClick={() => downloadChart("map-container", "mapa-4neop", "jpeg")} format="jpeg" />
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider" style={{ color: "#1a472a" }}>
+              Mapa de 4º NEOP por CTer
+            </h3>
+            <div className="flex gap-2">
+              <DownloadButton onClick={() => downloadChart("map-container", "mapa-4neop", "png")} format="png" isLoading={isDownloading} />
+              <DownloadButton onClick={() => downloadChart("map-container", "mapa-4neop", "jpeg")} format="jpeg" isLoading={isDownloading} />
           </div>
         </div>
         <div id="map-container">
