@@ -22,113 +22,209 @@ export function useChartDownload() {
       // Aguardar um pouco para garantir que o elemento está renderizado
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Encontrar o SVG dentro do elemento
-      const svg = element.querySelector("svg");
-      if (!svg) {
-        console.error("SVG not found in element");
-        alert("Erro: Gráfico SVG não encontrado");
-        setIsDownloading(false);
-        return;
-      }
+      // Verificar se é um mapa Leaflet
+      const isLeafletMap = element.classList.contains("leaflet-container") || 
+                          element.querySelector(".leaflet-container") !== null;
 
-      // Clonar o SVG
-      const clonedSvg = svg.cloneNode(true) as SVGElement;
+      if (isLeafletMap) {
+        // Para mapas Leaflet, usar html2canvas com configurações especiais
+        const { default: html2canvas } = await import("html2canvas");
+        
+        // Clonar o elemento
+        const clone = element.cloneNode(true) as HTMLElement;
 
-      // Remover atributos de estilo que possam conter oklch
-      const removeOklchStyles = (el: Element) => {
-        // Remover atributo style
-        el.removeAttribute("style");
+        // Remover atributos de estilo que possam conter oklch
+        const removeOklchStyles = (el: HTMLElement) => {
+          el.removeAttribute("style");
+          const allElements = el.querySelectorAll("*");
+          allElements.forEach((child) => {
+            (child as HTMLElement).removeAttribute("style");
+          });
+        };
 
-        // Processar todos os elementos filhos
-        const allElements = el.querySelectorAll("*");
-        allElements.forEach((child) => {
-          child.removeAttribute("style");
-        });
-      };
+        removeOklchStyles(clone);
 
-      removeOklchStyles(clonedSvg);
+        // Criar container temporário
+        const tempContainer = document.createElement("div");
+        tempContainer.style.position = "absolute";
+        tempContainer.style.left = "-9999px";
+        tempContainer.style.top = "-9999px";
+        tempContainer.appendChild(clone);
+        document.body.appendChild(tempContainer);
 
-      // Obter as dimensões do SVG
-      const svgRect = svg.getBoundingClientRect();
-      const width = svgRect.width || 800;
-      const height = svgRect.height || 400;
+        try {
+          const canvas = await html2canvas(clone, {
+            backgroundColor: "#ffffff",
+            scale: 2,
+            logging: false,
+            useCORS: false,
+            allowTaint: true,
+            imageTimeout: 0,
+            ignoreElements: (element: Element): boolean => {
+              // Ignorar scripts, estilos, comentários e imagens de atribuição
+              const src = element.getAttribute("src") || "";
+              const alt = element.getAttribute("alt") || "";
+              return (
+                element.tagName === "SCRIPT" ||
+                element.tagName === "STYLE" ||
+                element.nodeType === 8 ||
+                (element.tagName === "IMG" && 
+                 (src.includes("ukraine") || 
+                  alt.includes("ukraine") ||
+                  src.includes("flag")))
+              );
+            },
+            onclone: (clonedDocument: Document) => {
+              const styles = clonedDocument.querySelectorAll("style");
+              styles.forEach((style) => style.remove());
 
-      // Criar canvas
-      const canvas = document.createElement("canvas");
-      canvas.width = width * 2; // Escala 2x para melhor qualidade
-      canvas.height = height * 2;
+              // Remover imagens de atribuição/bandeiras
+              const allImages = clonedDocument.querySelectorAll("img");
+              allImages.forEach((img) => {
+                const src = img.getAttribute("src") || "";
+                const alt = img.getAttribute("alt") || "";
+                if (src.includes("ukraine") || alt.includes("ukraine") || src.includes("flag")) {
+                  img.remove();
+                }
+              });
 
-      // Converter SVG para string
-      const svgString = new XMLSerializer().serializeToString(clonedSvg);
+              // Remover estilos inline com oklch
+              const allElements = clonedDocument.querySelectorAll("*");
+              allElements.forEach((el) => {
+                const htmlEl = el as HTMLElement;
+                if (htmlEl.style && htmlEl.style.cssText) {
+                  if (htmlEl.style.cssText.includes("oklch")) {
+                    htmlEl.style.cssText = "";
+                  }
+                }
+              });
+            },
+          });
 
-      // Criar blob do SVG
-      const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-      const svgUrl = URL.createObjectURL(svgBlob);
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                console.error("Erro ao criar blob");
+                alert("Erro ao descarregar mapa");
+                setIsDownloading(false);
+                document.body.removeChild(tempContainer);
+                return;
+              }
 
-      // Criar imagem a partir do SVG
-      const img = new Image();
-      img.onload = () => {
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          console.error("Canvas context not available");
-          alert("Erro ao descarregar gráfico");
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download =
+                format === "jpeg" ? `${filename}.jpg` : `${filename}.png`;
+
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+
+              URL.revokeObjectURL(url);
+              document.body.removeChild(tempContainer);
+
+              setIsDownloading(false);
+            },
+            format === "jpeg" ? "image/jpeg" : "image/png",
+            format === "jpeg" ? 0.95 : undefined
+          );
+        } catch (error) {
+          document.body.removeChild(tempContainer);
+          throw error;
+        }
+      } else {
+        // Para gráficos Recharts, capturar SVG diretamente
+        const svg = element.querySelector("svg");
+        if (!svg) {
+          console.error("SVG not found in element");
+          alert("Erro: Gráfico SVG não encontrado");
           setIsDownloading(false);
-          URL.revokeObjectURL(svgUrl);
           return;
         }
 
-        // Preencher fundo branco
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const clonedSvg = svg.cloneNode(true) as SVGElement;
 
-        // Desenhar imagem
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Remover atributos de estilo
+        const removeOklchStyles = (el: Element) => {
+          el.removeAttribute("style");
+          const allElements = el.querySelectorAll("*");
+          allElements.forEach((child) => {
+            child.removeAttribute("style");
+          });
+        };
 
-        // Converter canvas para blob
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              console.error("Erro ao criar blob");
-              alert("Erro ao descarregar gráfico");
-              setIsDownloading(false);
-              URL.revokeObjectURL(svgUrl);
-              return;
-            }
+        removeOklchStyles(clonedSvg);
 
-            // Criar URL do blob
-            const url = URL.createObjectURL(blob);
+        const svgRect = svg.getBoundingClientRect();
+        const width = svgRect.width || 800;
+        const height = svgRect.height || 400;
 
-            // Criar link e descarregar
-            const link = document.createElement("a");
-            link.href = url;
-            link.download =
-              format === "jpeg" ? `${filename}.jpg` : `${filename}.png`;
+        const canvas = document.createElement("canvas");
+        canvas.width = width * 2;
+        canvas.height = height * 2;
 
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        const svgString = new XMLSerializer().serializeToString(clonedSvg);
+        const svgBlob = new Blob([svgString], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+        const svgUrl = URL.createObjectURL(svgBlob);
 
-            // Limpar URLs
-            URL.revokeObjectURL(url);
-            URL.revokeObjectURL(svgUrl);
-
+        const img = new Image();
+        img.onload = () => {
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            console.error("Canvas context not available");
+            alert("Erro ao descarregar gráfico");
             setIsDownloading(false);
-          },
-          format === "jpeg" ? "image/jpeg" : "image/png",
-          format === "jpeg" ? 0.95 : undefined
-        );
-      };
+            URL.revokeObjectURL(svgUrl);
+            return;
+          }
 
-      img.onerror = () => {
-        console.error("Erro ao carregar imagem do SVG");
-        alert("Erro ao descarregar gráfico");
-        setIsDownloading(false);
-        URL.revokeObjectURL(svgUrl);
-      };
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // Definir a origem do CORS
-      img.crossOrigin = "anonymous";
-      img.src = svgUrl;
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                console.error("Erro ao criar blob");
+                alert("Erro ao descarregar gráfico");
+                setIsDownloading(false);
+                URL.revokeObjectURL(svgUrl);
+                return;
+              }
+
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download =
+                format === "jpeg" ? `${filename}.jpg` : `${filename}.png`;
+
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+
+              URL.revokeObjectURL(url);
+              URL.revokeObjectURL(svgUrl);
+
+              setIsDownloading(false);
+            },
+            format === "jpeg" ? "image/jpeg" : "image/png",
+            format === "jpeg" ? 0.95 : undefined
+          );
+        };
+
+        img.onerror = () => {
+          console.error("Erro ao carregar imagem do SVG");
+          alert("Erro ao descarregar gráfico");
+          setIsDownloading(false);
+          URL.revokeObjectURL(svgUrl);
+        };
+
+        img.crossOrigin = "anonymous";
+        img.src = svgUrl;
+      }
     } catch (error) {
       console.error("Erro ao descarregar gráfico:", error);
       alert(
