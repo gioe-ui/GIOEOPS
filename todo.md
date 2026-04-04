@@ -169,3 +169,8 @@
   - Removidas colunas de verificação de email do schema
   - Simplificado fluxo de autenticação
   - Sistema agora funciona sem necessidade de verificação de email
+
+- [x] Corrigir erro oklch no download de gráficos - RESOLVIDO
+  - Implementada conversão completa de oklch para RGB
+  - Processadas todas as propriedades de cor (color, backgroundColor, borderColor, etc)
+  - Testado com sucesso em todos os gráficos
