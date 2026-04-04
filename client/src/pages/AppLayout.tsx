@@ -62,14 +62,15 @@ export default function AppLayout() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-4 text-sm font-semibold whitespace-nowrap border-b-[3px] transition-colors ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-semibold whitespace-nowrap border-b-[3px] transition-colors ${
                 activeTab === tab.id
                   ? "border-[#1a472a] text-[#1a472a]"
                   : "border-transparent text-gray-500 hover:text-[#1a472a] hover:bg-green-50"
               }`}
             >
               {tab.icon}
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
             </button>
           ))}
         </div>

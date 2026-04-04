@@ -134,3 +134,11 @@
 - [x] Adicionar botão de download para todos os gráficos em PNG/JPEG
 - [x] Instalar html2canvas para captura de gráficos
 - [x] Criar hook useChartDownload para reutilização
+
+
+### Bugs - Navegação
+- [x] Corrigir sobreposição do separador "Novo Formulário" com "Dashboard" em mobile
+  - Reduzido padding em mobile (px-2 sm:px-5)
+  - Reduzido gap entre ícone e texto (gap-1 sm:gap-2)
+  - Reduzido tamanho do texto em mobile (text-xs sm:text-sm)
+  - Adicionado texto abreviado em mobile ("Novo" em vez de "Novo Formulário")
