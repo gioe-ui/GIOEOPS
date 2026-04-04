@@ -51,20 +51,14 @@ export const authRouter = router({
     // Criar novo utilizador com email como openId
     const openId = `local_${input.email}`;
     
-    // Gerar token de verificação de email para utilizadores @gnr.pt
-    const isGnrEmail = input.email.endsWith("@gnr.pt");
-    const emailVerificationToken = isGnrEmail ? crypto.randomBytes(32).toString("hex") : undefined;
-    const emailVerificationTokenExpires = isGnrEmail ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined;
-    
+    // Considerar email já autenticado para utilizadores @gnr.pt
     await upsertUser({
       openId,
       email: input.email,
       name: input.name,
       loginMethod: "local",
       role: "user",
-      emailVerified: isGnrEmail ? 0 : 1, // Utilizadores @gnr.pt precisam de confirmar email
-      emailVerificationToken,
-      emailVerificationTokenExpires,
+      emailVerified: 1, // Considerar email já autenticado
       lastSignedIn: new Date(),
     });
 
@@ -73,18 +67,12 @@ export const authRouter = router({
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Falha ao criar utilizador" });
     }
 
-    // Se for @gnr.pt, enviar email de confirmação
-    if (isGnrEmail && emailVerificationToken) {
-      // TODO: Enviar email de confirmação com o token
-      console.log(`Email de confirmação enviado para ${input.email} com token ${emailVerificationToken}`);
-    }
-
     // Criar session token e definir cookie
     const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "" });
     const cookieOptions = getSessionCookieOptions(ctx.req);
     ctx.res.cookie(COOKIE_NAME, sessionToken, cookieOptions);
 
-    return { success: true, user, requiresEmailVerification: isGnrEmail };
+    return { success: true, user };
   }),
 
   login: publicProcedure.input(loginInput).mutation(async ({ input, ctx }) => {
@@ -101,14 +89,6 @@ export const authRouter = router({
     }
 
     const user = result[0];
-
-    // Verificar se o email foi confirmado (para utilizadores @gnr.pt)
-    if (!user.emailVerified) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Por favor, confirme o seu email antes de fazer login. Verifique a sua caixa de correio.",
-      });
-    }
 
     // Criar session token e definir cookie
     const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "" });

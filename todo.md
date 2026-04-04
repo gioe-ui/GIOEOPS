@@ -158,9 +158,7 @@
 
 ### Novas Funcionalidades - Segurança
 - [x] Adicionar confirmação de email para utilizadores @gnr.pt
-- [x] Implementar sistema de tokens de confirmação
-- [x] Enviar email de confirmação após registo (placeholder - TODO: integrar com serviço de email)
-- [x] Adicionar rota verifyEmail para confirmar email com token
-- [x] Adicionar rota resendVerificationEmail para reenviar token
-- [x] Bloquear login de utilizadores @gnr.pt não verificados
+- [x] Considerar utilizadores registados como já tendo feito autenticação de email
+- [x] Simplificar fluxo de registo - sem necessidade de confirmação
+- [x] Remover verificação de email no login
 - [x] Adicionar campos emailVerified, emailVerificationToken, emailVerificationTokenExpires ao schema
