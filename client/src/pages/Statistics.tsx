@@ -136,39 +136,39 @@ export default function Statistics() {
                 <Pie
                   data={neopData}
                   cx="50%"
-                  cy="40%"
-                  innerRadius={45}
-                  outerRadius={80}
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={90}
                   paddingAngle={2}
                   dataKey="value"
-                  label={({ cx, cy, midAngle, innerRadius, outerRadius, name, percent }) => {
+                  label={({ cx, cy, midAngle, outerRadius, name, percent, index }) => {
                     if (percent === 0) return "";
-                    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
-                    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+                    const RADIAN = Math.PI / 180;
+                    const radius = outerRadius + 60;
+                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
                     return (
                       <text
                         x={x}
                         y={y}
-                        fill="white"
+                        fill={NEOP_COLORS[index]}
                         textAnchor={x > cx ? "start" : "end"}
                         dominantBaseline="central"
-                        fontSize="12"
+                        fontSize="10"
                         fontWeight="bold"
                       >
-                        {`${name}`}
-                        <tspan x={x} dy="1.2em" fontSize="11">{`${(percent * 100).toFixed(0)}%`}</tspan>
+                        {`${name} ${(percent * 100).toFixed(0)}%`}
                       </text>
                     );
                   }}
-                  labelLine={false}
+                  labelLine={true}
                 >
                   {neopData.map((_, i) => (
                     <Cell key={i} fill={NEOP_COLORS[i]} />
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ paddingTop: "30px", fontSize: "12px" }} />
+                <Legend wrapperStyle={{ paddingTop: "20px", fontSize: "11px" }} />
               </PieChart>
             </ResponsiveContainer>
           )}
