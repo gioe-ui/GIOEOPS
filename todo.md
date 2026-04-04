@@ -109,3 +109,12 @@
   - [x] Histórico de uso de arma de fogo + Antecedentes de confronto com FSS = 4º NEOP
 - [x] Adicionar testes para validar a lógica de elevação (4 novos testes + 1 teste de cenário de exemplo)
 - [x] Todos os 15 testes Vitest passam (11 originais + 4 novos)
+
+
+### Novas Funcionalidades - Mapa de Portugal
+- [x] Adicionar mapa de Portugal continental na página de Estatísticas
+- [x] Criar coordenadas geográficas para cada CTer
+- [x] Implementar pontos vermelhos para registos de 4º NEOP por CTer
+- [x] Integrar mapa com filtros de data já existentes
+- [x] Adicionar rota backend para obter 4º NEOP por CTer
+- [x] Visualizar quantidade de 4º NEOP no mapa com tamanho variável dos pontos

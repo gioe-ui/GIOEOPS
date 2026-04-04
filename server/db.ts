@@ -147,3 +147,38 @@ export async function deleteUser(id: number) {
   if (!db) throw new Error("Database not available");
   await db.delete(users).where(eq(users.id, id));
 }
+
+
+export async function getNeop4ByCter(startDate?: Date, endDate?: Date) {
+  const db = await getDb();
+  if (!db) return {};
+
+  let all = await db.select().from(evaluations);
+  
+  if (startDate || endDate) {
+    all = all.filter((e) => {
+      const evalDate = new Date(e.createdAt);
+      if (startDate && evalDate < startDate) return false;
+      if (endDate && evalDate > endDate) return false;
+      return true;
+    });
+  }
+  
+  // Filtrar apenas 4º NEOP
+  const neop4Evaluations = all.filter((e) => e.neop === "4º NEOP");
+  
+  // Agrupar por CTer (extrair do parecer que contém [CTer]...)
+  const cterCounts: Record<string, number> = {};
+  neop4Evaluations.forEach((e) => {
+    if (e.parecer) {
+      // Procurar por padrão [CTer]...
+      const match = e.parecer.match(/\[CTer\]\s*([^\n]+)/);
+      if (match) {
+        const cterName = match[1].trim();
+        cterCounts[cterName] = (cterCounts[cterName] || 0) + 1;
+      }
+    }
+  });
+  
+  return cterCounts;
+}
