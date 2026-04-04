@@ -158,6 +158,7 @@ export default function EvaluationForm() {
       setShowConfirm(false);
       utils.evaluations.list.invalidate();
       utils.statistics.get.invalidate();
+      utils.statistics.neop4ByCter.invalidate();
     },
     onError: (e) => toast.error("Erro ao guardar: " + e.message),
   });

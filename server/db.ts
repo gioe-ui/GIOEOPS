@@ -167,12 +167,12 @@ export async function getNeop4ByCter(startDate?: Date, endDate?: Date) {
   // Filtrar apenas 4º NEOP
   const neop4Evaluations = all.filter((e) => e.neop === "4º NEOP");
   
-  // Agrupar por CTer (extrair do parecer que contém [CTer]...)
+  // Agrupar por CTer (extrair do parecer que contém [CT ...])
   const cterCounts: Record<string, number> = {};
   neop4Evaluations.forEach((e) => {
     if (e.parecer) {
-      // Procurar por padrão [CTer]...
-      const match = e.parecer.match(/\[CTer\]\s*([^\n]+)/);
+      // Procurar por padrão [CT ...]
+      const match = e.parecer.match(/\[([^\]]+)\]/);
       if (match) {
         const cterName = match[1].trim();
         cterCounts[cterName] = (cterCounts[cterName] || 0) + 1;

@@ -119,3 +119,5 @@
 - [x] Instalar Leaflet e react-leaflet
 - [x] Criar componente PortugalMap com Leaflet
 - [x] Integrar mapa na página de Estatísticas
+- [x] Corrigir regex de extração do CTer do parecer
+- [x] Adicionar invalidation do neop4ByCter após criar avaliação
