@@ -150,3 +150,8 @@
   - Adicionado estado isDownloading para feedback visual
   - Implementado uso de Blob em vez de DataURL para melhor compatibilidade
   - Adicionado delay de 100ms para garantir renderização do elemento
+
+- [x] Corrigir erro "oklch" ao descarregar gráficos (html2canvas não suporta oklch)
+  - Implementada função oklchToRgb para converter cores oklch para RGB
+  - Processado elemento clonado antes de capturar com html2canvas
+  - Adicionado container temporário para evitar problemas de renderização
