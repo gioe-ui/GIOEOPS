@@ -26,45 +26,35 @@ export function useChartDownload() {
       // Clonar o elemento
       const clone = element.cloneNode(true) as HTMLElement;
 
-      // Remover todas as classes que possam conter oklch
+      // Remover todas as classes que possam conter oklch (apenas de elementos HTML)
       const removeClasses = (el: HTMLElement) => {
-        el.className = "";
-        const allElements = el.querySelectorAll("*");
-        allElements.forEach((child) => {
-          (child as HTMLElement).className = "";
-        });
-      };
-
-      removeClasses(clone);
-
-      // Aplicar estilos inline RGB básicos
-      const applyBasicStyles = (el: HTMLElement) => {
-        el.style.backgroundColor = "rgb(255, 255, 255)";
-        el.style.color = "rgb(0, 0, 0)";
-        el.style.fontFamily = "Arial, sans-serif";
+        // Verificar se é um elemento HTML (não SVG)
+        if (el.namespaceURI === "http://www.w3.org/1999/xhtml" || !el.namespaceURI) {
+          try {
+            el.className = "";
+          } catch (e) {
+            // Ignorar erros ao tentar remover className
+          }
+        }
 
         const allElements = el.querySelectorAll("*");
         allElements.forEach((child) => {
           const htmlChild = child as HTMLElement;
-          const style = window.getComputedStyle(child);
-
-          // Aplicar cores RGB básicas
-          if (style.backgroundColor && !style.backgroundColor.includes("transparent")) {
-            htmlChild.style.backgroundColor = "rgb(240, 240, 240)";
+          // Verificar se é um elemento HTML (não SVG)
+          if (
+            htmlChild.namespaceURI === "http://www.w3.org/1999/xhtml" ||
+            !htmlChild.namespaceURI
+          ) {
+            try {
+              htmlChild.className = "";
+            } catch (e) {
+              // Ignorar erros ao tentar remover className
+            }
           }
-          if (style.color) {
-            htmlChild.style.color = "rgb(0, 0, 0)";
-          }
-
-          // Aplicar padding e margin
-          htmlChild.style.padding = style.padding;
-          htmlChild.style.margin = style.margin;
-          htmlChild.style.width = style.width;
-          htmlChild.style.height = style.height;
         });
       };
 
-      applyBasicStyles(clone);
+      removeClasses(clone);
 
       // Criar container temporário
       const tempContainer = document.createElement("div");
