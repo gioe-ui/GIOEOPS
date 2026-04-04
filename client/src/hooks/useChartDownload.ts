@@ -1,95 +1,6 @@
 import html2canvas from "html2canvas";
 import { useState } from "react";
 
-// Converter oklch para RGB
-function oklchToRgb(oklchString: string): string {
-  const match = oklchString.match(/oklch\(([\d.]+)%?\s+([\d.]+)%?\s+([\d.]+)deg?\)/);
-  if (!match) return oklchString;
-
-  const [, lStr, cStr, hStr] = match;
-  const l = parseFloat(lStr) / 100;
-  const c = parseFloat(cStr) / 100;
-  const h = parseFloat(hStr) * (Math.PI / 180);
-
-  const a = c * Math.cos(h);
-  const b = c * Math.sin(h);
-
-  const l_ = l + 0.3963377774 * a + 0.2158037573 * b;
-  const m_ = l - 0.1055613458 * a - 0.0638541728 * b;
-  const s_ = l - 0.0894841775 * a - 1.291486575 * b;
-
-  const l2 = l_ * l_ * l_;
-  const m2 = m_ * m_ * m_;
-  const s2 = s_ * s_ * s_;
-
-  const r = 4.0767416621 * l2 - 3.3077363322 * m2 + 0.2309101289 * s2;
-  const g = -1.2684380046 * l2 + 2.6097574011 * m2 - 0.3413193761 * s2;
-  const b2 = -0.0041960771 * l2 - 0.7034186147 * m2 + 1.707614701 * s2;
-
-  const toLinear = (x: number) => {
-    const abs = Math.abs(x);
-    return x >= 0
-      ? Math.pow(Math.max(0, x), 2)
-      : -Math.pow(Math.max(0, abs), 2);
-  };
-
-  const rGamma = toLinear(r);
-  const gGamma = toLinear(g);
-  const bGamma = toLinear(b2);
-
-  const rInt = Math.round(Math.max(0, Math.min(255, rGamma * 255)));
-  const gInt = Math.round(Math.max(0, Math.min(255, gGamma * 255)));
-  const bInt = Math.round(Math.max(0, Math.min(255, bGamma * 255)));
-
-  return `rgb(${rInt}, ${gInt}, ${bInt})`;
-}
-
-// Converter todas as cores oklch para RGB recursivamente
-function convertOklchToRgb(element: HTMLElement) {
-  const allElements = [element, ...Array.from(element.querySelectorAll("*"))];
-
-  allElements.forEach((el) => {
-    const htmlEl = el as HTMLElement;
-    const style = window.getComputedStyle(htmlEl);
-
-    // Verificar todas as propriedades de cor
-    const colorProps = [
-      "color",
-      "backgroundColor",
-      "borderColor",
-      "borderTopColor",
-      "borderRightColor",
-      "borderBottomColor",
-      "borderLeftColor",
-      "outlineColor",
-      "textDecorationColor",
-      "fill",
-      "stroke",
-    ];
-
-    colorProps.forEach((prop) => {
-      const value = style.getPropertyValue(prop);
-      if (value && value.includes("oklch")) {
-        const rgbValue = oklchToRgb(value);
-        htmlEl.style.setProperty(prop, rgbValue, "important");
-      }
-    });
-
-    // Também processar o atributo style direto
-    if (htmlEl.style.cssText) {
-      let cssText = htmlEl.style.cssText;
-      const oklchMatches = cssText.match(/oklch\([^)]+\)/g);
-      if (oklchMatches) {
-        oklchMatches.forEach((match) => {
-          const rgbValue = oklchToRgb(match);
-          cssText = cssText.replace(match, rgbValue);
-        });
-        htmlEl.style.cssText = cssText;
-      }
-    }
-  });
-}
-
 export function useChartDownload() {
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -115,8 +26,45 @@ export function useChartDownload() {
       // Clonar o elemento
       const clone = element.cloneNode(true) as HTMLElement;
 
-      // Converter oklch para RGB
-      convertOklchToRgb(clone);
+      // Remover todas as classes que possam conter oklch
+      const removeClasses = (el: HTMLElement) => {
+        el.className = "";
+        const allElements = el.querySelectorAll("*");
+        allElements.forEach((child) => {
+          (child as HTMLElement).className = "";
+        });
+      };
+
+      removeClasses(clone);
+
+      // Aplicar estilos inline RGB básicos
+      const applyBasicStyles = (el: HTMLElement) => {
+        el.style.backgroundColor = "rgb(255, 255, 255)";
+        el.style.color = "rgb(0, 0, 0)";
+        el.style.fontFamily = "Arial, sans-serif";
+
+        const allElements = el.querySelectorAll("*");
+        allElements.forEach((child) => {
+          const htmlChild = child as HTMLElement;
+          const style = window.getComputedStyle(child);
+
+          // Aplicar cores RGB básicas
+          if (style.backgroundColor && !style.backgroundColor.includes("transparent")) {
+            htmlChild.style.backgroundColor = "rgb(240, 240, 240)";
+          }
+          if (style.color) {
+            htmlChild.style.color = "rgb(0, 0, 0)";
+          }
+
+          // Aplicar padding e margin
+          htmlChild.style.padding = style.padding;
+          htmlChild.style.margin = style.margin;
+          htmlChild.style.width = style.width;
+          htmlChild.style.height = style.height;
+        });
+      };
+
+      applyBasicStyles(clone);
 
       // Criar container temporário
       const tempContainer = document.createElement("div");
@@ -124,11 +72,12 @@ export function useChartDownload() {
       tempContainer.style.left = "-9999px";
       tempContainer.style.top = "-9999px";
       tempContainer.style.width = "1200px";
+      tempContainer.style.backgroundColor = "white";
       tempContainer.appendChild(clone);
       document.body.appendChild(tempContainer);
 
       try {
-        // Usar html2canvas com allowTaint para ignorar erros de CORS
+        // Usar html2canvas com opções para evitar erros de CSS
         const canvas = await html2canvas(clone, {
           backgroundColor: "#ffffff",
           scale: 2,
@@ -136,8 +85,17 @@ export function useChartDownload() {
           useCORS: true,
           allowTaint: true,
           ignoreElements: (element: Element) => {
-            // Ignorar scripts e estilos
-            return element.tagName === "SCRIPT" || element.tagName === "STYLE";
+            // Ignorar scripts, estilos e comentários
+            return (
+              element.tagName === "SCRIPT" ||
+              element.tagName === "STYLE" ||
+              element.nodeType === 8
+            );
+          },
+          onclone: (clonedDocument: Document) => {
+            // Remover todas as tags style
+            const styles = clonedDocument.querySelectorAll("style");
+            styles.forEach((style) => style.remove());
           },
         });
 
