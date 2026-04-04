@@ -162,3 +162,9 @@
 - [x] Simplificar fluxo de registo - sem necessidade de confirmação
 - [x] Remover verificação de email no login
 - [x] Adicionar campos emailVerified, emailVerificationToken, emailVerificationTokenExpires ao schema
+
+
+### Bugs - Login
+- [x] Corrigir login de contas existentes criadas com lógica antiga (emailVerified = 0)
+  - Adicionadas colunas emailVerified, emailVerificationToken, emailVerificationTokenExpires
+  - Atualizado todos os utilizadores existentes para emailVerified = 1
