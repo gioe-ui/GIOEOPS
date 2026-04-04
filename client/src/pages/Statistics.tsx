@@ -131,12 +131,12 @@ export default function Statistics() {
               Sem dados
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={400}>
               <PieChart>
                 <Pie
                   data={neopData}
                   cx="50%"
-                  cy="50%"
+                  cy="45%"
                   innerRadius={50}
                   outerRadius={90}
                   paddingAngle={2}
@@ -144,7 +144,7 @@ export default function Statistics() {
                   label={({ cx, cy, midAngle, outerRadius, name, percent, index }) => {
                     if (percent === 0) return "";
                     const RADIAN = Math.PI / 180;
-                    const radius = outerRadius + 60;
+                    const radius = outerRadius + 80;
                     const x = cx + radius * Math.cos(-midAngle * RADIAN);
                     const y = cy + radius * Math.sin(-midAngle * RADIAN);
                     return (
