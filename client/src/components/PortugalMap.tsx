@@ -76,8 +76,8 @@ export default function PortugalMap({ neop4ByCter, cterCoordinates }: PortugalMa
       </h3>
       <div
         ref={mapContainer}
-        className="w-full h-96 rounded-lg overflow-hidden"
-        style={{ minHeight: "400px" }}
+        className="w-full rounded-lg overflow-hidden"
+        style={{ minHeight: "600px" }}
       />
       <p className="text-xs text-gray-600 mt-2">
         Pontos vermelhos indicam registos de 4º NEOP. Tamanho do ponto indica quantidade por CTer. Clique para ver detalhes.

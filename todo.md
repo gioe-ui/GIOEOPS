@@ -126,3 +126,11 @@
 ### Melhorias de UX - Layout do Formulário
 - [x] Reorganizar campo CTer para alinhar com outros campos (Posto/Função, Nome, Contacto)
 - [x] Adicionar espaçamento consistente entre seções do formulário
+
+### Melhorias de Visualização - Página de Estatísticas
+- [x] Aumentar tamanho da caixa do mapa (de 400px para 600px)
+- [x] Melhorar qualidade visual do mapa (usando Leaflet com OpenStreetMap)
+- [x] Adicionar botão de download para o mapa em PNG/JPEG
+- [x] Adicionar botão de download para todos os gráficos em PNG/JPEG
+- [x] Instalar html2canvas para captura de gráficos
+- [x] Criar hook useChartDownload para reutilização

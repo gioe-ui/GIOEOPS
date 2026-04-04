@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PortugalMap from "@/components/PortugalMap";
+import { useChartDownload } from "@/hooks/useChartDownload";
+import { Download } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -44,9 +46,22 @@ const CTER_COORDINATES: Record<string, { lat: number; lng: number }> = {
   "CT Viseu": { lat: 40.66, lng: -7.47 },
 };
 
+const DownloadButton = ({ onClick, format }: { onClick: () => void; format: "png" | "jpeg" }) => (
+  <button
+    onClick={onClick}
+    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-xs font-semibold flex items-center gap-1"
+    title={`Descarregar como ${format.toUpperCase()}`}
+    style={{ color: "#1a472a" }}
+  >
+    <Download className="w-4 h-4" />
+    {format.toUpperCase()}
+  </button>
+);
+
 export default function Statistics() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const { downloadChart } = useChartDownload();
 
   const { data: stats, isLoading } = trpc.statistics.get.useQuery({
     startDate: startDate || undefined,
@@ -99,39 +114,41 @@ export default function Statistics() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 className="text-lg sm:text-xl font-bold mb-6" style={{ color: "#1a472a" }}>
+    <div className="max-w-7xl mx-auto">
+      <h2 className="text-xl font-bold mb-6" style={{ color: "#1a472a" }}>
         Estatísticas
       </h2>
 
-      {/* Date Filters */}
-      <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-8 border border-gray-200">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 items-end">
+      {/* Filtros */}
+      <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
-            <Label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Data Inicial</Label>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Data Inicial</Label>
             <Input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="border-2 focus:border-[#1a472a] text-xs sm:text-sm"
+              className="border-2 focus:border-[#1a472a]"
             />
           </div>
           <div>
-            <Label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Data Final</Label>
+            <Label className="text-sm font-semibold text-gray-600 mb-2 block">Data Final</Label>
             <Input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="border-2 focus:border-[#1a472a] text-xs sm:text-sm"
+              className="border-2 focus:border-[#1a472a]"
             />
           </div>
-          <Button
-            onClick={handleClearFilters}
-            variant="outline"
-            className="border-2 border-gray-300 hover:bg-gray-100 text-xs sm:text-sm w-full sm:w-auto"
-          >
-            Limpar Filtros
-          </Button>
+          <div className="flex items-end">
+            <Button
+              onClick={handleClearFilters}
+              variant="outline"
+              className="w-full border-2 text-gray-600 hover:bg-gray-50"
+            >
+              Limpar Filtros
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -150,87 +167,115 @@ export default function Statistics() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
         {/* NEOP Donut */}
         <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-5 shadow-sm border border-gray-100">
-          <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider mb-3 sm:mb-4" style={{ color: "#1a472a" }}>
-            Distribuição por NEOP
-          </h3>
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider" style={{ color: "#1a472a" }}>
+              Distribuição por NEOP
+            </h3>
+            <div className="flex gap-2">
+              <DownloadButton onClick={() => downloadChart("chart-neop", "distribuicao-neop", "png")} format="png" />
+              <DownloadButton onClick={() => downloadChart("chart-neop", "distribuicao-neop", "jpeg")} format="jpeg" />
+            </div>
+          </div>
           {stats.total === 0 ? (
             <div className="flex items-center justify-center h-48 text-gray-400 text-xs sm:text-sm">
               Sem dados
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={400}>
-              <PieChart>
-                <Pie
-                  data={neopData}
-                  cx="50%"
-                  cy="45%"
-                  innerRadius={50}
-                  outerRadius={90}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={({ cx, cy, midAngle, outerRadius, name, percent, index }) => {
-                    if (percent === 0) return "";
-                    const RADIAN = Math.PI / 180;
-                    // Aumentar o raio para segmentos pequenos para evitar sobreposição
-                    const baseRadius = outerRadius + 60;
-                    const radius = percent < 0.1 ? baseRadius + 40 : baseRadius;
-                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                    return (
-                      <text
-                        x={x}
-                        y={y}
-                        fill={NEOP_COLORS[index]}
-                        textAnchor={x > cx ? "start" : "end"}
-                        dominantBaseline="central"
-                        fontSize="11"
-                        fontWeight="bold"
-                      >
-                        {`${name} ${(percent * 100).toFixed(0)}%`}
-                      </text>
-                    );
-                  }}
-                  labelLine={true}
-                >
-                  {neopData.map((_, i) => (
-                    <Cell key={i} fill={NEOP_COLORS[i]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend wrapperStyle={{ paddingTop: "20px", fontSize: "11px" }} />
-              </PieChart>
-            </ResponsiveContainer>
+            <div id="chart-neop">
+              <ResponsiveContainer width="100%" height={400}>
+                <PieChart>
+                  <Pie
+                    data={neopData}
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={50}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={({ cx, cy, midAngle, outerRadius, name, percent, index }) => {
+                      if (percent === 0) return "";
+                      const RADIAN = Math.PI / 180;
+                      const baseRadius = outerRadius + 60;
+                      const radius = percent < 0.1 ? baseRadius + 40 : baseRadius;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          fill={NEOP_COLORS[index]}
+                          textAnchor={x > cx ? "start" : "end"}
+                          dominantBaseline="central"
+                          fontSize="11"
+                          fontWeight="bold"
+                        >
+                          {`${name} ${(percent * 100).toFixed(0)}%`}
+                        </text>
+                      );
+                    }}
+                    labelLine={true}
+                  >
+                    {neopData.map((_, i) => (
+                      <Cell key={i} fill={NEOP_COLORS[i]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend wrapperStyle={{ paddingTop: "20px", fontSize: "11px" }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           )}
         </div>
 
         {/* Score Bar Chart */}
         <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-5 shadow-sm border border-gray-100">
-          <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider mb-3 sm:mb-4" style={{ color: "#1a472a" }}>
-            Distribuição por Pontuação
-          </h3>
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider" style={{ color: "#1a472a" }}>
+              Distribuição por Pontuação
+            </h3>
+            <div className="flex gap-2">
+              <DownloadButton onClick={() => downloadChart("chart-score", "distribuicao-pontuacao", "png")} format="png" />
+              <DownloadButton onClick={() => downloadChart("chart-score", "distribuicao-pontuacao", "jpeg")} format="jpeg" />
+            </div>
+          </div>
           {stats.total === 0 ? (
             <div className="flex items-center justify-center h-48 text-gray-400 text-xs sm:text-sm">
               Sem dados
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={scoreData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="range" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Bar dataKey="count" name="Avaliações" fill="#1a472a" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div id="chart-score">
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={scoreData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="range" tick={{ fontSize: 11 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Bar dataKey="count" name="Avaliações" fill="#1a472a" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Mapa de Portugal com 4º NEOP por CTer */}
-      <PortugalMap neop4ByCter={neop4ByCter} cterCoordinates={CTER_COORDINATES} />
+      {/* Mapa de Portugal com 4º NEOP por CTer - Aumentado */}
+      <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-5 shadow-sm border border-gray-100 mb-8">
+        <div className="flex justify-between items-center mb-3 sm:mb-4">
+          <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider" style={{ color: "#1a472a" }}>
+            Mapa de 4º NEOP por CTer
+          </h3>
+          <div className="flex gap-2">
+            <DownloadButton onClick={() => downloadChart("map-container", "mapa-4neop", "png")} format="png" />
+            <DownloadButton onClick={() => downloadChart("map-container", "mapa-4neop", "jpeg")} format="jpeg" />
+          </div>
+        </div>
+        <div id="map-container">
+          <PortugalMap neop4ByCter={neop4ByCter} cterCoordinates={CTER_COORDINATES} />
+        </div>
+      </div>
     </div>
   );
 }
