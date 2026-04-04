@@ -90,3 +90,8 @@
 
 ### Bugs Reportados
 - [x] Erro ao guardar o formulário de avaliação com o campo CTer (corrigido: CTer armazenado no parecer)
+
+
+### Melhorias Solicitadas
+- [x] Corrigir sobreposição do rótulo "4º NEOP" no gráfico de Distribuição por NEOP
+- [x] Melhorar responsividade mobile em toda a aplicação
