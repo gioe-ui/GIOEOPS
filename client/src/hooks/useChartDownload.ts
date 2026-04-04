@@ -41,7 +41,14 @@ export function useChartDownload() {
         const allElements = clone.querySelectorAll("*");
         allElements.forEach((el) => {
           const htmlEl = el as HTMLElement;
-          htmlEl.className = "";
+          // Verificar se é um elemento SVG antes de modificar className
+          if (el.namespaceURI !== "http://www.w3.org/2000/svg") {
+            try {
+              htmlEl.className = "";
+            } catch (e) {
+              // Ignorar erros ao modificar className
+            }
+          }
           htmlEl.removeAttribute("style");
         });
 
