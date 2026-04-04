@@ -136,14 +136,31 @@ export default function Statistics() {
                 <Pie
                   data={neopData}
                   cx="50%"
-                  cy="45%"
-                  innerRadius={50}
-                  outerRadius={85}
+                  cy="40%"
+                  innerRadius={45}
+                  outerRadius={80}
                   paddingAngle={2}
                   dataKey="value"
-                  label={({ name, percent }) =>
-                    percent > 0 ? `${name}\n${(percent * 100).toFixed(0)}%` : ""
-                  }
+                  label={({ cx, cy, midAngle, innerRadius, outerRadius, name, percent }) => {
+                    if (percent === 0) return "";
+                    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+                    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+                    return (
+                      <text
+                        x={x}
+                        y={y}
+                        fill="white"
+                        textAnchor={x > cx ? "start" : "end"}
+                        dominantBaseline="central"
+                        fontSize="12"
+                        fontWeight="bold"
+                      >
+                        {`${name}`}
+                        <tspan x={x} dy="1.2em" fontSize="11">{`${(percent * 100).toFixed(0)}%`}</tspan>
+                      </text>
+                    );
+                  }}
                   labelLine={false}
                 >
                   {neopData.map((_, i) => (
@@ -151,7 +168,7 @@ export default function Statistics() {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend wrapperStyle={{ paddingTop: "20px", fontSize: "12px" }} />
+                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ paddingTop: "30px", fontSize: "12px" }} />
               </PieChart>
             </ResponsiveContainer>
           )}

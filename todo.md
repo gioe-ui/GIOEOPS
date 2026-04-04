@@ -95,3 +95,7 @@
 ### Melhorias Solicitadas
 - [x] Corrigir sobreposição do rótulo "4º NEOP" no gráfico de Distribuição por NEOP
 - [x] Melhorar responsividade mobile em toda a aplicação
+
+
+### Bugs Adicionais
+- [x] Descrição do 3º NEOP não se vê no gráfico de Distribuição por NEOP (corrigido: custom label renderer com posicionamento radial)
