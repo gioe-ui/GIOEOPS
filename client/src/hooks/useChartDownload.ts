@@ -29,7 +29,7 @@ export const useChartDownload = () => {
         const area = rect.width * rect.height;
         
         // Ignorar SVGs muito pequenos (provavelmente ícones ou bandeiras)
-        if (area > 1000 && area > maxArea) {
+        if (area > 500 && area > maxArea) {
           maxArea = area;
           targetSvg = svg as SVGElement;
         }
