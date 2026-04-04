@@ -33,16 +33,17 @@ export function useChartDownload() {
         // Clonar o elemento
         const clone = element.cloneNode(true) as HTMLElement;
 
-        // Remover atributos de estilo que possam conter oklch
-        const removeOklchStyles = (el: HTMLElement) => {
-          el.removeAttribute("style");
-          const allElements = el.querySelectorAll("*");
-          allElements.forEach((child) => {
-            (child as HTMLElement).removeAttribute("style");
-          });
-        };
+        // Remover todas as tags style
+        const styles = clone.querySelectorAll("style");
+        styles.forEach((style) => style.remove());
 
-        removeOklchStyles(clone);
+        // Remover todas as classes e estilos inline
+        const allElements = clone.querySelectorAll("*");
+        allElements.forEach((el) => {
+          const htmlEl = el as HTMLElement;
+          htmlEl.className = "";
+          htmlEl.removeAttribute("style");
+        });
 
         // Criar container temporário
         const tempContainer = document.createElement("div");
