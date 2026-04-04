@@ -99,3 +99,12 @@
 
 ### Bugs Adicionais
 - [x] Descrição do 3º NEOP não se vê no gráfico de Distribuição por NEOP (corrigido: custom label renderer com posicionamento radial)
+
+
+### Análise de Pontuação - Comparação com Código Referência
+- [x] Revisar pontuação - TODAS AS PONTUAÇÕES ESTÃO CORRETAS
+- [x] Implementar lógica de critérios que elevam automaticamente para 4º NEOP:
+  - [x] Associação criminosa + Posse/Probabilidade de armas de fogo = 4º NEOP
+  - [x] Histórico de uso de arma de fogo + Antecedentes de confronto com FSS = 4º NEOP
+- [x] Adicionar testes para validar a lógica de elevação (4 novos testes + 1 teste de cenário de exemplo)
+- [x] Todos os 15 testes Vitest passam (11 originais + 4 novos)

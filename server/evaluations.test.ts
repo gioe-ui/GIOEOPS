@@ -179,6 +179,67 @@ describe("evaluations scoring", () => {
     });
     expect(withBairro.pontuacao).toBe(withBairroAndRural.pontuacao);
   });
+
+  it("elevates to 4º NEOP when associação criminosa + arma registada (criterion 1)", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.evaluations.preview({
+      ...baseInput,
+      modalidadeAssociacao: 1,
+      posseArma: "registada",
+      // Low score: 1 (qty) + 8 (associacao) + 8 (registada) + 3 (naoHaRegisto) = 20 → normally 2º NEOP
+      // But should be elevated to 4º NEOP due to criterion
+    });
+    expect(result.pontuacao).toBeLessThanOrEqual(25); // Score is low
+    expect(result.neop).toBe("4º NEOP"); // But NEOP is elevated
+  });
+
+  it("elevates to 4º NEOP when associação criminosa + arma provável (criterion 1)", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.evaluations.preview({
+      ...baseInput,
+      modalidadeAssociacao: 1,
+      posseArma: "provavel",
+      // Low score: 1 (qty) + 8 (associacao) + 6 (provavel) + 3 (naoHaRegisto) = 18 → normally 2º NEOP
+      // But should be elevated to 4º NEOP due to criterion
+    });
+    expect(result.pontuacao).toBeLessThanOrEqual(25); // Score is low
+    expect(result.neop).toBe("4º NEOP"); // But NEOP is elevated
+  });
+
+  it("elevates to 4º NEOP when uso de arma + antecedentes FSS (criterion 2)", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.evaluations.preview({
+      ...baseInput,
+      usoArma: "haRegisto",
+      antecedentesFSS: "sim",
+      // Low score: 1 (qty) + 4 (outro) + 2 (improvavel) + 10 (haRegisto) + 9 (sim) = 26 → normally 3º NEOP
+      // But should be elevated to 4º NEOP due to criterion
+    });
+    expect(result.pontuacao).toBeLessThanOrEqual(50); // Score is moderate
+    expect(result.neop).toBe("4º NEOP"); // But NEOP is elevated
+  });
+
+  it("example scenario: 54 points with criteria should be 4º NEOP", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    // Scenario from reference: Associação criminosa + 2 suspeitos + Antecedentes contra pessoas
+    // + Antecedentes contra FSS + Arma registada + Uso de arma
+    const result = await caller.evaluations.preview({
+      ...baseInput,
+      quantidadeSuspeitos: "2",
+      modalidadeAssociacao: 1,
+      antecedentesContraPessoas: 1,
+      antecedentesFSS: "sim",
+      posseArma: "registada",
+      usoArma: "haRegisto",
+    });
+    // 2 + 8 + 8 + 9 + 8 + 10 + 4 + 3 = 52 (close to 54 in reference)
+    // Should be 4º NEOP due to both criteria being met
+    expect(result.neop).toBe("4º NEOP");
+  });
 });
 
 // ─── Auth logout test ─────────────────────────────────────────────────────────

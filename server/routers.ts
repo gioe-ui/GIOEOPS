@@ -88,7 +88,25 @@ function calcScore(d: {
   if (d.segurancaOutrasMedidas) s += 5;
 
   const pontuacao = Math.min(s, 100);
-  const neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 75 ? "3º NEOP" : "4º NEOP";
+  let neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 75 ? "3º NEOP" : "4º NEOP";
+  
+  // Critérios que elevam automaticamente para 4º NEOP
+  const temAssociacaoCriminosa = d.modalidadeAssociacao;
+  const temArmaRegistada = d.posseArma === "registada";
+  const temArmaProbavel = d.posseArma === "provavel";
+  const temUsoArma = d.usoArma === "haRegisto";
+  const temAntecedentesContraFSS = d.antecedentesFSS === "sim";
+  
+  // Elevação 1: Associação criminosa + Posse/Probabilidade de armas de fogo
+  if (temAssociacaoCriminosa && (temArmaRegistada || temArmaProbavel)) {
+    neop = "4º NEOP";
+  }
+  
+  // Elevação 2: Histórico de uso de arma de fogo + Antecedentes de confronto com FSS
+  if (temUsoArma && temAntecedentesContraFSS) {
+    neop = "4º NEOP";
+  }
+  
   return { pontuacao, neop };
 }
 
