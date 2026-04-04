@@ -166,5 +166,6 @@
 
 ### Bugs - Login
 - [x] Corrigir login de contas existentes criadas com lógica antiga (emailVerified = 0)
-  - Adicionadas colunas emailVerified, emailVerificationToken, emailVerificationTokenExpires
-  - Atualizado todos os utilizadores existentes para emailVerified = 1
+  - Removidas colunas de verificação de email do schema
+  - Simplificado fluxo de autenticação
+  - Sistema agora funciona sem necessidade de verificação de email
