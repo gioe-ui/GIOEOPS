@@ -121,3 +121,8 @@
 - [x] Integrar mapa na página de Estatísticas
 - [x] Corrigir regex de extração do CTer do parecer
 - [x] Adicionar invalidation do neop4ByCter após criar avaliação
+
+
+### Melhorias de UX - Layout do Formulário
+- [x] Reorganizar campo CTer para alinhar com outros campos (Posto/Função, Nome, Contacto)
+- [x] Adicionar espaçamento consistente entre seções do formulário

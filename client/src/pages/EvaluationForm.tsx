@@ -192,7 +192,7 @@ export default function EvaluationForm() {
             <Input placeholder="Telefone/Email" value={form.pocContacto} onChange={(e) => set("pocContacto", e.target.value)} className="border-2 focus:border-[#1a472a]" />
           </div>
         </div>
-        <div>
+        <div className="mb-4">
           <Label className="text-sm font-semibold text-gray-600 mb-1 block">Despacho</Label>
           <Textarea placeholder="Registo do despacho..." value={form.despacho} onChange={(e) => set("despacho", e.target.value)} className="min-h-[80px] border-2 focus:border-[#1a472a]" />
         </div>
