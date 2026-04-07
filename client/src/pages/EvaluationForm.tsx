@@ -196,7 +196,7 @@ export default function EvaluationForm() {
       <div id="form-container" className="bg-white p-6 rounded-lg">
         {/* Cabeçalho do PDF */}
         <div className="text-center mb-8 pb-6 border-b-2" style={{ borderColor: "#1a472a" }}>
-          <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663511663974/bkxrxh5szwZfcvrDKi6FHK/GIOE_NewLogo_7249f113.webp" alt="GIOE Logo" className="h-24 mx-auto mb-4" style={{ filter: "hue-rotate(110deg) saturate(0.6) brightness(0.85) contrast(1.1)" }} />
+          <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663511663974/bkxrxh5szwZfcvrDKi6FHK/GIOE_NewLogo_7249f113.webp" alt="GIOE Logo" className="h-24 mx-auto mb-4" style={{ filter: "hue-rotate(110deg) saturate(0.4) brightness(0.75) contrast(1.2) invert(0.05)" }} />
           <div className="text-2xl font-bold" style={{ color: "#1a472a" }}>GIOE</div>
           <div className="text-sm" style={{ color: "#1a472a" }}>Grupo de Intervenção de Operações Especiais</div>
           <div className="text-xs mt-2" style={{ color: "#666" }}>Avaliação de Pedido de Apoio</div>
