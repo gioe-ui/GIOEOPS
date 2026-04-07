@@ -11,6 +11,7 @@ import {
   getAllUsers,
   getEvaluations,
   getEvaluationById,
+  getUniqueCters,
   getStatistics,
   getDb,
   getNeop4ByCter,
@@ -187,6 +188,10 @@ export const appRouter = router({
 
     preview: protectedProcedure.input(EvaluationInput).query(async ({ input }) => {
       return calcScore(input);
+    }),
+
+    getCters: protectedProcedure.query(async () => {
+      return getUniqueCters();
     }),
   }),
 

@@ -116,6 +116,26 @@ export async function getEvaluationById(id: number) {
   return result.length > 0 ? result[0] : null;
 }
 
+export async function getUniqueCters() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const all = await db.select().from(evaluations);
+  const cters = new Set<string>();
+  
+  all.forEach((e) => {
+    if (e.parecer) {
+      const match = e.parecer.match(/CTer:\s*([^\n,]+)/i);
+      if (match) {
+        const cter = match[1].trim();
+        if (cter) cters.add(cter);
+      }
+    }
+  });
+  
+  return Array.from(cters).sort();
+}
+
 export async function deleteEvaluation(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -25,15 +25,16 @@ export default function Dashboard() {
   const [filterNeop, setFilterNeop] = useState("all");
   const [filterAvaliador, setFilterAvaliador] = useState("");
   const [avaliadorInput, setAvaliadorInput] = useState("");
-  const [filterCter, setFilterCter] = useState("");
-  const [cterInput, setCterInput] = useState("");
+  const [filterCter, setFilterCter] = useState("all");
   const utils = trpc.useUtils();
 
   const { data: evaluations, isLoading } = trpc.evaluations.list.useQuery({
     neop: filterNeop === "all" ? undefined : filterNeop,
     avaliador: filterAvaliador || undefined,
-    cterRequerente: filterCter || undefined,
+    cterRequerente: filterCter === "all" ? undefined : filterCter,
   });
+
+  const { data: cters, isLoading: ctersLoading } = trpc.evaluations.getCters.useQuery();
 
   const deleteMutation = trpc.evaluations.delete.useMutation({
     onSuccess: () => {
@@ -81,7 +82,6 @@ export default function Dashboard() {
 
   const applyFilter = () => {
     setFilterAvaliador(avaliadorInput);
-    setFilterCter(cterInput);
   };
 
   return (
@@ -117,21 +117,37 @@ export default function Dashboard() {
             </Select>
           </div>
           <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Filtrar por CTer</Label>
+            <Select value={filterCter} onValueChange={setFilterCter}>
+              <SelectTrigger className="border-2 focus:border-[#1a472a]">
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {ctersLoading ? (
+                  <SelectItem value="loading" disabled>
+                    A carregar...
+                  </SelectItem>
+                ) : cters && cters.length > 0 ? (
+                  cters.map((cter) => (
+                    <SelectItem key={cter} value={cter}>
+                      {cter}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>
+                    Nenhum CTer encontrado
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
             <Label className="text-sm font-semibold text-gray-600 mb-1 block">Filtrar por Avaliador</Label>
             <Input
               placeholder="Nome do avaliador"
               value={avaliadorInput}
               onChange={(e) => setAvaliadorInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && applyFilter()}
-              className="border-2 focus:border-[#1a472a]"
-            />
-          </div>
-          <div>
-            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Filtrar por CTer</Label>
-            <Input
-              placeholder="CTer Requerente"
-              value={cterInput}
-              onChange={(e) => setCterInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && applyFilter()}
               className="border-2 focus:border-[#1a472a]"
             />

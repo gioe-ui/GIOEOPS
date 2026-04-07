@@ -214,3 +214,8 @@
 - [x] Corrigir PDF saindo em branco (problema com html2canvas)
 - [x] Aplicar filtro CSS de tons de verde ao logo GIOE original
 - [x] Testar geração de PDF com filtro de verde
+
+### Melhorias - Filtro de CTer
+- [x] Criar procedure para obter lista de CTers únicos
+- [x] Atualizar Dashboard para usar Select dropdown para CTer
+- [x] Remover campo de pesquisa de CTer
