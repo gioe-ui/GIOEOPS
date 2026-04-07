@@ -15,7 +15,7 @@ export const useFormScreenshot = () => {
       // Clonar elemento
       const clonedElement = element.cloneNode(true) as HTMLElement;
 
-      // Remover todas as classes usando setAttribute
+      // Remover todas as classes
       const removeClasses = (el: Element) => {
         el.removeAttribute("class");
         for (let i = 0; i < el.children.length; i++) {
@@ -25,7 +25,7 @@ export const useFormScreenshot = () => {
       removeClasses(clonedElement);
 
       // Aplicar estilos inline básicos
-      clonedElement.setAttribute("style", "background-color: white; padding: 20px; font-family: Arial, sans-serif;");
+      clonedElement.setAttribute("style", "background-color: white; padding: 20px; font-family: Arial, sans-serif; color: black;");
 
       // Posicionar fora da tela
       clonedElement.style.position = "fixed";
@@ -34,28 +34,54 @@ export const useFormScreenshot = () => {
       clonedElement.style.width = element.offsetWidth + "px";
       clonedElement.style.zIndex = "-9999";
 
-      document.body.appendChild(clonedElement);
+      // Criar container para o elemento clonado
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "-9999px";
+      container.style.width = element.offsetWidth + "px";
+      container.style.backgroundColor = "white";
+      container.style.padding = "20px";
+      container.style.fontFamily = "Arial, sans-serif";
+      container.style.color = "black";
+      container.appendChild(clonedElement);
+
+      document.body.appendChild(container);
 
       // Aguardar renderização
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-      // Usar html2canvas
+      // Usar html2canvas com onclone para remover stylesheets
       const html2canvas = (await import("html2canvas")).default;
 
-      const canvas = await html2canvas(clonedElement, {
+      const canvas = await html2canvas(container, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
         imageTimeout: 0,
+        onclone: (clonedDoc: Document) => {
+          // Remover todas as stylesheets do documento clonado
+          const stylesheets = clonedDoc.querySelectorAll("style, link[rel='stylesheet']");
+          stylesheets.forEach((sheet) => {
+            sheet.remove();
+          });
+
+          // Remover todas as classes
+          const allElements = clonedDoc.querySelectorAll("*");
+          allElements.forEach((el) => {
+            el.removeAttribute("class");
+            el.removeAttribute("id");
+          });
+        },
         ignoreElements: (element: Element) => {
-          return element.tagName === "SCRIPT" || element.tagName === "STYLE";
+          return element.tagName === "SCRIPT" || element.tagName === "STYLE" || element.tagName === "LINK";
         },
       });
 
-      // Remover elemento clonado
-      document.body.removeChild(clonedElement);
+      // Remover container
+      document.body.removeChild(container);
 
       // Verificar se canvas tem conteúdo
       if (canvas.width === 0 || canvas.height === 0) {
