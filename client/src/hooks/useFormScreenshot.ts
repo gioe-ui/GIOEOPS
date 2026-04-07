@@ -39,27 +39,18 @@ const oklchToRgb = (oklchColor: string): string => {
   return `rgb(${R}, ${G}, ${B})`;
 };
 
-// Processar estilos para converter oklch - versão melhorada
-const processStylesForCanvas = (element: HTMLElement) => {
-  // Processar o elemento raiz
-  processElement(element);
+// Converter todas as cores oklch em CSS inline
+const convertOklchInElement = (element: HTMLElement) => {
+  // Processar atributo style
+  if (element.style.cssText) {
+    let cssText = element.style.cssText;
+    // Encontrar e substituir todas as cores oklch
+    cssText = cssText.replace(/oklch\([^)]+\)/g, (match) => oklchToRgb(match));
+    element.style.cssText = cssText;
+  }
 
-  // Processar todos os filhos recursivamente
-  const processChildren = (el: HTMLElement) => {
-    for (let i = 0; i < el.children.length; i++) {
-      const child = el.children[i] as HTMLElement;
-      processElement(child);
-      processChildren(child);
-    }
-  };
-
-  processChildren(element);
-};
-
-const processElement = (element: HTMLElement) => {
+  // Processar propriedades CSS computadas
   const style = window.getComputedStyle(element);
-
-  // Processar propriedades de cor
   const colorProps = [
     "color",
     "backgroundColor",
@@ -70,8 +61,6 @@ const processElement = (element: HTMLElement) => {
     "borderLeftColor",
     "outlineColor",
     "textDecorationColor",
-    "textShadow",
-    "boxShadow",
     "fill",
     "stroke",
   ];
@@ -83,6 +72,43 @@ const processElement = (element: HTMLElement) => {
       element.style.setProperty(prop, rgbValue, "important");
     }
   }
+
+  // Processar textShadow e boxShadow
+  const shadowProps = ["textShadow", "boxShadow"];
+  for (const prop of shadowProps) {
+    const value = style.getPropertyValue(prop);
+    if (value && value.includes("oklch")) {
+      const rgbValue = value.replace(/oklch\([^)]+\)/g, (match) => oklchToRgb(match));
+      element.style.setProperty(prop, rgbValue, "important");
+    }
+  }
+
+  // Processar recursivamente todos os filhos
+  for (let i = 0; i < element.children.length; i++) {
+    convertOklchInElement(element.children[i] as HTMLElement);
+  }
+};
+
+// Remover todas as folhas de estilo que possam conter oklch
+const removeStylesheets = () => {
+  const styles = document.querySelectorAll("style");
+  const links = document.querySelectorAll("link[rel='stylesheet']");
+
+  const stylesToRemove: Element[] = [];
+
+  // Marcar folhas de estilo para remoção
+  styles.forEach((style) => {
+    if (style.textContent && style.textContent.includes("oklch")) {
+      stylesToRemove.push(style);
+    }
+  });
+
+  links.forEach((link) => {
+    // Remover todos os links de stylesheet para evitar problemas
+    stylesToRemove.push(link);
+  });
+
+  return stylesToRemove;
 };
 
 export const useFormScreenshot = () => {
@@ -104,13 +130,17 @@ export const useFormScreenshot = () => {
       clonedElement.style.visibility = "hidden";
       clonedElement.style.width = element.offsetWidth + "px";
       clonedElement.style.backgroundColor = "#ffffff";
+
+      // Remover todos os atributos que possam conter oklch
+      clonedElement.removeAttribute("class");
+
       document.body.appendChild(clonedElement);
 
-      // Processar estilos oklch recursivamente
-      processStylesForCanvas(clonedElement);
+      // Converter todas as cores oklch em RGB
+      convertOklchInElement(clonedElement);
 
       // Aguardar um pouco para garantir que os estilos foram aplicados
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Capturar o elemento como canvas
       const canvas = await html2canvas(clonedElement, {
@@ -122,6 +152,14 @@ export const useFormScreenshot = () => {
         imageTimeout: 5000,
         ignoreElements: (element: Element) => {
           return element.tagName === "SCRIPT" || element.tagName === "STYLE";
+        },
+        onclone: (clonedDocument: Document) => {
+          // Remover todas as folhas de estilo do documento clonado
+          const styles = clonedDocument.querySelectorAll("style");
+          styles.forEach((style) => style.remove());
+
+          const links = clonedDocument.querySelectorAll("link[rel='stylesheet']");
+          links.forEach((link) => link.remove());
         },
       });
 
