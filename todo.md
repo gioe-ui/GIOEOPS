@@ -174,3 +174,12 @@
   - Implementada conversão completa de oklch para RGB
   - Processadas todas as propriedades de cor (color, backgroundColor, borderColor, etc)
   - Testado com sucesso em todos os gráficos
+
+
+### Novas Funcionalidades - Download de PDF
+- [x] Adicionar botão de download do formulário em PDF no canto superior direito
+- [x] Criar cabeçalho GNR igual ao do PDF de referência
+- [x] Incluir todas as variáveis assinaladas no PDF
+- [x] Incluir classificação recomendada (NEOP)
+- [x] Incluir grau de complexidade
+- [ ] Testar geração de PDF com dados preenchidos

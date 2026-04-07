@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Save, User, AlertTriangle, Crosshair, MapPin, ClipboardList } from "lucide-react";
+import { Save, User, AlertTriangle, Crosshair, MapPin, ClipboardList, Download } from "lucide-react";
+import { usePdfDownload, type FormDataForPdf } from "@/hooks/usePdfDownload";
 
 // ─── Scoring ─────────────────────────────────────────────────────────────────
 const TIPO_SCORES: Record<string, number> = {
@@ -148,8 +149,48 @@ export default function EvaluationForm() {
   const [form, setForm] = useState<FormState>(DEFAULT);
   const [showConfirm, setShowConfirm] = useState(false);
   const utils = trpc.useUtils();
+  const { downloadFormPdf, isGenerating } = usePdfDownload();
 
   const { pontuacao, neop, complexidade, descricao, neopColor: neopColorFromCalc } = calcScore(form);
+
+  const handleDownloadPdf = () => {
+    const pdfData: FormDataForPdf = {
+      pocPosto: form.pocPosto,
+      pocNome: form.pocNome,
+      pocContacto: form.pocContacto,
+      despacho: form.despacho,
+      cterRequerente: form.cterRequerente,
+      mandadoDetencao: form.mandadoDetencao,
+      mandadoBusca: form.mandadoBusca,
+      quantidadeSuspeitos: form.quantidadeSuspeitos,
+      modalidadeIsolado: form.modalidadeIsolado,
+      modalidadeAssociacao: form.modalidadeAssociacao,
+      tipoCriminal: form.tipoCriminal,
+      antecedentesContraPessoas: form.antecedentesContraPessoas,
+      antecedentesContraPatrimonio: form.antecedentesContraPatrimonio,
+      antecedentesOutros: form.antecedentesOutros,
+      antecedentesFSS: form.antecedentesFSS,
+      posseArma: form.posseArma,
+      usoArma: form.usoArma,
+      tipologiaApartamento: form.tipologiaApartamento,
+      tipologiaMoradia: form.tipologiaMoradia,
+      tipologiaOutro: form.tipologiaOutro,
+      contextoIsolado: form.contextoIsolado,
+      contextoBairroSocial: form.contextoBairroSocial,
+      contextoMeioUrbano: form.contextoMeioUrbano,
+      contextoMeioRural: form.contextoMeioRural,
+      segurancaCaes: form.segurancaCaes,
+      segurancaPortaBlindada: form.segurancaPortaBlindada,
+      segurancaOutrasMedidas: form.segurancaOutrasMedidas,
+      avaliador: form.avaliador,
+      dataAvaliacao: form.dataAvaliacao,
+      parecer: form.parecer,
+      pontuacao,
+      neop,
+      complexidade,
+    };
+    downloadFormPdf(pdfData, `GIOE_${new Date().getTime()}`);
+  };
 
   const createMutation = trpc.evaluations.create.useMutation({
     onSuccess: () => {
@@ -171,9 +212,19 @@ export default function EvaluationForm() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-xl font-bold mb-6" style={{ color: "#1a472a" }}>
-        Novo Formulário de Avaliação
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold" style={{ color: "#1a472a" }}>
+          Novo Formulário de Avaliação
+        </h2>
+        <Button
+          onClick={handleDownloadPdf}
+          disabled={isGenerating}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          {isGenerating ? "A gerar PDF..." : "Descarregar PDF"}
+        </Button>
+      </div>
 
       {/* POC e Despacho */}
       <Section>

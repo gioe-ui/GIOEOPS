@@ -43,6 +43,13 @@
       "when": 1775301207052,
       "tag": "0005_odd_silver_centurion",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1775552230213,
+      "tag": "0006_safe_guardsmen",
+      "breakpoints": true
     }
   ]
 }
