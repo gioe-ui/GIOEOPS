@@ -23,8 +23,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Save, User, AlertTriangle, Crosshair, MapPin, ClipboardList, Download } from "lucide-react";
-import { usePdfDownload, type FormDataForPdf } from "@/hooks/usePdfDownload";
-import { useFormScreenshot } from "@/hooks/useFormScreenshot";
+
 
 // ─── Scoring ─────────────────────────────────────────────────────────────────
 const TIPO_SCORES: Record<string, number> = {
@@ -151,13 +150,10 @@ export default function EvaluationForm() {
   const [form, setForm] = useState<FormState>(DEFAULT);
   const [showConfirm, setShowConfirm] = useState(false);
   const utils = trpc.useUtils();
-  const { downloadFormScreenshot, isGenerating: isGeneratingScreenshot } = useFormScreenshot();
 
   const { pontuacao, neop, complexidade, descricao, neopColor: neopColorFromCalc } = calcScore(form);
 
-  const handleDownloadPdf = () => {
-    downloadFormScreenshot("form-container", `GIOE_${new Date().getTime()}`);
-  };
+
 
   const createMutation = trpc.evaluations.create.useMutation({
     onSuccess: () => {
@@ -183,14 +179,7 @@ export default function EvaluationForm() {
         <h2 className="text-xl font-bold" style={{ color: "#1a472a" }}>
           Novo Formulário de Avaliação
         </h2>
-        <Button
-          onClick={handleDownloadPdf}
-          disabled={isGeneratingScreenshot}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          {isGeneratingScreenshot ? "A gerar PDF..." : "Descarregar PDF"}
-        </Button>
+
       </div>
 
       <div id="form-container" className="bg-white p-6 rounded-lg">

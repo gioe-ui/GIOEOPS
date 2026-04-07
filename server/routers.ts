@@ -10,6 +10,7 @@ import {
   deleteUser,
   getAllUsers,
   getEvaluations,
+  getEvaluationById,
   getStatistics,
   getDb,
   getNeop4ByCter,
@@ -155,10 +156,20 @@ export const appRouter = router({
 
   evaluations: router({
     list: protectedProcedure
-      .input(z.object({ neop: z.string().optional(), avaliador: z.string().optional() }))
+      .input(z.object({ neop: z.string().optional(), avaliador: z.string().optional(), cterRequerente: z.string().optional() }))
       .query(async ({ input }) => {
         const rows = await getEvaluations(input);
         return rows;
+      }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .query(async ({ input }) => {
+        const evaluation = await getEvaluationById(input.id);
+        if (!evaluation) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Avaliação não encontrada" });
+        }
+        return evaluation;
       }),
 
     create: protectedProcedure.input(EvaluationInput).mutation(async ({ input, ctx }) => {

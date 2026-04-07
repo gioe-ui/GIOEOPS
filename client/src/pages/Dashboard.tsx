@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, Trash2, Search } from "lucide-react";
+import { Download, Trash2, Search, Printer } from "lucide-react";
 
 const NEOP_COLORS: Record<string, string> = {
   "2º NEOP": "#1a472a",
@@ -20,14 +21,18 @@ const NEOP_COLORS: Record<string, string> = {
 };
 
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const [filterNeop, setFilterNeop] = useState("all");
   const [filterAvaliador, setFilterAvaliador] = useState("");
   const [avaliadorInput, setAvaliadorInput] = useState("");
+  const [filterCter, setFilterCter] = useState("");
+  const [cterInput, setCterInput] = useState("");
   const utils = trpc.useUtils();
 
   const { data: evaluations, isLoading } = trpc.evaluations.list.useQuery({
     neop: filterNeop === "all" ? undefined : filterNeop,
     avaliador: filterAvaliador || undefined,
+    cterRequerente: filterCter || undefined,
   });
 
   const deleteMutation = trpc.evaluations.delete.useMutation({
@@ -45,6 +50,12 @@ export default function Dashboard() {
     }
   };
 
+  const extractCter = (parecer: string | null): string => {
+    if (!parecer) return "—";
+    const match = parecer.match(/CTer:\s*([^\n,]+)/i);
+    return match ? match[1].trim() : "—";
+  };
+
   const exportToExcel = async () => {
     if (!evaluations || evaluations.length === 0) {
       toast.error("Nenhuma avaliação para exportar.");
@@ -59,6 +70,7 @@ export default function Dashboard() {
         Pontuação: e.pontuacao,
         NEOP: e.neop,
         Avaliador: e.avaliador,
+        CTer: extractCter(e.parecer),
         Parecer: e.parecer,
       }))
     );
@@ -67,10 +79,13 @@ export default function Dashboard() {
     XLSX.writeFile(wb, "avaliacoes_GIOE.xlsx");
   };
 
-  const applyFilter = () => setFilterAvaliador(avaliadorInput);
+  const applyFilter = () => {
+    setFilterAvaliador(avaliadorInput);
+    setFilterCter(cterInput);
+  };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold" style={{ color: "#1a472a" }}>
           Histórico de Avaliações
@@ -86,7 +101,7 @@ export default function Dashboard() {
 
       {/* Filters */}
       <div className="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div>
             <Label className="text-sm font-semibold text-gray-600 mb-1 block">Filtrar por NEOP</Label>
             <Select value={filterNeop} onValueChange={setFilterNeop}>
@@ -111,6 +126,16 @@ export default function Dashboard() {
               className="border-2 focus:border-[#1a472a]"
             />
           </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Filtrar por CTer</Label>
+            <Input
+              placeholder="CTer Requerente"
+              value={cterInput}
+              onChange={(e) => setCterInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && applyFilter()}
+              className="border-2 focus:border-[#1a472a]"
+            />
+          </div>
           <Button onClick={applyFilter} style={{ background: "#1a472a" }}>
             <Search className="w-4 h-4 mr-2" />
             Pesquisar
@@ -130,7 +155,7 @@ export default function Dashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "#1a472a" }}>
-                {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "Ação"].map((h) => (
+                {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "CTer", "Ação"].map((h) => (
                   <th key={h} className="text-white text-left px-4 py-3 font-semibold">
                     {h}
                   </th>
@@ -164,7 +189,17 @@ export default function Dashboard() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-600">{e.avaliador || "—"}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-gray-600">{extractCter(e.parecer)}</td>
+                  <td className="px-4 py-3 flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/print/${e.id}`)}
+                      className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                    >
+                      <Printer className="w-3 h-3 mr-1" />
+                      Imprimir
+                    </Button>
                     <Button
                       variant="destructive"
                       size="sm"

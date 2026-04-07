@@ -200,6 +200,16 @@
 - [ ] Notificar admin quando novo utilizador se regista
 - [ ] Testar fluxo completo de registo → aguardando aprovação → acesso após aprovação
 
+### Novas Funcionalidades - Impressão de Avaliações
+- [x] Remover botão "Imprimir" do formulário novo (EvaluationForm.tsx)
+- [x] Remover hook usePrintForm se não for mais necessário
+- [x] Criar página de visualização/impressão de avaliação (PrintEvaluation.tsx)
+- [x] Adicionar rota para página de impressão (/print/:id)
+- [x] Adicionar botão "Imprimir" no dashboard para cada avaliação
+- [x] Implementar estilos @media print para layout de impressão
+- [x] Adicionar filtro por CTer no dashboard
+- [ ] Testar impressão com dados preenchidos
+
 ### Correções Necessárias - PDF e Logo GIOE
 - [x] Corrigir PDF saindo em branco (problema com html2canvas)
 - [x] Aplicar filtro CSS de tons de verde ao logo GIOE original

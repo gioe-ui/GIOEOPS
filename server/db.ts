@@ -82,7 +82,7 @@ export async function createEvaluation(data: InsertEvaluation) {
   return result;
 }
 
-export async function getEvaluations(filters?: { neop?: string; avaliador?: string }) {
+export async function getEvaluations(filters?: { neop?: string; avaliador?: string; cterRequerente?: string }) {
   const db = await getDb();
   if (!db) return [];
 
@@ -92,6 +92,9 @@ export async function getEvaluations(filters?: { neop?: string; avaliador?: stri
   }
   if (filters?.avaliador) {
     conditions.push(like(evaluations.avaliador, `%${filters.avaliador}%`));
+  }
+  if (filters?.cterRequerente) {
+    conditions.push(like(evaluations.parecer, `%${filters.cterRequerente}%`));
   }
 
   const rows =
@@ -104,6 +107,13 @@ export async function getEvaluations(filters?: { neop?: string; avaliador?: stri
       : await db.select().from(evaluations).orderBy(desc(evaluations.createdAt));
 
   return rows;
+}
+
+export async function getEvaluationById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(evaluations).where(eq(evaluations.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
 }
 
 export async function deleteEvaluation(id: number) {
