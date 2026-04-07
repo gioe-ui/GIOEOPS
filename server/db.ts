@@ -51,6 +51,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (user.approved !== undefined) {
       values.approved = user.approved;
       updateSet.approved = user.approved;
+    } else if (user.role === "admin") {
+      // Admins são sempre aprovados
+      values.approved = 1;
+      updateSet.approved = 1;
     }
     if (!values.lastSignedIn) values.lastSignedIn = new Date();
     if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();

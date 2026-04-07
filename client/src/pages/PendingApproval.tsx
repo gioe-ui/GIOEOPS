@@ -29,7 +29,7 @@ export default function PendingApproval() {
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-blue-800">
-            <strong>Dica:</strong> Será notificado por email assim que a sua conta for aprovada.
+            Será notificado por email assim que a sua conta for aprovada.
           </p>
         </div>
 
