@@ -15,18 +15,17 @@ export const useFormScreenshot = () => {
       // Clonar elemento
       const clonedElement = element.cloneNode(true) as HTMLElement;
 
-      // Remover todas as classes para evitar oklch
-      clonedElement.className = "";
-      const removeClasses = (el: HTMLElement) => {
-        el.className = "";
+      // Remover todas as classes usando setAttribute
+      const removeClasses = (el: Element) => {
+        el.removeAttribute("class");
         for (let i = 0; i < el.children.length; i++) {
-          removeClasses(el.children[i] as HTMLElement);
+          removeClasses(el.children[i]);
         }
       };
       removeClasses(clonedElement);
 
       // Aplicar estilos inline básicos
-      clonedElement.style.cssText = "background-color: white; padding: 20px; font-family: Arial, sans-serif;";
+      clonedElement.setAttribute("style", "background-color: white; padding: 20px; font-family: Arial, sans-serif;");
 
       // Posicionar fora da tela
       clonedElement.style.position = "fixed";
@@ -40,7 +39,7 @@ export const useFormScreenshot = () => {
       // Aguardar renderização
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Usar html2canvas sem processar cores
+      // Usar html2canvas
       const html2canvas = (await import("html2canvas")).default;
 
       const canvas = await html2canvas(clonedElement, {
