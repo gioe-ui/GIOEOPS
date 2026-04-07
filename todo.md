@@ -182,6 +182,8 @@
 - [x] Adicionar cabeçalho centrado com logo GIOE em tons de verde
 - [x] Usar html2canvas para capturar o layout da página
 - [x] Manter visual exato da página no PDF
+- [x] Integrar logo GIOE centrado no cabeçalho
+- [x] Corrigir erro oklch na geração de PDF
 
 
 
