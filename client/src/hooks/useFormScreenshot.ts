@@ -39,18 +39,14 @@ const oklchToRgb = (oklchColor: string): string => {
   return `rgb(${R}, ${G}, ${B})`;
 };
 
-// Converter todas as cores oklch em CSS inline
-const convertOklchInElement = (element: HTMLElement) => {
-  // Processar atributo style
+// Converter todas as cores oklch recursivamente
+const convertOklchColors = (element: HTMLElement) => {
+  // Processar inline styles
   if (element.style.cssText) {
-    let cssText = element.style.cssText;
-    // Encontrar e substituir todas as cores oklch
-    cssText = cssText.replace(/oklch\([^)]+\)/g, (match) => oklchToRgb(match));
-    element.style.cssText = cssText;
+    element.style.cssText = element.style.cssText.replace(/oklch\([^)]+\)/g, (match) => oklchToRgb(match));
   }
 
-  // Processar propriedades CSS computadas
-  const style = window.getComputedStyle(element);
+  // Processar cada propriedade de estilo
   const colorProps = [
     "color",
     "backgroundColor",
@@ -60,55 +56,21 @@ const convertOklchInElement = (element: HTMLElement) => {
     "borderBottomColor",
     "borderLeftColor",
     "outlineColor",
-    "textDecorationColor",
     "fill",
     "stroke",
   ];
 
   for (const prop of colorProps) {
-    const value = style.getPropertyValue(prop);
+    const value = element.style.getPropertyValue(prop);
     if (value && value.includes("oklch")) {
-      const rgbValue = oklchToRgb(value);
-      element.style.setProperty(prop, rgbValue, "important");
+      element.style.setProperty(prop, oklchToRgb(value), "important");
     }
   }
 
-  // Processar textShadow e boxShadow
-  const shadowProps = ["textShadow", "boxShadow"];
-  for (const prop of shadowProps) {
-    const value = style.getPropertyValue(prop);
-    if (value && value.includes("oklch")) {
-      const rgbValue = value.replace(/oklch\([^)]+\)/g, (match) => oklchToRgb(match));
-      element.style.setProperty(prop, rgbValue, "important");
-    }
-  }
-
-  // Processar recursivamente todos os filhos
+  // Processar recursivamente filhos
   for (let i = 0; i < element.children.length; i++) {
-    convertOklchInElement(element.children[i] as HTMLElement);
+    convertOklchColors(element.children[i] as HTMLElement);
   }
-};
-
-// Remover todas as folhas de estilo que possam conter oklch
-const removeStylesheets = () => {
-  const styles = document.querySelectorAll("style");
-  const links = document.querySelectorAll("link[rel='stylesheet']");
-
-  const stylesToRemove: Element[] = [];
-
-  // Marcar folhas de estilo para remoção
-  styles.forEach((style) => {
-    if (style.textContent && style.textContent.includes("oklch")) {
-      stylesToRemove.push(style);
-    }
-  });
-
-  links.forEach((link) => {
-    // Remover todos os links de stylesheet para evitar problemas
-    stylesToRemove.push(link);
-  });
-
-  return stylesToRemove;
 };
 
 export const useFormScreenshot = () => {
@@ -122,27 +84,27 @@ export const useFormScreenshot = () => {
         throw new Error("Elemento do formulário não encontrado");
       }
 
-      // Clonar elemento para não modificar o original
+      // Clonar o elemento original (sem remover classes)
       const clonedElement = element.cloneNode(true) as HTMLElement;
-      clonedElement.style.position = "absolute";
+
+      // Posicionar fora da tela
+      clonedElement.style.position = "fixed";
       clonedElement.style.left = "-9999px";
       clonedElement.style.top = "-9999px";
-      clonedElement.style.visibility = "hidden";
       clonedElement.style.width = element.offsetWidth + "px";
+      clonedElement.style.zIndex = "-9999";
       clonedElement.style.backgroundColor = "#ffffff";
 
-      // Remover todos os atributos que possam conter oklch
-      clonedElement.removeAttribute("class");
-
+      // Adicionar ao DOM
       document.body.appendChild(clonedElement);
 
-      // Converter todas as cores oklch em RGB
-      convertOklchInElement(clonedElement);
+      // Converter cores oklch
+      convertOklchColors(clonedElement);
 
-      // Aguardar um pouco para garantir que os estilos foram aplicados
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Aguardar processamento
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Capturar o elemento como canvas
+      // Capturar com html2canvas
       const canvas = await html2canvas(clonedElement, {
         scale: 2,
         useCORS: true,
@@ -150,29 +112,19 @@ export const useFormScreenshot = () => {
         backgroundColor: "#ffffff",
         logging: false,
         imageTimeout: 5000,
-        ignoreElements: (element: Element) => {
-          return element.tagName === "SCRIPT" || element.tagName === "STYLE";
-        },
-        onclone: (clonedDocument: Document) => {
-          // Remover todas as folhas de estilo do documento clonado
-          const styles = clonedDocument.querySelectorAll("style");
-          styles.forEach((style) => style.remove());
-
-          const links = clonedDocument.querySelectorAll("link[rel='stylesheet']");
-          links.forEach((link) => link.remove());
-        },
+        windowHeight: clonedElement.scrollHeight,
+        windowWidth: clonedElement.scrollWidth,
       });
 
       // Remover elemento clonado
       document.body.removeChild(clonedElement);
 
-      // Verificar se o canvas tem conteúdo
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        throw new Error("Não foi possível obter contexto do canvas");
+      // Verificar se canvas tem conteúdo
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error("Canvas vazio - elemento não foi capturado corretamente");
       }
 
-      // Converter canvas para imagem
+      // Converter para imagem
       const imgData = canvas.toDataURL("image/png");
 
       // Criar PDF
@@ -185,25 +137,22 @@ export const useFormScreenshot = () => {
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
 
-      // Calcular dimensões da imagem para caber na página
-      const imgWidth = pageWidth - 10; // Margem de 5mm em cada lado
+      // Calcular dimensões
+      const imgWidth = pageWidth - 10;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       // Adicionar imagem ao PDF
       if (imgHeight > pageHeight - 10) {
-        // Se a imagem for maior que a página, redimensionar
         const scale = (pageHeight - 10) / imgHeight;
-        const scaledWidth = imgWidth * scale;
-        const scaledHeight = imgHeight * scale;
-        doc.addImage(imgData, "PNG", 5, 5, scaledWidth, scaledHeight);
+        doc.addImage(imgData, "PNG", 5, 5, imgWidth * scale, imgHeight * scale);
       } else {
-        // Se caber na página, adicionar com tamanho normal
         doc.addImage(imgData, "PNG", 5, 5, imgWidth, imgHeight);
       }
 
       // Salvar PDF
       const fileName = `AVAL_OPS_GIOE_${docNumber || new Date().getTime()}.pdf`;
       doc.save(fileName);
+
       setIsGenerating(false);
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
