@@ -202,5 +202,5 @@
 
 ### Correções Necessárias - PDF e Logo GIOE
 - [x] Corrigir PDF saindo em branco (problema com html2canvas)
-- [x] Converter imagem GIOE para tons de verde
-- [x] Testar geração de PDF com imagem em verde
+- [x] Aplicar filtro CSS de tons de verde ao logo GIOE original
+- [x] Testar geração de PDF com filtro de verde
