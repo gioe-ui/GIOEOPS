@@ -102,13 +102,15 @@ export const useFormScreenshot = () => {
       clonedElement.style.left = "-9999px";
       clonedElement.style.top = "-9999px";
       clonedElement.style.visibility = "hidden";
+      clonedElement.style.width = element.offsetWidth + "px";
+      clonedElement.style.backgroundColor = "#ffffff";
       document.body.appendChild(clonedElement);
 
       // Processar estilos oklch recursivamente
       processStylesForCanvas(clonedElement);
 
       // Aguardar um pouco para garantir que os estilos foram aplicados
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Capturar o elemento como canvas
       const canvas = await html2canvas(clonedElement, {
@@ -117,6 +119,7 @@ export const useFormScreenshot = () => {
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
+        imageTimeout: 5000,
         ignoreElements: (element: Element) => {
           return element.tagName === "SCRIPT" || element.tagName === "STYLE";
         },
@@ -124,6 +127,12 @@ export const useFormScreenshot = () => {
 
       // Remover elemento clonado
       document.body.removeChild(clonedElement);
+
+      // Verificar se o canvas tem conteúdo
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("Não foi possível obter contexto do canvas");
+      }
 
       // Converter canvas para imagem
       const imgData = canvas.toDataURL("image/png");
@@ -142,15 +151,16 @@ export const useFormScreenshot = () => {
       const imgWidth = pageWidth - 10; // Margem de 5mm em cada lado
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // Se a imagem for maior que a página, redimensionar
-      let yPosition = 5;
+      // Adicionar imagem ao PDF
       if (imgHeight > pageHeight - 10) {
+        // Se a imagem for maior que a página, redimensionar
         const scale = (pageHeight - 10) / imgHeight;
         const scaledWidth = imgWidth * scale;
         const scaledHeight = imgHeight * scale;
-        doc.addImage(imgData, "PNG", 5, yPosition, scaledWidth, scaledHeight);
+        doc.addImage(imgData, "PNG", 5, 5, scaledWidth, scaledHeight);
       } else {
-        doc.addImage(imgData, "PNG", 5, yPosition, imgWidth, imgHeight);
+        // Se caber na página, adicionar com tamanho normal
+        doc.addImage(imgData, "PNG", 5, 5, imgWidth, imgHeight);
       }
 
       // Salvar PDF

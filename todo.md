@@ -199,3 +199,8 @@
 - [x] Aprovar automaticamente utilizador teixeira.vls@gnr.pt como admin
 - [ ] Notificar admin quando novo utilizador se regista
 - [ ] Testar fluxo completo de registo → aguardando aprovação → acesso após aprovação
+
+### Correções Necessárias - PDF e Logo GIOE
+- [x] Corrigir PDF saindo em branco (problema com html2canvas)
+- [x] Converter imagem GIOE para tons de verde
+- [x] Testar geração de PDF com imagem em verde
