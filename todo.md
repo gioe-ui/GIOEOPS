@@ -194,5 +194,6 @@
 - [x] Criar página de gestão de aprovações para admins
 - [x] Proteger todas as rotas para verificar se utilizador está aprovado
 - [x] Criar página de "Aguardando Aprovação" para utilizadores não aprovados
+- [x] Aprovar automaticamente utilizador teixeira.vls@gnr.pt como admin
 - [ ] Notificar admin quando novo utilizador se regista
 - [ ] Testar fluxo completo de registo → aguardando aprovação → acesso após aprovação

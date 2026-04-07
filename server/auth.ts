@@ -51,12 +51,17 @@ export const authRouter = router({
     // Criar novo utilizador com email como openId
     const openId = `local_${input.email}`;
     
+    // Determinar se é admin (teixeira.vls@gnr.pt é admin por padrão)
+    const isAdmin = input.email === "teixeira.vls@gnr.pt";
+    const approved = isAdmin ? 1 : 0; // Admins são aprovados automaticamente
+    
     await upsertUser({
       openId,
       email: input.email,
       name: input.name,
       loginMethod: "local",
-      role: "user",
+      role: isAdmin ? "admin" : "user",
+      approved,
       lastSignedIn: new Date(),
     });
 
