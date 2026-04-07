@@ -182,7 +182,9 @@
 - [x] Incluir todas as variáveis assinaladas no PDF
 - [x] Incluir classificação recomendada (NEOP)
 - [x] Incluir grau de complexidade
-- [ ] Testar geração de PDF com dados preenchidos
+- [x] Aumentar espaçamento entre linhas no PDF
+- [x] Mostrar apenas variáveis selecionadas com seus valores
+- [x] Formatar valores de forma legível (ex: "Quantidade de suspeitos: 2 suspeitos")
 
 
 ### Novas Funcionalidades - Sistema de Aprovação de Utilizadores
