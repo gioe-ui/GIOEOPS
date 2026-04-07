@@ -178,13 +178,11 @@
 
 ### Novas Funcionalidades - Download de PDF
 - [x] Adicionar botão de download do formulário em PDF no canto superior direito
-- [x] Criar cabeçalho GNR igual ao do PDF de referência
-- [x] Incluir todas as variáveis assinaladas no PDF
-- [x] Incluir classificação recomendada (NEOP)
-- [x] Incluir grau de complexidade
-- [x] Aumentar espaçamento entre linhas no PDF
-- [x] Mostrar apenas variáveis selecionadas com seus valores
-- [x] Formatar valores de forma legível (ex: "Quantidade de suspeitos: 2 suspeitos")
+- [x] Criar PDF com print do layout da página (com quadrículas de seleção visíveis)
+- [x] Adicionar cabeçalho centrado com logo GIOE em tons de verde
+- [x] Usar html2canvas para capturar o layout da página
+- [x] Manter visual exato da página no PDF
+
 
 
 ### Novas Funcionalidades - Sistema de Aprovação de Utilizadores

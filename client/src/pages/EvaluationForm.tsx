@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Save, User, AlertTriangle, Crosshair, MapPin, ClipboardList, Download } from "lucide-react";
 import { usePdfDownload, type FormDataForPdf } from "@/hooks/usePdfDownload";
+import { useFormScreenshot } from "@/hooks/useFormScreenshot";
 
 // ─── Scoring ─────────────────────────────────────────────────────────────────
 const TIPO_SCORES: Record<string, number> = {
@@ -149,47 +151,12 @@ export default function EvaluationForm() {
   const [form, setForm] = useState<FormState>(DEFAULT);
   const [showConfirm, setShowConfirm] = useState(false);
   const utils = trpc.useUtils();
-  const { downloadFormPdf, isGenerating } = usePdfDownload();
+  const { downloadFormScreenshot, isGenerating: isGeneratingScreenshot } = useFormScreenshot();
 
   const { pontuacao, neop, complexidade, descricao, neopColor: neopColorFromCalc } = calcScore(form);
 
   const handleDownloadPdf = () => {
-    const pdfData: FormDataForPdf = {
-      pocPosto: form.pocPosto,
-      pocNome: form.pocNome,
-      pocContacto: form.pocContacto,
-      despacho: form.despacho,
-      cterRequerente: form.cterRequerente,
-      mandadoDetencao: form.mandadoDetencao,
-      mandadoBusca: form.mandadoBusca,
-      quantidadeSuspeitos: form.quantidadeSuspeitos,
-      modalidadeIsolado: form.modalidadeIsolado,
-      modalidadeAssociacao: form.modalidadeAssociacao,
-      tipoCriminal: form.tipoCriminal,
-      antecedentesContraPessoas: form.antecedentesContraPessoas,
-      antecedentesContraPatrimonio: form.antecedentesContraPatrimonio,
-      antecedentesOutros: form.antecedentesOutros,
-      antecedentesFSS: form.antecedentesFSS,
-      posseArma: form.posseArma,
-      usoArma: form.usoArma,
-      tipologiaApartamento: form.tipologiaApartamento,
-      tipologiaMoradia: form.tipologiaMoradia,
-      tipologiaOutro: form.tipologiaOutro,
-      contextoIsolado: form.contextoIsolado,
-      contextoBairroSocial: form.contextoBairroSocial,
-      contextoMeioUrbano: form.contextoMeioUrbano,
-      contextoMeioRural: form.contextoMeioRural,
-      segurancaCaes: form.segurancaCaes,
-      segurancaPortaBlindada: form.segurancaPortaBlindada,
-      segurancaOutrasMedidas: form.segurancaOutrasMedidas,
-      avaliador: form.avaliador,
-      dataAvaliacao: form.dataAvaliacao,
-      parecer: form.parecer,
-      pontuacao,
-      neop,
-      complexidade,
-    };
-    downloadFormPdf(pdfData, `GIOE_${new Date().getTime()}`);
+    downloadFormScreenshot("form-container", `GIOE_${new Date().getTime()}`);
   };
 
   const createMutation = trpc.evaluations.create.useMutation({
@@ -218,15 +185,23 @@ export default function EvaluationForm() {
         </h2>
         <Button
           onClick={handleDownloadPdf}
-          disabled={isGenerating}
+          disabled={isGeneratingScreenshot}
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Download className="w-4 h-4 mr-2" />
-          {isGenerating ? "A gerar PDF..." : "Descarregar PDF"}
+          {isGeneratingScreenshot ? "A gerar PDF..." : "Descarregar PDF"}
         </Button>
       </div>
 
-      {/* POC e Despacho */}
+      <div id="form-container" className="bg-white p-6 rounded-lg">
+        {/* Cabeçalho do PDF */}
+        <div className="text-center mb-8 pb-6 border-b-2" style={{ borderColor: "#1a472a" }}>
+          <div className="text-2xl font-bold" style={{ color: "#1a472a" }}>GIOE</div>
+          <div className="text-sm" style={{ color: "#1a472a" }}>Grupo de Intervenção de Operações Especiais</div>
+          <div className="text-xs mt-2" style={{ color: "#666" }}>Avaliação de Pedido de Apoio</div>
+        </div>
+
+        {/* POC e Despacho */}
       <Section>
         <SectionTitle icon={<User className="w-4 h-4" />} title="POC e Despacho" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -524,6 +499,7 @@ export default function EvaluationForm() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
