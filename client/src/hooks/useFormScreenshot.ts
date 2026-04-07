@@ -2,6 +2,83 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useState } from "react";
 
+// Converter cores oklch para RGB
+const oklchToRgb = (oklchColor: string): string => {
+  const match = oklchColor.match(/oklch\(([0-9.]+)%?\s+([0-9.]+)\s+([0-9.]+)\s*\/?(\s*[0-9.]*)?/);
+  if (!match) return oklchColor;
+
+  const L = parseFloat(match[1]) / 100;
+  const C = parseFloat(match[2]);
+  const H = parseFloat(match[3]);
+  const A = match[4] ? parseFloat(match[4]) : 1;
+
+  const hRad = (H * Math.PI) / 180;
+  const a = C * Math.cos(hRad);
+  const b = C * Math.sin(hRad);
+
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.291486575 * b;
+
+  const l3 = l_ * l_ * l_;
+  const m3 = m_ * m_ * m_;
+  const s3 = s_ * s_ * s_;
+
+  const r = 4.0767416621 * l3 - 3.3077363322 * m3 + 0.2309101289 * s3;
+  const g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193761 * s3;
+  const b_ = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3;
+
+  const toLinear = (x: number) => (x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055);
+  const R = Math.round(toLinear(r) * 255);
+  const G = Math.round(toLinear(g) * 255);
+  const B = Math.round(toLinear(b_) * 255);
+
+  if (A < 1) {
+    return `rgba(${R}, ${G}, ${B}, ${A})`;
+  }
+  return `rgb(${R}, ${G}, ${B})`;
+};
+
+// Processar estilos para converter oklch
+const processStylesForCanvas = (element: HTMLElement) => {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_ELEMENT,
+    null
+  );
+
+  let node = walker.nextNode() as Element;
+  while (node) {
+    const htmlElement = node as HTMLElement;
+    const style = window.getComputedStyle(htmlElement);
+
+    // Processar propriedades de cor
+    const colorProps = [
+      "color",
+      "backgroundColor",
+      "borderColor",
+      "borderTopColor",
+      "borderRightColor",
+      "borderBottomColor",
+      "borderLeftColor",
+      "outlineColor",
+      "textDecorationColor",
+      "textShadow",
+      "boxShadow",
+    ];
+
+    for (const prop of colorProps) {
+      const value = style.getPropertyValue(prop);
+      if (value && value.includes("oklch")) {
+        const rgbValue = oklchToRgb(value);
+        htmlElement.style.setProperty(prop, rgbValue);
+      }
+    }
+
+    node = walker.nextNode() as Element;
+  }
+};
+
 export const useFormScreenshot = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -13,14 +90,32 @@ export const useFormScreenshot = () => {
         throw new Error("Elemento do formulário não encontrado");
       }
 
+      // Clonar elemento para não modificar o original
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      clonedElement.style.position = "absolute";
+      clonedElement.style.left = "-9999px";
+      document.body.appendChild(clonedElement);
+
+      // Processar estilos oklch
+      processStylesForCanvas(clonedElement);
+
+      // Aguardar um pouco para garantir que os estilos foram aplicados
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       // Capturar o elemento como canvas
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(clonedElement, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
+        ignoreElements: (element: Element) => {
+          return element.tagName === "SCRIPT" || element.tagName === "STYLE";
+        },
       });
+
+      // Remover elemento clonado
+      document.body.removeChild(clonedElement);
 
       // Converter canvas para imagem
       const imgData = canvas.toDataURL("image/png");
