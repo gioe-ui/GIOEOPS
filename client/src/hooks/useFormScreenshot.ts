@@ -29,9 +29,9 @@ const oklchToRgb = (oklchColor: string): string => {
   const b_ = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3;
 
   const toLinear = (x: number) => (x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055);
-  const R = Math.round(toLinear(r) * 255);
-  const G = Math.round(toLinear(g) * 255);
-  const B = Math.round(toLinear(b_) * 255);
+  const R = Math.round(Math.max(0, Math.min(255, toLinear(r) * 255)));
+  const G = Math.round(Math.max(0, Math.min(255, toLinear(g) * 255)));
+  const B = Math.round(Math.max(0, Math.min(255, toLinear(b_) * 255)));
 
   if (A < 1) {
     return `rgba(${R}, ${G}, ${B}, ${A})`;
@@ -39,43 +39,49 @@ const oklchToRgb = (oklchColor: string): string => {
   return `rgb(${R}, ${G}, ${B})`;
 };
 
-// Processar estilos para converter oklch
+// Processar estilos para converter oklch - versão melhorada
 const processStylesForCanvas = (element: HTMLElement) => {
-  const walker = document.createTreeWalker(
-    element,
-    NodeFilter.SHOW_ELEMENT,
-    null
-  );
+  // Processar o elemento raiz
+  processElement(element);
 
-  let node = walker.nextNode() as Element;
-  while (node) {
-    const htmlElement = node as HTMLElement;
-    const style = window.getComputedStyle(htmlElement);
-
-    // Processar propriedades de cor
-    const colorProps = [
-      "color",
-      "backgroundColor",
-      "borderColor",
-      "borderTopColor",
-      "borderRightColor",
-      "borderBottomColor",
-      "borderLeftColor",
-      "outlineColor",
-      "textDecorationColor",
-      "textShadow",
-      "boxShadow",
-    ];
-
-    for (const prop of colorProps) {
-      const value = style.getPropertyValue(prop);
-      if (value && value.includes("oklch")) {
-        const rgbValue = oklchToRgb(value);
-        htmlElement.style.setProperty(prop, rgbValue);
-      }
+  // Processar todos os filhos recursivamente
+  const processChildren = (el: HTMLElement) => {
+    for (let i = 0; i < el.children.length; i++) {
+      const child = el.children[i] as HTMLElement;
+      processElement(child);
+      processChildren(child);
     }
+  };
 
-    node = walker.nextNode() as Element;
+  processChildren(element);
+};
+
+const processElement = (element: HTMLElement) => {
+  const style = window.getComputedStyle(element);
+
+  // Processar propriedades de cor
+  const colorProps = [
+    "color",
+    "backgroundColor",
+    "borderColor",
+    "borderTopColor",
+    "borderRightColor",
+    "borderBottomColor",
+    "borderLeftColor",
+    "outlineColor",
+    "textDecorationColor",
+    "textShadow",
+    "boxShadow",
+    "fill",
+    "stroke",
+  ];
+
+  for (const prop of colorProps) {
+    const value = style.getPropertyValue(prop);
+    if (value && value.includes("oklch")) {
+      const rgbValue = oklchToRgb(value);
+      element.style.setProperty(prop, rgbValue, "important");
+    }
   }
 };
 
@@ -94,13 +100,15 @@ export const useFormScreenshot = () => {
       const clonedElement = element.cloneNode(true) as HTMLElement;
       clonedElement.style.position = "absolute";
       clonedElement.style.left = "-9999px";
+      clonedElement.style.top = "-9999px";
+      clonedElement.style.visibility = "hidden";
       document.body.appendChild(clonedElement);
 
-      // Processar estilos oklch
+      // Processar estilos oklch recursivamente
       processStylesForCanvas(clonedElement);
 
       // Aguardar um pouco para garantir que os estilos foram aplicados
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       // Capturar o elemento como canvas
       const canvas = await html2canvas(clonedElement, {
