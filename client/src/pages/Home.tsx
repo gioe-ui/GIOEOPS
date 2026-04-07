@@ -2,6 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import Auth from "./Auth";
 import AppLayout from "./AppLayout";
+import PendingApproval from "./PendingApproval";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -19,6 +20,10 @@ export default function Home() {
 
   if (!user) {
     return <Auth />;
+  }
+
+  if (!user.approved) {
+    return <PendingApproval />;
   }
 
   return <AppLayout />;

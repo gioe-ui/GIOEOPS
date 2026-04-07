@@ -13,6 +13,9 @@ import {
   getStatistics,
   getDb,
   getNeop4ByCter,
+  getPendingApprovals,
+  approveUser,
+  rejectUser,
 } from "./db";
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
@@ -224,6 +227,33 @@ export const appRouter = router({
         }
 
         await db.update(users).set({ role: "admin" }).where(eq(users.id, input.id));
+        return { success: true };
+      }),
+
+    getPending: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem ver aprovações pendentes" });
+      }
+      return getPendingApprovals();
+    }),
+
+    approve: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem aprovar utilizadores" });
+        }
+        await approveUser(input.id);
+        return { success: true };
+      }),
+
+    reject: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem rejeitar utilizadores" });
+        }
+        await rejectUser(input.id);
         return { success: true };
       }),
   }),

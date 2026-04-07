@@ -149,6 +149,24 @@ export async function deleteUser(id: number) {
 }
 
 
+export async function getPendingApprovals() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(users).where(eq(users.approved, 0)).orderBy(desc(users.createdAt));
+}
+
+export async function approveUser(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ approved: 1 }).where(eq(users.id, id));
+}
+
+export async function rejectUser(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(users).where(eq(users.id, id));
+}
+
 export async function getNeop4ByCter(startDate?: Date, endDate?: Date) {
   const db = await getDb();
   if (!db) return {};

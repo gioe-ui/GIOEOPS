@@ -183,3 +183,16 @@
 - [x] Incluir classificação recomendada (NEOP)
 - [x] Incluir grau de complexidade
 - [ ] Testar geração de PDF com dados preenchidos
+
+
+### Novas Funcionalidades - Sistema de Aprovação de Utilizadores
+- [x] Adicionar campo `approved` ao schema da tabela `users`
+- [x] Criar migração para adicionar coluna `approved` com valor padrão false
+- [x] Implementar procedimento tRPC para listar utilizadores não aprovados
+- [x] Implementar procedimento tRPC para aprovar utilizador (admin only)
+- [x] Implementar procedimento tRPC para rejeitar utilizador (admin only)
+- [x] Criar página de gestão de aprovações para admins
+- [x] Proteger todas as rotas para verificar se utilizador está aprovado
+- [x] Criar página de "Aguardando Aprovação" para utilizadores não aprovados
+- [ ] Notificar admin quando novo utilizador se regista
+- [ ] Testar fluxo completo de registo → aguardando aprovação → acesso após aprovação
