@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, Trash2, Search, Printer } from "lucide-react";
+import { Download, Trash2, Search, Printer, FileText } from "lucide-react";
 
 const NEOP_COLORS: Record<string, string> = {
   "2º NEOP": "#1a472a",
@@ -207,6 +207,17 @@ export default function Dashboard() {
                   <td className="px-4 py-3 text-gray-600">{e.avaliador || "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{extractCter(e.parecer)}</td>
                   <td className="px-4 py-3 flex gap-2">
+                    {e.neop === "4º NEOP" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/operation/${e.id}`)}
+                        className="border-orange-600 text-orange-600 hover:bg-orange-50"
+                      >
+                        <FileText className="w-3 h-3 mr-1" />
+                        Operação
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

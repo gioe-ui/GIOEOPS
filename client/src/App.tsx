@@ -6,6 +6,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import PrintEvaluation from "./pages/PrintEvaluation";
+import OperationForm from "./pages/OperationForm";
+import PrintOperation from "./pages/PrintOperation";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -13,6 +15,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/print/:id" component={PrintEvaluation} />
+      <Route path="/operation/:evaluationId" component={OperationForm} />
+      <Route path="/print-operation/:id" component={PrintOperation} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

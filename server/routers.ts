@@ -18,6 +18,10 @@ import {
   getPendingApprovals,
   approveUser,
   rejectUser,
+  createOperation,
+  getOperationByEvaluationId,
+  getOperationById,
+  updateOperation,
 } from "./db";
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
@@ -270,6 +274,166 @@ export const appRouter = router({
           throw new TRPCError({ code: "FORBIDDEN", message: "Apenas administradores podem rejeitar utilizadores" });
         }
         await rejectUser(input.id);
+        return { success: true };
+      }),
+  }),
+
+  operations: router({
+    create: protectedProcedure
+      .input(z.object({
+        evaluationId: z.number().int(),
+        refFiledoc: z.string().optional(),
+        operacaoNumero: z.string().optional(),
+        preenchimentoSecOp: z.string().optional(),
+        cmdtOp: z.string().optional(),
+        dataOp: z.string().optional(),
+        tipoEmpenho: z.string().optional(),
+        missao: z.string().optional(),
+        entidadeSolicitadora: z.string().optional(),
+        local: z.string().optional(),
+        obsReuniao: z.string().optional(),
+        gdhSaidaUI: z.string().optional(),
+        gdhEntradaUI: z.string().optional(),
+        cmdtForcaReuniao: z.string().optional(),
+        indicativoRadioReuniao: z.string().optional(),
+        efetivTotalReuniao: z.string().optional(),
+        viaturasCaracterizadasReuniao: z.number().optional(),
+        viaturasDescaracterizadasReuniao: z.number().optional(),
+        viaturasEspeciaisReuniao: z.number().optional(),
+        kmTotaisReuniao: z.string().optional(),
+        cterOperacao: z.string().optional(),
+        dterOperacao: z.string().optional(),
+        pterZaOperacao: z.string().optional(),
+        gdhInicioOperacao: z.string().optional(),
+        gdhChegadaUIOperacao: z.string().optional(),
+        cmdtForcaOperacao: z.string().optional(),
+        indicativoRadioOperacao: z.string().optional(),
+        efetivTotalOperacao: z.string().optional(),
+        viaturasCaracterizadasOperacao: z.number().optional(),
+        viaturasDescaracterizadasOperacao: z.number().optional(),
+        viaturasEspeciaisOperacao: z.number().optional(),
+        kmTotaisOperacao: z.string().optional(),
+        itpTipo: z.string().optional(),
+        gdhInicioITP: z.string().optional(),
+        gdhFimITP: z.string().optional(),
+        forcaTitularInqueritos: z.number().optional(),
+        custosPortagens: z.string().optional(),
+        custosCombustiveis: z.string().optional(),
+        obsVisados: z.string().optional(),
+        municoesArmasAuto762: z.number().optional(),
+        municoesArmasAuto9mm: z.number().optional(),
+        municoesArmasAuto762mm: z.number().optional(),
+        municoesArmasAuto556mm: z.number().optional(),
+        municoesArmasAuto556: z.number().optional(),
+        municoesCacadeiraBarracha: z.number().optional(),
+        municoesCacadeiraChumbo: z.number().optional(),
+        municoesCacadeiraBeamBag: z.number().optional(),
+        municoesCacadeiraZagalote: z.number().optional(),
+        municoesCacadeiraZinco: z.number().optional(),
+        municoesRevolverASP: z.number().optional(),
+        taserCargaX26: z.number().optional(),
+        taserGranadaFlashBang1Estalo: z.number().optional(),
+        taserGranadaFlashBang1Estalo2Bang: z.number().optional(),
+        taserGranadaFlashBang2Estalos2Bangs: z.number().optional(),
+        taserGranadaFlashBangMultiplos: z.number().optional(),
+        taserAlgemas: z.string().optional(),
+        obsConsumos: z.string().optional(),
+        obsSECOp: z.string().optional(),
+        regSECOp: z.string().optional(),
+        excelSECOp: z.number().optional(),
+        apontamentosNotas: z.string().optional(),
+        croquis: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { evaluationId, ...rest } = input;
+        const operation = await createOperation({
+          evaluationId,
+          userId: ctx.user?.id || 0,
+          ...rest,
+        });
+        return { success: true };
+      }),
+
+    getByEvaluationId: protectedProcedure
+      .input(z.object({ evaluationId: z.number().int() }))
+      .query(async ({ input }) => {
+        return getOperationByEvaluationId(input.evaluationId);
+      }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .query(async ({ input }) => {
+        return getOperationById(input.id);
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int(),
+        refFiledoc: z.string().optional(),
+        operacaoNumero: z.string().optional(),
+        preenchimentoSecOp: z.string().optional(),
+        cmdtOp: z.string().optional(),
+        dataOp: z.string().optional(),
+        tipoEmpenho: z.string().optional(),
+        missao: z.string().optional(),
+        entidadeSolicitadora: z.string().optional(),
+        local: z.string().optional(),
+        obsReuniao: z.string().optional(),
+        gdhSaidaUI: z.string().optional(),
+        gdhEntradaUI: z.string().optional(),
+        cmdtForcaReuniao: z.string().optional(),
+        indicativoRadioReuniao: z.string().optional(),
+        efetivTotalReuniao: z.string().optional(),
+        viaturasCaracterizadasReuniao: z.number().optional(),
+        viaturasDescaracterizadasReuniao: z.number().optional(),
+        viaturasEspeciaisReuniao: z.number().optional(),
+        kmTotaisReuniao: z.string().optional(),
+        cterOperacao: z.string().optional(),
+        dterOperacao: z.string().optional(),
+        pterZaOperacao: z.string().optional(),
+        gdhInicioOperacao: z.string().optional(),
+        gdhChegadaUIOperacao: z.string().optional(),
+        cmdtForcaOperacao: z.string().optional(),
+        indicativoRadioOperacao: z.string().optional(),
+        efetivTotalOperacao: z.string().optional(),
+        viaturasCaracterizadasOperacao: z.number().optional(),
+        viaturasDescaracterizadasOperacao: z.number().optional(),
+        viaturasEspeciaisOperacao: z.number().optional(),
+        kmTotaisOperacao: z.string().optional(),
+        itpTipo: z.string().optional(),
+        gdhInicioITP: z.string().optional(),
+        gdhFimITP: z.string().optional(),
+        forcaTitularInqueritos: z.number().optional(),
+        custosPortagens: z.string().optional(),
+        custosCombustiveis: z.string().optional(),
+        obsVisados: z.string().optional(),
+        municoesArmasAuto762: z.number().optional(),
+        municoesArmasAuto9mm: z.number().optional(),
+        municoesArmasAuto762mm: z.number().optional(),
+        municoesArmasAuto556mm: z.number().optional(),
+        municoesArmasAuto556: z.number().optional(),
+        municoesCacadeiraBarracha: z.number().optional(),
+        municoesCacadeiraChumbo: z.number().optional(),
+        municoesCacadeiraBeamBag: z.number().optional(),
+        municoesCacadeiraZagalote: z.number().optional(),
+        municoesCacadeiraZinco: z.number().optional(),
+        municoesRevolverASP: z.number().optional(),
+        taserCargaX26: z.number().optional(),
+        taserGranadaFlashBang1Estalo: z.number().optional(),
+        taserGranadaFlashBang1Estalo2Bang: z.number().optional(),
+        taserGranadaFlashBang2Estalos2Bangs: z.number().optional(),
+        taserGranadaFlashBangMultiplos: z.number().optional(),
+        taserAlgemas: z.string().optional(),
+        obsConsumos: z.string().optional(),
+        obsSECOp: z.string().optional(),
+        regSECOp: z.string().optional(),
+        excelSECOp: z.number().optional(),
+        apontamentosNotas: z.string().optional(),
+        croquis: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updateOperation(id, data);
         return { success: true };
       }),
   }),

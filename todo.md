@@ -236,3 +236,13 @@
 
 ### Correções - CTer (4ª Rodada)
 - [x] Restaurar exibição de CTer num campo separado
+
+
+### Novas Funcionalidades - Registo de Dados de Operações
+- [x] Criar tabela de dados para registos de operações (65 campos)
+- [x] Criar procedures tRPC para guardar/recuperar registos de operações
+- [x] Criar formulário de Registo de Dados de Operações (OperationForm.tsx com 5 abas)
+- [x] Adicionar botão "Operação" no dashboard para 4º NEOP
+- [x] Criar página de impressão para registos de operações (PrintOperation.tsx)
+- [x] Adicionar rotas para formulário e impressão de operações
+- [ ] Testar funcionalidade completa com dados reais

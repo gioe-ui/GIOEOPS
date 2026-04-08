@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, like, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { evaluations, InsertEvaluation, InsertUser, users } from "../drizzle/schema";
+import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -237,4 +237,33 @@ export async function getNeop4ByCter(startDate?: Date, endDate?: Date) {
   });
   
   return cterCounts;
+}
+
+// ─── Operations ──────────────────────────────────────────────────────────────
+
+export async function createOperation(data: InsertOperation) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(operations).values(data);
+  return result;
+}
+
+export async function getOperationByEvaluationId(evaluationId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(operations).where(eq(operations.evaluationId, evaluationId)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getOperationById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(operations).where(eq(operations.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function updateOperation(id: number, data: Partial<InsertOperation>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(operations).set(data).where(eq(operations.id, id));
 }
