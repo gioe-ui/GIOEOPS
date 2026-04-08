@@ -230,3 +230,6 @@
 ### Correções - Impressão (2ª Rodada)
 - [x] Corrigir URL do logo GIOE para aparecer na impressão
 - [x] Remover CTer do parecer na página de impressão
+
+### Correções - Parecer (3ª Rodada)
+- [x] Remover informação de CTer e NEOP do campo Parecer na impressão

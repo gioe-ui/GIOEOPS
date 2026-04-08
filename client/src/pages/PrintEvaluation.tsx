@@ -278,7 +278,7 @@ export default function PrintEvaluation() {
             {evaluation.parecer && (
               <div>
                 <div className="text-xs font-semibold text-gray-600 mb-1">Parecer</div>
-                <div className="text-sm whitespace-pre-wrap">{evaluation.parecer}</div>
+                <div className="text-sm whitespace-pre-wrap">{evaluation.parecer.replace(/CTer:.*?(?=\n|$)/gi, '').trim()}</div>
               </div>
             )}
           </div>
