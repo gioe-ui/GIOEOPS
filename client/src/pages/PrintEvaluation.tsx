@@ -172,7 +172,12 @@ export default function PrintEvaluation() {
                 <div className="text-sm whitespace-pre-wrap">{evaluation.despacho}</div>
               </div>
             )}
-
+            {cter !== "—" && (
+              <div>
+                <div className="text-xs font-semibold text-gray-600 mb-1">CTer Requerente</div>
+                <div className="text-sm">{cter}</div>
+              </div>
+            )}
           </div>
 
           {/* Suspeitos */}

@@ -233,3 +233,6 @@
 
 ### Correções - Parecer (3ª Rodada)
 - [x] Remover informação de CTer e NEOP do campo Parecer na impressão
+
+### Correções - CTer (4ª Rodada)
+- [x] Restaurar exibição de CTer num campo separado
