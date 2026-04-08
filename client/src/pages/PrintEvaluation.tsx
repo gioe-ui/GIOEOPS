@@ -125,7 +125,7 @@ export default function PrintEvaluation() {
           {/* Cabeçalho */}
           <div className="text-center mb-8 pb-6 border-b-2" style={{ borderColor: "#1a472a" }}>
             <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663511663974/bkxrxh5swZfcvrDKi6FHK/GIOE_NewLogo_7249f113.webp"
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663511663974/bkxrxh5szwZfcvrDKi6FHK/GIOE_NewLogo_7249f113.webp"
               alt="GIOE Logo"
               className="h-24 mx-auto mb-4"
               style={{ filter: "hue-rotate(110deg) saturate(0.4) brightness(0.75) contrast(1.2) invert(0.05)" }}
@@ -172,12 +172,7 @@ export default function PrintEvaluation() {
                 <div className="text-sm whitespace-pre-wrap">{evaluation.despacho}</div>
               </div>
             )}
-            {cter !== "—" && (
-              <div>
-                <div className="text-xs font-semibold text-gray-600 mb-1">CTer Requerente</div>
-                <div className="text-sm">{cter}</div>
-              </div>
-            )}
+
           </div>
 
           {/* Suspeitos */}

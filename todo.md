@@ -226,3 +226,7 @@
 ### Correções - Impressão
 - [x] Corrigir URL do logo GIOE na página de impressão
 - [x] Corrigir texto de "Associação Criminosa" na seção de Atividades Criminais
+
+### Correções - Impressão (2ª Rodada)
+- [x] Corrigir URL do logo GIOE para aparecer na impressão
+- [x] Remover CTer do parecer na página de impressão
