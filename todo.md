@@ -219,3 +219,6 @@
 - [x] Criar procedure para obter lista de CTers únicos
 - [x] Atualizar Dashboard para usar Select dropdown para CTer
 - [x] Remover campo de pesquisa de CTer
+
+### Melhorias - Impressão
+- [x] Ocultar variáveis com valor zero na página de impressão
