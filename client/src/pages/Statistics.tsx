@@ -1,4 +1,3 @@
-import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import PortugalMap from "@/components/PortugalMap";
 import { useChartDownload } from "@/hooks/useChartDownload";
 import { Download } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 import {
   PieChart,
   Pie,
@@ -62,6 +62,7 @@ const DownloadButton = ({ onClick, format, isLoading }: { onClick: () => void; f
 export default function Statistics() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [activeTab, setActiveTab] = useState<"avaliacoes" | "operacoes">("avaliacoes");
   const { downloadChart, isDownloading } = useChartDownload();
 
   const { data: stats, isLoading } = trpc.statistics.get.useQuery({
@@ -277,6 +278,42 @@ export default function Statistics() {
           <PortugalMap neop4ByCter={neop4ByCter} cterCoordinates={CTER_COORDINATES} />
         </div>
       </div>
+    </div>
+  );
+}
+
+import OperationsStatistics from "./OperationsStatistics";
+
+export function StatisticsPage() {
+  const [activeTab, setActiveTab] = useState<"avaliacoes" | "operacoes">("avaliacoes");
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-6 border-b border-gray-200">
+        <button
+          onClick={() => setActiveTab("avaliacoes")}
+          className={`px-4 py-2 font-semibold transition-colors ${
+            activeTab === "avaliacoes"
+              ? "border-b-2"
+              : "text-gray-600 hover:text-gray-800"
+          }`}
+          style={activeTab === "avaliacoes" ? { borderBottomColor: "#1a472a", color: "#1a472a" } : {}}
+        >
+          Avaliações - Estatística
+        </button>
+        <button
+          onClick={() => setActiveTab("operacoes")}
+          className={`px-4 py-2 font-semibold transition-colors ${
+            activeTab === "operacoes"
+              ? "border-b-2"
+              : "text-gray-600 hover:text-gray-800"
+          }`}
+          style={activeTab === "operacoes" ? { borderBottomColor: "#1a472a", color: "#1a472a" } : {}}
+        >
+          Operações - Estatística
+        </button>
+      </div>
+      {activeTab === "avaliacoes" ? <Statistics /> : <OperationsStatistics />}
     </div>
   );
 }

@@ -22,6 +22,8 @@ import {
   getOperationByEvaluationId,
   getOperationById,
   updateOperation,
+  getOperationsByMonth,
+  getOperationMonths,
 } from "./db";
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
@@ -435,6 +437,15 @@ export const appRouter = router({
         const { id, ...data } = input;
         await updateOperation(id, data);
         return { success: true };
+      }),
+    getMonths: protectedProcedure
+      .query(async () => {
+        return getOperationMonths();
+      }),
+    getByMonth: protectedProcedure
+      .input(z.object({ month: z.string().optional() }))
+      .query(async ({ input }) => {
+        return getOperationsByMonth(input.month);
       }),
   }),
 });

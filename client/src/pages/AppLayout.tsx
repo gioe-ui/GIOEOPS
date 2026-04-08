@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, FileText, BarChart2, PieChart, Users, CheckCircle } from "lucide-react";
 import EvaluationForm from "./EvaluationForm";
 import Dashboard from "./Dashboard";
-import Statistics from "./Statistics";
+import { StatisticsPage } from "./Statistics";
 import UsersPage from "./UsersPage";
 import UserApprovals from "./UserApprovals";
 
@@ -84,7 +84,7 @@ export default function AppLayout() {
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
         {activeTab === "form" && <EvaluationForm />}
         {activeTab === "dashboard" && <Dashboard />}
-        {activeTab === "statistics" && <Statistics />}
+        {activeTab === "statistics" && <StatisticsPage />}
         {activeTab === "users" && user?.role === "admin" && <UsersPage />}
         {activeTab === "approvals" && user?.role === "admin" && <UserApprovals />}
       </main>

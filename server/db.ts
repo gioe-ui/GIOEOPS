@@ -267,3 +267,31 @@ export async function updateOperation(id: number, data: Partial<InsertOperation>
   if (!db) throw new Error("Database not available");
   await db.update(operations).set(data).where(eq(operations.id, id));
 }
+
+
+export async function getOperationsByMonth(month?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (month) {
+    const result = await db.select().from(operations).where(eq(operations.preenchimentoSecOp, month));
+    return result;
+  }
+  
+  const result = await db.select().from(operations);
+  return result;
+}
+
+export async function getOperationMonths() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const all = await db.select().from(operations);
+  const months = new Set<string>();
+  all.forEach(op => {
+    if (op.preenchimentoSecOp) {
+      months.add(op.preenchimentoSecOp);
+    }
+  });
+  return Array.from(months).sort();
+}

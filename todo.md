@@ -246,3 +246,12 @@
 - [x] Criar página de impressão para registos de operações (PrintOperation.tsx)
 - [x] Adicionar rotas para formulário e impressão de operações
 - [ ] Testar funcionalidade completa com dados reais
+
+
+### Novas Funcionalidades - Estatísticas de Operações
+- [x] Criar procedure tRPC para obter estatísticas de operações por mês
+- [x] Criar componente OperationsStatistics com filtro por mês
+- [x] Implementar tabela de operações com todos os campos relevantes
+- [x] Implementar exportação para Excel no formato do ficheiro anexado
+- [x] Integrar sub-menu "Operações - Estatística" no separador Estatística
+- [ ] Testar funcionalidade completa com dados reais
