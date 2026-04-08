@@ -222,3 +222,7 @@
 
 ### Melhorias - Impressão
 - [x] Ocultar variáveis com valor zero na página de impressão
+
+### Correções - Impressão
+- [x] Corrigir URL do logo GIOE na página de impressão
+- [x] Corrigir texto de "Associação Criminosa" na seção de Atividades Criminais

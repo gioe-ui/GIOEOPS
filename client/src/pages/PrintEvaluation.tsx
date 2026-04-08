@@ -125,7 +125,7 @@ export default function PrintEvaluation() {
           {/* Cabeçalho */}
           <div className="text-center mb-8 pb-6 border-b-2" style={{ borderColor: "#1a472a" }}>
             <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663511663974/bkxrxh5s-zwZfcvrDKi6FHK/GIOE_NewLogo_7249f113.webp"
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663511663974/bkxrxh5swZfcvrDKi6FHK/GIOE_NewLogo_7249f113.webp"
               alt="GIOE Logo"
               className="h-24 mx-auto mb-4"
               style={{ filter: "hue-rotate(110deg) saturate(0.4) brightness(0.75) contrast(1.2) invert(0.05)" }}
@@ -201,7 +201,7 @@ export default function PrintEvaluation() {
                 Atividade Criminal
               </div>
               {evaluation.modalidadeIsolado === 1 && <div className="text-sm mb-2">✓ Modalidade: Isolado</div>}
-              {evaluation.modalidadeAssociacao === 1 && <div className="text-sm mb-2">✓ Modalidade: Associação</div>}
+              {evaluation.modalidadeAssociacao === 1 && <div className="text-sm mb-2">✓ Modalidade: Associação Criminosa</div>}
               {evaluation.tipoCriminal && (
                 <div className="text-sm mb-2">Tipo Criminal: {TIPO_LABELS[evaluation.tipoCriminal] || evaluation.tipoCriminal}</div>
               )}
