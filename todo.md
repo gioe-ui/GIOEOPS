@@ -261,3 +261,8 @@
 - [x] Corrigir nomes das abas: "Dados Reunião Coordenação/Reconhecimento", "Dados da Operação/ITP", etc.
 - [x] Investigar e corrigir problema de gravação de dados de operações (tabela não existia, migration executada)
 - [x] Testar gravação completa de dados
+
+
+### Correções - Layout e Impressão de Operações
+- [x] Corrigir layout das abas para evitar sobreposição de texto
+- [x] Corrigir botão imprimir no formulário de operações

@@ -90,7 +90,6 @@ export default function OperationForm() {
   const { evaluationId } = useParams();
   const [, navigate] = useLocation();
   const [isSaving, setIsSaving] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
 
   const [form, setForm] = useState<FormState>({
     refFiledoc: "",
@@ -185,8 +184,17 @@ export default function OperationForm() {
     }
   };
 
+  const getOperationQuery = trpc.operations.getByEvaluationId.useQuery(
+    { evaluationId: evaluationId ? parseInt(evaluationId) : 0 },
+    { enabled: !!evaluationId }
+  );
+
   const handlePrint = () => {
-    setIsPrinting(true);
+    if (getOperationQuery.data) {
+      navigate(`/print-operation/${getOperationQuery.data.id}`);
+    } else {
+      toast.error("Nenhum registo de operação encontrado. Guarde primeiro.");
+    }
   };
 
   return (
@@ -241,12 +249,12 @@ export default function OperationForm() {
         {/* Form */}
         <div className="bg-white rounded-lg shadow-lg p-8">
           <Tabs defaultValue="referencia" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-6">
-              <TabsTrigger value="referencia">Referência</TabsTrigger>
-              <TabsTrigger value="reuniao">Dados Reunião Coordenação/Reconhecimento</TabsTrigger>
-              <TabsTrigger value="operacao">Dados da Operação/ITP</TabsTrigger>
-              <TabsTrigger value="consumos">Consumos</TabsTrigger>
-              <TabsTrigger value="observacoes">Observações</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5 mb-6 h-auto">
+              <TabsTrigger value="referencia" className="text-xs sm:text-sm">Referência</TabsTrigger>
+              <TabsTrigger value="reuniao" className="text-xs sm:text-sm">Reunião</TabsTrigger>
+              <TabsTrigger value="operacao" className="text-xs sm:text-sm">Operação</TabsTrigger>
+              <TabsTrigger value="consumos" className="text-xs sm:text-sm">Consumos</TabsTrigger>
+              <TabsTrigger value="observacoes" className="text-xs sm:text-sm">Observações</TabsTrigger>
             </TabsList>
 
             {/* Referência Tab */}
