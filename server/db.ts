@@ -139,6 +139,9 @@ export async function getUniqueCters() {
 export async function deleteEvaluation(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  // Eliminar operações associadas primeiro (cascata)
+  await db.delete(operations).where(eq(operations.evaluationId, id));
+  // Depois eliminar a avaliação
   await db.delete(evaluations).where(eq(evaluations.id, id));
 }
 

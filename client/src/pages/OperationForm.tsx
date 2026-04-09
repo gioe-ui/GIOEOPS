@@ -356,7 +356,7 @@ export default function OperationForm() {
 
             {/* Reunião Tab */}
             <TabsContent value="reuniao" className="space-y-6">
-              <h3 className="font-bold text-lg">Dados Reunião Coordenação</h3>
+              <h3 className="font-bold text-lg">Dados Reunião Coordenação / Reconhecimento</h3>
 
               <div>
                 <Label>Local</Label>

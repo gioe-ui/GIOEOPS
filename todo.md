@@ -266,3 +266,9 @@
 ### Correções - Layout e Impressão de Operações
 - [x] Corrigir layout das abas para evitar sobreposição de texto
 - [x] Corrigir botão imprimir no formulário de operações
+
+
+### Correções - Operações (5ª Rodada)
+- [x] Adicionar campos de dados de reunião de coordenação/reconhecimento
+- [x] Corrigir logo GIOE na página de impressão de operações
+- [x] Implementar cascata de eliminação de operações quando avaliação é eliminada

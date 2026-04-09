@@ -91,7 +91,7 @@ export default function PrintOperation() {
         {/* Logo e Cabeçalho */}
         <div className="text-center mb-8 pb-6 border-b-2 border-gray-300">
           <img
-            src="https://d1lfxha46hqnrk.cloudfront.net/gioe-logo.png"
+            src="https://cdn.manus.im/gioe-logo.png"
             alt="GIOE"
             className="h-16 mx-auto mb-3"
           />
