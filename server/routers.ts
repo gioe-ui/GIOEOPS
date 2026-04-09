@@ -24,6 +24,7 @@ import {
   updateOperation,
   getOperationsByMonth,
   getOperationMonths,
+  deleteOperations,
 } from "./db";
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
@@ -446,6 +447,11 @@ export const appRouter = router({
       .input(z.object({ month: z.string().optional() }))
       .query(async ({ input }) => {
         return getOperationsByMonth(input.month);
+      }),
+    deleteMany: protectedProcedure
+      .input(z.object({ ids: z.array(z.number().int()) }))
+      .mutation(async ({ input }) => {
+        return deleteOperations(input.ids);
       }),
   }),
 });

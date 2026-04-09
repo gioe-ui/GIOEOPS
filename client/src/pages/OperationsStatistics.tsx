@@ -8,7 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, Loader2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Download, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const MONTHS_ORDER = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
@@ -16,10 +25,24 @@ const MONTHS_ORDER = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "S
 export default function OperationsStatistics() {
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: months, isLoading: monthsLoading } = trpc.operations.getMonths.useQuery();
-  const { data: operations, isLoading: operationsLoading } = trpc.operations.getByMonth.useQuery({
+  const { data: operations, isLoading: operationsLoading, refetch } = trpc.operations.getByMonth.useQuery({
     month: selectedMonth === "all" ? undefined : selectedMonth,
+  });
+
+  const deleteMany = trpc.operations.deleteMany.useMutation({
+    onSuccess: () => {
+      toast.success("Operações eliminadas com sucesso!");
+      setSelectedIds(new Set());
+      setShowDeleteDialog(false);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Erro ao eliminar: ${error.message}`);
+    },
   });
 
   const sortedMonths = useMemo(() => {
@@ -30,6 +53,36 @@ export default function OperationsStatistics() {
       return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
     });
   }, [months]);
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && operations) {
+      setSelectedIds(new Set(operations.map(op => op.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectOne = (id: number, checked: boolean) => {
+    const newSet = new Set(selectedIds);
+    if (checked) {
+      newSet.add(id);
+    } else {
+      newSet.delete(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) {
+      toast.error("Selecione pelo menos uma operação para eliminar.");
+      return;
+    }
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    await deleteMany.mutateAsync({ ids: Array.from(selectedIds) });
+  };
 
   const exportToExcel = async () => {
     if (!operations || operations.length === 0) {
@@ -85,6 +138,8 @@ export default function OperationsStatistics() {
   };
 
   const isLoading = monthsLoading || operationsLoading;
+  const allSelected = operations && operations.length > 0 && selectedIds.size === operations.length;
+  const someSelected = selectedIds.size > 0;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -92,23 +147,25 @@ export default function OperationsStatistics() {
         <h2 className="text-xl font-bold" style={{ color: "#1a472a" }}>
           Operações - Estatística
         </h2>
-        <Button
-          onClick={exportToExcel}
-          disabled={isExporting || !operations || operations.length === 0}
-          className="bg-green-600 hover:bg-green-700 text-white"
-        >
-          {isExporting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              A exportar...
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4 mr-2" />
-              Exportar para Excel
-            </>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={exportToExcel}
+            disabled={isExporting || !operations || operations.length === 0}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                A exportar...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 mr-2" />
+                Exportar para Excel
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Filtro de Mês */}
@@ -129,6 +186,33 @@ export default function OperationsStatistics() {
         </Select>
       </div>
 
+      {/* Botão Eliminar (visível quando há seleção) */}
+      {someSelected && (
+        <div className="mb-4 flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+          <span className="text-sm text-gray-700">
+            {selectedIds.size} operação(ões) selecionada(s)
+          </span>
+          <Button
+            onClick={handleDeleteSelected}
+            disabled={deleteMany.isPending}
+            className="bg-red-600 hover:bg-red-700 text-white ml-auto"
+            size="sm"
+          >
+            {deleteMany.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                A eliminar...
+              </>
+            ) : (
+              <>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Eliminar Selecionadas
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
       {/* Tabela de Operações */}
       {isLoading ? (
         <div className="text-center py-12 text-gray-400">
@@ -144,6 +228,14 @@ export default function OperationsStatistics() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "#1a472a" }}>
+                <th className="text-white text-left px-3 py-3 font-semibold text-xs w-12">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="w-4 h-4 cursor-pointer"
+                  />
+                </th>
                 {[
                   "Nº Op",
                   "Atividade",
@@ -175,8 +267,16 @@ export default function OperationsStatistics() {
                   key={op.id}
                   className={`border-b border-gray-100 hover:bg-green-50 transition-colors ${
                     i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                  }`}
+                  } ${selectedIds.has(op.id) ? "bg-blue-50" : ""}`}
                 >
+                  <td className="px-3 py-3 text-gray-600 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(op.id)}
+                      onChange={(e) => handleSelectOne(op.id, e.target.checked)}
+                      className="w-4 h-4 cursor-pointer"
+                    />
+                  </td>
                   <td className="px-3 py-3 text-gray-600 text-xs">{i}</td>
                   <td className="px-3 py-3 text-gray-800 text-xs font-medium">{op.preenchimentoSecOp || "—"}</td>
                   <td className="px-3 py-3 text-gray-600 text-xs">{op.preenchimentoSecOp || "—"}</td>
@@ -203,6 +303,27 @@ export default function OperationsStatistics() {
           </div>
         </div>
       )}
+
+      {/* Dialog de Confirmação de Eliminação */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Eliminação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem a certeza que deseja eliminar {selectedIds.size} operação(ões)? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

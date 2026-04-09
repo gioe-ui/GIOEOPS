@@ -272,3 +272,9 @@
 - [x] Adicionar campos de dados de reunião de coordenação/reconhecimento
 - [x] Corrigir logo GIOE na página de impressão de operações
 - [x] Implementar cascata de eliminação de operações quando avaliação é eliminada
+
+
+### Novas Funcionalidades - Eliminação em Massa de Operações
+- [x] Adicionar checkboxes na tabela de operações-estatística
+- [x] Criar procedure tRPC para eliminar múltiplas operações
+- [x] Adicionar botão "Eliminar" com confirmação

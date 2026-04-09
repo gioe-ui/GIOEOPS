@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, like, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, or, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -297,4 +297,13 @@ export async function getOperationMonths() {
     }
   });
   return Array.from(months).sort();
+}
+
+
+export async function deleteOperations(ids: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (ids.length === 0) return;
+  
+  await db.delete(operations).where(inArray(operations.id, ids));
 }
