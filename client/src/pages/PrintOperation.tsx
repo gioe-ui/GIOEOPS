@@ -91,9 +91,10 @@ export default function PrintOperation() {
         {/* Logo e Cabeçalho */}
         <div className="text-center mb-8 pb-6 border-b-2 border-gray-300">
           <img
-            src="https://cdn.manus.im/gioe-logo.png"
-            alt="GIOE"
+            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663511663974/bkxrxh5szwZfcvrDKi6FHK/GIOE_NewLogo_7249f113.webp"
+            alt="GIOE Logo"
             className="h-16 mx-auto mb-3"
+            style={{ filter: "hue-rotate(110deg) saturate(0.4) brightness(0.75) contrast(1.2) invert(0.05)" }}
           />
           <h1 className="text-2xl font-bold" style={{ color: "#1a472a" }}>
             REGISTO DE DADOS DA OPERAÇÃO

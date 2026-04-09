@@ -278,3 +278,8 @@
 - [x] Adicionar checkboxes na tabela de operações-estatística
 - [x] Criar procedure tRPC para eliminar múltiplas operações
 - [x] Adicionar botão "Eliminar" com confirmação
+
+### Correções - Logo GIOE na Impressão de Operações
+- [x] Corrigir URL do logo GIOE na página PrintOperation.tsx
+- [x] Aplicar filtro CSS de tons de verde ao logo (hue-rotate, saturate, brightness, contrast, invert)
+- [x] Testar visualização do logo na página de impressão
