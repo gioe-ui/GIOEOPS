@@ -255,3 +255,9 @@
 - [x] Implementar exportação para Excel no formato do ficheiro anexado
 - [x] Integrar sub-menu "Operações - Estatística" no separador Estatística
 - [ ] Testar funcionalidade completa com dados reais
+
+
+### Correções - Formulário de Operações
+- [x] Corrigir nomes das abas: "Dados Reunião Coordenação/Reconhecimento", "Dados da Operação/ITP", etc.
+- [x] Investigar e corrigir problema de gravação de dados de operações (tabela não existia, migration executada)
+- [x] Testar gravação completa de dados

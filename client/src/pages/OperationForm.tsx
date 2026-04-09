@@ -243,8 +243,8 @@ export default function OperationForm() {
           <Tabs defaultValue="referencia" className="w-full">
             <TabsList className="grid w-full grid-cols-5 mb-6">
               <TabsTrigger value="referencia">Referência</TabsTrigger>
-              <TabsTrigger value="reuniao">Reunião</TabsTrigger>
-              <TabsTrigger value="operacao">Operação</TabsTrigger>
+              <TabsTrigger value="reuniao">Dados Reunião Coordenação/Reconhecimento</TabsTrigger>
+              <TabsTrigger value="operacao">Dados da Operação/ITP</TabsTrigger>
               <TabsTrigger value="consumos">Consumos</TabsTrigger>
               <TabsTrigger value="observacoes">Observações</TabsTrigger>
             </TabsList>
