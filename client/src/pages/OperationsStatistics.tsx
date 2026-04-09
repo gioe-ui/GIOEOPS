@@ -94,39 +94,143 @@ export default function OperationsStatistics() {
     try {
       const XLSX = await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs" as any);
 
-      const data = operations.map((op, idx) => ({
-        "ID Op": idx,
-        "Atividade (VER LEGENDA ABAIXO)": op.preenchimentoSecOp || "",
-        "Mês": op.preenchimentoSecOp || "",
-        "Inicio": op.gdhSaidaUI || "",
-        "Fim": op.gdhEntradaUI || "",
-        "Horas": op.efetivTotalReuniao || "",
-        "Destacamento": op.cmdtForcaReuniao || "",
-        "Cmdt Força GIOE": op.cmdtOp || "",
-        "Of's": "",
-        "Sarg's": "",
-        "Grd's": "",
-        "Total": op.efetivTotalOperacao || "",
-        "Viaturas": op.viaturasCaracterizadasOperacao || 0,
-        "KM": op.kmTotaisOperacao || "",
-        "CTer": op.cterOperacao || "",
-        "DTer": op.dterOperacao || "",
-        "Área Operações": op.pterZaOperacao || "",
-        "Entidade Requisitante (CO - CTer - PSP - PJ ...)": op.entidadeSolicitadora || "",
-        "Força Titular do Inquérito": op.forcaTitularInqueritos || "",
-        "Custos Combustíveis (€)": op.custosCombustiveis || "",
-        "Custos Portagens (€)": op.custosPortagens || "",
-        "Observações Visados": op.obsVisados || "",
-        "Armas": "",
-        "Detidos": "",
-        "Feridos": "",
-        "Mortos": "",
-        "Observações": op.apontamentosNotas || "",
-      }));
+      // Cabeçalhos da primeira linha (títulos de secção)
+      const headerRow = [
+        "ID Op ",
+        "",
+        "LOCALIZAÇÃO TEMPORAL",
+        "",
+        "",
+        "",
+        "EFETIVO",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "LOGISTICA",
+        "",
+        "ÁREA OPERAÇÕES",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "RESULTADOS",
+        "",
+        "",
+        "",
+        "OBSERVAÇÕES",
+      ];
 
-      const ws = XLSX.utils.json_to_sheet(data);
+      // Cabeçalhos da segunda linha (nomes das colunas)
+      const subHeaderRow = [
+        "Nº Op",
+        "Atividade\n(VER LEGENDA ABAIXO)",
+        "Mês",
+        "Inicio",
+        "Fim",
+        "Horas",
+        "Destacamento",
+        "Cmdt Força\nGIOE",
+        "Of's",
+        "Sarg's",
+        "Grd's",
+        "Total",
+        "Viaturas",
+        "KM",
+        "CTer",
+        "DTer",
+        "Área Operações",
+        "Entidade Requisitante\n(CO - CTer - PSP - PJ ...)",
+        "Força Titular do Inquérito",
+        "Custos Combustíveis\n(€)",
+        "Custos Portagens\n(€)",
+        "Observações Visados\n(Visado Alertado / Não Residente / De 2 só estava 1 / Etc.)",
+        "Armas",
+        "Detidos",
+        "Feridos",
+        "Mortos",
+        "",
+      ];
+
+      const data = operations.map((op, idx) => {
+        // Extrair mês do campo dataOp
+        let mes = "";
+        if (op.dataOp) {
+          const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+          const mesNum = parseInt(op.dataOp.substring(2, 4));
+          mes = meses[mesNum - 1] || "";
+        }
+        
+        return [
+          idx,
+          op.preenchimentoSecOp || "",
+          mes,
+          op.gdhSaidaUI || "",
+          op.gdhEntradaUI || "",
+          op.efetivTotalReuniao || "",
+          op.cmdtForcaReuniao || "",
+          op.cmdtOp || "",
+          "",  // Of's
+          "",  // Sarg's
+          "",  // Grd's
+          op.efetivTotalOperacao || "",
+          op.viaturasCaracterizadasOperacao || "",
+          op.kmTotaisOperacao || "",
+          op.cterOperacao || "",
+          op.dterOperacao || "",
+          op.pterZaOperacao || "",
+          op.entidadeSolicitadora || "",
+          op.forcaTitularInqueritos || "",
+          op.custosCombustiveis || "",
+          op.custosPortagens || "",
+          op.obsVisados || "",
+          "",  // Armas
+          "",  // Detidos
+          "",  // Feridos
+          "",  // Mortos
+          op.apontamentosNotas || "",
+        ];
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet([headerRow, subHeaderRow, ...data.map(row => row)]);
+      
+      // Ajustar largura das colunas
+      ws['!cols'] = [
+        { wch: 8 },   // Nº Op
+        { wch: 20 },  // Atividade
+        { wch: 8 },   // Mês
+        { wch: 12 },  // Inicio
+        { wch: 12 },  // Fim
+        { wch: 8 },   // Horas
+        { wch: 15 },  // Destacamento
+        { wch: 15 },  // Cmdt Força
+        { wch: 6 },   // Of's
+        { wch: 8 },   // Sarg's
+        { wch: 8 },   // Grd's
+        { wch: 8 },   // Total
+        { wch: 10 },  // Viaturas
+        { wch: 8 },   // KM
+        { wch: 12 },  // CTer
+        { wch: 12 },  // DTer
+        { wch: 15 },  // Área Operações
+        { wch: 20 },  // Entidade Requisitante
+        { wch: 20 },  // Força Titular
+        { wch: 12 },  // Custos Combustíveis
+        { wch: 12 },  // Custos Portagens
+        { wch: 30 },  // Observações Visados
+        { wch: 8 },   // Armas
+        { wch: 8 },   // Detidos
+        { wch: 8 },   // Feridos
+        { wch: 8 },   // Mortos
+        { wch: 30 },  // Observações
+      ];
+
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Reg. Operações");
+      XLSX.utils.book_append_sheet(wb, ws, "Reg. Operações 2025");
       XLSX.writeFile(wb, `operacoes_${selectedMonth === "all" ? "todas" : selectedMonth}_${new Date().getFullYear()}.xlsx`);
       toast.success("Ficheiro exportado com sucesso!");
     } catch (error) {
@@ -151,28 +255,17 @@ export default function OperationsStatistics() {
           <Button
             onClick={exportToExcel}
             disabled={isExporting || !operations || operations.length === 0}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            style={{ background: "#1a472a" }}
           >
-            {isExporting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                A exportar...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4 mr-2" />
-                Exportar para Excel
-              </>
-            )}
+            <Download className="w-4 h-4 mr-2" />
+            {isExporting ? "Exportando..." : "Exportar para Excel"}
           </Button>
         </div>
       </div>
 
-      {/* Filtro de Mês */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">Filtrar por Mês</label>
+      <div className="mb-6 flex gap-4 items-center">
         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-full md:w-64">
+          <SelectTrigger className="w-48">
             <SelectValue placeholder="Selecione um mês" />
           </SelectTrigger>
           <SelectContent>
@@ -184,131 +277,97 @@ export default function OperationsStatistics() {
             ))}
           </SelectContent>
         </Select>
-      </div>
 
-      {/* Botão Eliminar (visível quando há seleção) */}
-      {someSelected && (
-        <div className="mb-4 flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
-          <span className="text-sm text-gray-700">
-            {selectedIds.size} operação(ões) selecionada(s)
-          </span>
+        {someSelected && (
           <Button
             onClick={handleDeleteSelected}
-            disabled={deleteMany.isPending}
-            className="bg-red-600 hover:bg-red-700 text-white ml-auto"
+            variant="destructive"
             size="sm"
           >
-            {deleteMany.isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                A eliminar...
-              </>
-            ) : (
-              <>
-                <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar Selecionadas
-              </>
-            )}
+            <Trash2 className="w-4 h-4 mr-2" />
+            Eliminar Selecionadas ({selectedIds.size})
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Tabela de Operações */}
       {isLoading ? (
-        <div className="text-center py-12 text-gray-400">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
-          A carregar...
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
         </div>
       ) : !operations || operations.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-          <p className="text-gray-400 text-sm">Nenhuma operação encontrada.</p>
+        <div className="text-center py-12 text-gray-500">
+          Nenhuma operação encontrada
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-gray-300">
             <thead>
-              <tr style={{ background: "#1a472a" }}>
-                <th className="text-white text-left px-3 py-3 font-semibold text-xs w-12">
+              <tr style={{ background: "#1a472a", color: "white" }}>
+                <th className="border border-gray-300 p-2 text-left">
                   <input
                     type="checkbox"
                     checked={allSelected}
                     onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="w-4 h-4 cursor-pointer"
                   />
                 </th>
-                {[
-                  "Nº Op",
-                  "Atividade",
-                  "Mês",
-                  "Início",
-                  "Fim",
-                  "Horas",
-                  "Cmdt Força",
-                  "Total Efetivo",
-                  "Viaturas",
-                  "KM",
-                  "CTer",
-                  "DTer",
-                  "Área Op.",
-                  "Entidade",
-                  "Custos Comb.",
-                  "Custos Port.",
-                  "Observações",
-                ].map((h) => (
-                  <th key={h} className="text-white text-left px-3 py-3 font-semibold text-xs">
-                    {h}
-                  </th>
-                ))}
+                <th className="border border-gray-300 p-2 text-left">Nº Op</th>
+                <th className="border border-gray-300 p-2 text-left">Atividade</th>
+                <th className="border border-gray-300 p-2 text-left">Mês</th>
+                <th className="border border-gray-300 p-2 text-left">Inicio</th>
+                <th className="border border-gray-300 p-2 text-left">Fim</th>
+                <th className="border border-gray-300 p-2 text-left">Horas</th>
+                <th className="border border-gray-300 p-2 text-left">Cmdt Força</th>
+                <th className="border border-gray-300 p-2 text-left">Total</th>
+                <th className="border border-gray-300 p-2 text-left">Viaturas</th>
+                <th className="border border-gray-300 p-2 text-left">KM</th>
+                <th className="border border-gray-300 p-2 text-left">CTer</th>
+                <th className="border border-gray-300 p-2 text-left">DTer</th>
+                <th className="border border-gray-300 p-2 text-left">Entidade</th>
+                <th className="border border-gray-300 p-2 text-left">Custos Comb.</th>
+                <th className="border border-gray-300 p-2 text-left">Custos Port.</th>
+                <th className="border border-gray-300 p-2 text-left">Observações</th>
               </tr>
             </thead>
             <tbody>
-              {operations.map((op, i) => (
+              {operations.map((op) => (
                 <tr
                   key={op.id}
-                  className={`border-b border-gray-100 hover:bg-green-50 transition-colors ${
-                    i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                  } ${selectedIds.has(op.id) ? "bg-blue-50" : ""}`}
+                  className={selectedIds.has(op.id) ? "bg-blue-100" : "hover:bg-gray-50"}
                 >
-                  <td className="px-3 py-3 text-gray-600 text-xs">
+                  <td className="border border-gray-300 p-2">
                     <input
                       type="checkbox"
                       checked={selectedIds.has(op.id)}
                       onChange={(e) => handleSelectOne(op.id, e.target.checked)}
-                      className="w-4 h-4 cursor-pointer"
                     />
                   </td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{i}</td>
-                  <td className="px-3 py-3 text-gray-800 text-xs font-medium">{op.preenchimentoSecOp || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.preenchimentoSecOp || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.gdhSaidaUI || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.gdhEntradaUI || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.efetivTotalReuniao || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.cmdtOp || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.efetivTotalOperacao || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.viaturasCaracterizadasOperacao || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.kmTotaisOperacao || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.cterOperacao || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.dterOperacao || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.pterZaOperacao || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.entidadeSolicitadora || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.custosCombustiveis || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs">{op.custosPortagens || "—"}</td>
-                  <td className="px-3 py-3 text-gray-600 text-xs truncate max-w-xs">{op.apontamentosNotas || "—"}</td>
+                  <td className="border border-gray-300 p-2">{op.operacaoNumero || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.preenchimentoSecOp || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.dataOp ? op.dataOp.substring(2, 5) : "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.gdhSaidaUI || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.gdhEntradaUI || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.efetivTotalReuniao || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.cmdtOp || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.efetivTotalOperacao || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.viaturasCaracterizadasOperacao || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.kmTotaisOperacao || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.cterOperacao || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.dterOperacao || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.entidadeSolicitadora || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.custosCombustiveis || "-"}</td>
+                  <td className="border border-gray-300 p-2">{op.custosPortagens || "-"}</td>
+                  <td className="border border-gray-300 p-2 text-sm">{op.apontamentosNotas || "-"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
-            {operations.length} operação(ões) encontrada(s)
-          </div>
         </div>
       )}
 
-      {/* Dialog de Confirmação de Eliminação */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Eliminação</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar eliminação</AlertDialogTitle>
             <AlertDialogDescription>
               Tem a certeza que deseja eliminar {selectedIds.size} operação(ões)? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
@@ -317,7 +376,7 @@ export default function OperationsStatistics() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              style={{ background: "#dc2626" }}
             >
               Eliminar
             </AlertDialogAction>

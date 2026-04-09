@@ -283,3 +283,8 @@
 - [x] Corrigir URL do logo GIOE na página PrintOperation.tsx
 - [x] Aplicar filtro CSS de tons de verde ao logo (hue-rotate, saturate, brightness, contrast, invert)
 - [x] Testar visualização do logo na página de impressão
+
+### Correções - Exportação Excel de Operações
+- [x] Analisar formato esperado do Excel (27 colunas com cabeçalhos específicos)
+- [x] Atualizar estrutura de exportação para corresponder exatamente ao ficheiro de referência
+- [x] Testar exportação com dados reais
