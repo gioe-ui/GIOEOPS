@@ -250,7 +250,7 @@ export default function Dashboard() {
             <tbody>
               {evaluations.map((e, i) => (
                 <tr
-                  key={e.id}
+                  key={`eval-${e.id}-op-${e.operationId || 'none'}`}
                   className={`border-b border-gray-100 hover:bg-green-50 transition-colors ${
                     i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                   }`}
