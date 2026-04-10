@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
@@ -939,6 +940,9 @@ export default function OperationForm() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Atribuir Operação a Militar</DialogTitle>
+              <DialogDescription>
+                Selecione um militar disponível e defina a data prevista para a realização da operação.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>

@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, like, lte, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, inArray, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation, notifications, Notification } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -339,4 +339,86 @@ export async function markNotificationAsSent(notificationId: number): Promise<vo
   await db.update(notifications)
     .set({ sent: 1, sentAt: new Date() })
     .where(eq(notifications.id, notificationId));
+}
+
+
+export async function updateOperationStatus(operationId: number, data: {
+  operacaoPreenchida?: number;
+  consumosPreenchidos?: number;
+  observacoesPreenchidas?: number;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  const updateData: Record<string, any> = {};
+  if (data.operacaoPreenchida !== undefined) updateData.operacaoPreenchida = data.operacaoPreenchida;
+  if (data.consumosPreenchidos !== undefined) updateData.consumosPreenchidos = data.consumosPreenchidos;
+  if (data.observacoesPreenchidas !== undefined) updateData.observacoesPreenchidas = data.observacoesPreenchidas;
+  
+  if (Object.keys(updateData).length === 0) return;
+  
+  await db.update(operations)
+    .set(updateData)
+    .where(eq(operations.id, operationId));
+}
+
+export async function flagIncompleteOperations(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+  
+  const incompleteOps = await db.select()
+    .from(operations)
+    .where(
+      and(
+        eq(operations.assignedUserId, operations.assignedUserId),
+        lte(operations.scheduledDate, twoDaysAgo.toISOString().split('T')[0]),
+        eq(operations.flaggedForCompletion, 0),
+        or(
+          eq(operations.operacaoPreenchida, 0),
+          eq(operations.consumosPreenchidos, 0),
+          eq(operations.observacoesPreenchidas, 0)
+        )
+      )
+    );
+  
+  for (const op of incompleteOps) {
+    await db.update(operations)
+      .set({
+        flaggedForCompletion: 1,
+        flaggedAt: new Date(),
+      })
+      .where(eq(operations.id, op.id));
+  }
+  
+  return incompleteOps.length;
+}
+
+export async function getFlaggedOperations(): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(operations)
+    .where(eq(operations.flaggedForCompletion, 1));
+}
+
+export async function getOperationWithAssignedUser(operationId: number): Promise<any> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const op = await db.select()
+    .from(operations)
+    .where(eq(operations.id, operationId))
+    .limit(1);
+  
+  if (!op || !op[0] || !op[0].assignedUserId) return null;
+  
+  const user = await db.select()
+    .from(users)
+    .where(eq(users.id, op[0].assignedUserId))
+    .limit(1);
+  
+  return { operation: op[0], user: user?.[0] };
 }

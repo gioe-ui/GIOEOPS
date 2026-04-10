@@ -159,6 +159,11 @@ export const operations = mysqlTable("operations", {
   excelSECOp: tinyint("excelSECOp").default(0),
   apontamentosNotas: text("apontamentosNotas"),
   croquis: text("croquis"),
+  operacaoPreenchida: tinyint("operacaoPreenchida").default(0).notNull(),
+  consumosPreenchidos: tinyint("consumosPreenchidos").default(0).notNull(),
+  observacoesPreenchidas: tinyint("observacoesPreenchidas").default(0).notNull(),
+  flaggedForCompletion: tinyint("flaggedForCompletion").default(0).notNull(),
+  flaggedAt: timestamp("flaggedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

@@ -328,3 +328,14 @@
 - [ ] Criar página/modal de notificações para envio manual
 - [ ] Integrar notificações automáticas após atribuição de operação
 - [ ] Testar fluxo completo de notificações
+
+
+### Correções e Melhorias - Atribuição e Sinalização
+- [x] Corrigir aviso de acessibilidade no modal de atribuição (DialogDescription)
+- [x] Criar sistema de sinalização de reservas incompletas (2 dias após data de operação)
+- [x] Adicionar colunas de status na tabela operations
+- [x] Criar procedures tRPC para sinalização e atualização de status
+- [ ] Adicionar coluna de status no dashboard (completa, incompleta, sinalizada)
+- [ ] Adicionar filtro por status no dashboard
+- [ ] Integrar botão de notificação WhatsApp no dashboard para reservas sinalizadas
+- [ ] Testar fluxo completo de sinalização e notificação

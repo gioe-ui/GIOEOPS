@@ -28,6 +28,10 @@ import {
   createNotification,
   getNotificationsByOperation,
   markNotificationAsSent,
+  updateOperationStatus,
+  flagIncompleteOperations,
+  getFlaggedOperations,
+  getOperationWithAssignedUser,
 } from "./db";
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
@@ -530,6 +534,39 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await markNotificationAsSent(input.notificationId);
         return { success: true };
+      }),
+
+    updateOperationStatus: protectedProcedure
+      .input(z.object({
+        operationId: z.number().int(),
+        operacaoPreenchida: z.number().int().optional(),
+        consumosPreenchidos: z.number().int().optional(),
+        observacoesPreenchidas: z.number().int().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await updateOperationStatus(input.operationId, {
+          operacaoPreenchida: input.operacaoPreenchida,
+          consumosPreenchidos: input.consumosPreenchidos,
+          observacoesPreenchidas: input.observacoesPreenchidas,
+        });
+        return { success: true };
+      }),
+
+    flagIncompleteOperations: protectedProcedure
+      .mutation(async () => {
+        const count = await flagIncompleteOperations();
+        return { flagged: count };
+      }),
+
+    getFlaggedOperations: protectedProcedure
+      .query(async () => {
+        return getFlaggedOperations();
+      }),
+
+    getOperationWithAssignedUser: protectedProcedure
+      .input(z.object({ operationId: z.number().int() }))
+      .query(async ({ input }) => {
+        return getOperationWithAssignedUser(input.operationId);
       }),
   }),
 });
