@@ -177,9 +177,14 @@ export const appRouter = router({
 
   evaluations: router({
     list: protectedProcedure
-      .input(z.object({ neop: z.string().optional(), avaliador: z.string().optional(), cterRequerente: z.string().optional() }))
-      .query(async ({ input }) => {
-        const rows = await getEvaluations(input);
+      .input(z.object({ neop: z.string().optional(), avaliador: z.string().optional(), cterRequerente: z.string().optional(), userId: z.number().optional() }))
+      .query(async ({ input, ctx }) => {
+        // Filtrar por utilizador se não for admin
+        const filters = { ...input };
+        if (ctx.user.role !== "admin") {
+          filters.userId = ctx.user.id;
+        }
+        const rows = await getEvaluations(filters);
         return rows;
       }),
 

@@ -82,7 +82,7 @@ export async function createEvaluation(data: InsertEvaluation) {
   return result;
 }
 
-export async function getEvaluations(filters?: { neop?: string; avaliador?: string; cterRequerente?: string }) {
+export async function getEvaluations(filters?: { neop?: string; avaliador?: string; cterRequerente?: string; userId?: number }) {
   const db = await getDb();
   if (!db) return [];
 
@@ -95,6 +95,9 @@ export async function getEvaluations(filters?: { neop?: string; avaliador?: stri
   }
   if (filters?.cterRequerente) {
     conditions.push(like(evaluations.parecer, `%${filters.cterRequerente}%`));
+  }
+  if (filters?.userId) {
+    conditions.push(eq(evaluations.userId, filters.userId));
   }
 
   const rows =
@@ -353,27 +356,7 @@ export async function createOperation(data: InsertOperation) {
 export async function getOperationByEvaluationId(evaluationId: number) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db
-    .select({
-      id: operations.id,
-      evaluationId: operations.evaluationId,
-      assignedUserId: operations.assignedUserId,
-      operacaoPreenchida: operations.operacaoPreenchida,
-      consumosPreenchidos: operations.consumosPreenchidos,
-      observacoesPreenchidas: operations.observacoesPreenchidas,
-      flaggedForCompletion: operations.flaggedForCompletion,
-      flaggedAt: operations.flaggedAt,
-      preenchimentoSecOp: operations.preenchimentoSecOp,
-      scheduledDate: operations.scheduledDate,
-      createdAt: operations.createdAt,
-      assignedUserName: users.name,
-      assignedUserRank: users.rank,
-      assignedUserPhone: users.phoneNumber,
-    })
-    .from(operations)
-    .leftJoin(users, eq(operations.assignedUserId, users.id))
-    .where(eq(operations.evaluationId, evaluationId))
-    .limit(1);
+  const result = await db.select().from(operations).where(eq(operations.evaluationId, evaluationId)).limit(1);
   return result.length > 0 ? result[0] : null;
 }
 

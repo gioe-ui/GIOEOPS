@@ -25,7 +25,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode; adminOnly?: boolean
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("form");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
   const visibleTabs = TABS.filter((tab) => !tab.adminOnly || user?.role === "admin");
 

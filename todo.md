@@ -377,3 +377,8 @@
 - [ ] Criar botão de notificação WhatsApp no dashboard do militar
 - [ ] Implementar notificação para solicitar preenchimento de dados em falta
 - [ ] Testar fluxo completo de atribuição e notificação
+
+### Correções Solicitadas - Filtro de Utilizador e Dashboard
+- [ ] Filtrar operações por utilizador para utilizadores não-admin
+- [ ] Redirecionar para Dashboard após login (em vez de Home)
+- [ ] Corrigir persistência de dados nos formulários de operação (dados devem aparecer nos separadores)
