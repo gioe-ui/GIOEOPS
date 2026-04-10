@@ -284,18 +284,22 @@ export default function Dashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "#1a472a" }}>
-                <th className="text-white text-left px-4 py-3 font-semibold w-8">
+                <th className="text-white text-left px-2 py-3 font-semibold w-8">
                   <input
                     type="checkbox"
                     checked={selectedEvaluations.size > 0 && evaluations && selectedEvaluations.size === evaluations.length}
                     onChange={(e) => handleSelectAll(e.target.checked)}
                   />
                 </th>
-                {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "CTer", "Militar Atribuído", "Status", "Ação"].map((h) => (
-                  <th key={h} className="text-white text-left px-4 py-3 font-semibold">
-                    {h}
-                  </th>
-                ))}
+                <th className="text-white text-left px-2 py-3 font-semibold whitespace-nowrap">Data</th>
+                <th className="text-white text-left px-2 py-3 font-semibold whitespace-nowrap">POC</th>
+                <th className="text-white text-left px-2 py-3 font-semibold whitespace-nowrap">Pontuação</th>
+                <th className="text-white text-left px-2 py-3 font-semibold whitespace-nowrap">NEOP</th>
+                <th className="text-white text-left px-2 py-3 font-semibold whitespace-nowrap">Avaliador</th>
+                <th className="text-white text-left px-2 py-3 font-semibold whitespace-nowrap">CTer</th>
+                <th className="text-white text-left px-2 py-3 font-semibold">Militar Atribuído</th>
+                <th className="text-white text-left px-2 py-3 font-semibold whitespace-nowrap">Status</th>
+                <th className="text-white text-left px-2 py-3 font-semibold">Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -306,24 +310,24 @@ export default function Dashboard() {
                     i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                   }`}
                 >
-                  <td className="px-4 py-3 w-8">
+                  <td className="px-2 py-3 w-8">
                     <input
                       type="checkbox"
                       checked={selectedEvaluations.has(e.id)}
                       onChange={() => handleSelectEvaluation(e.id)}
                     />
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-2 py-3 text-gray-600 whitespace-nowrap text-xs">
                     {new Date(e.createdAt).toLocaleDateString("pt-PT")}
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{e.pocNome || "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className="font-bold" style={{ color: "#1a472a" }}>
+                  <td className="px-2 py-3 font-medium text-gray-800 truncate max-w-[80px]" title={e.pocNome || ""}>{e.pocNome || "—"}</td>
+                  <td className="px-2 py-3 whitespace-nowrap">
+                    <span className="font-bold text-xs" style={{ color: "#1a472a" }}>
                       {e.pontuacao}
                     </span>
-                    <span className="text-gray-400">/100</span>
+                    <span className="text-gray-400 text-xs">/100</span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-2 py-3 whitespace-nowrap">
                     <span
                       className="px-2 py-1 rounded-full text-white text-xs font-bold"
                       style={{ background: NEOP_COLORS[e.neop] ?? "#1a472a" }}
@@ -331,36 +335,36 @@ export default function Dashboard() {
                       {e.neop}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{e.avaliador || "—"}</td>
-                  <td className="px-4 py-3 text-gray-600">{extractCter(e.parecer)}</td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-2 py-3 text-gray-600 truncate max-w-[100px]" title={e.avaliador || ""}>{e.avaliador || "—"}</td>
+                  <td className="px-2 py-3 text-gray-600 truncate max-w-[80px]" title={extractCter(e.parecer)}>{extractCter(e.parecer)}</td>
+                  <td className="px-2 py-3 text-gray-600 truncate max-w-[150px]" title={e.assignedUserRank && e.assignedUserName ? `${e.assignedUserRank} ${e.assignedUserName}` : ""}>
                     {e.assignedUserRank && e.assignedUserName
                       ? `${e.assignedUserRank} ${e.assignedUserName}`
                       : "—"}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-2 py-3 whitespace-nowrap">
                     {e.operationId ? (
-                      <div className="flex items-center gap-2" title={getStatusColor(e).label}>
+                      <div className="flex items-center gap-1" title={getStatusColor(e).label}>
                         <div
-                          className="w-4 h-4 rounded-full"
+                          className="w-3 h-3 rounded-full flex-shrink-0"
                           style={{ backgroundColor: getStatusColor(e).color }}
                         />
-                        <span className="text-xs text-gray-600">{getStatusColor(e).label}</span>
+                        <span className="text-xs text-gray-600 truncate max-w-[100px]">{getStatusColor(e).label}</span>
                       </div>
                     ) : (
                       <span className="text-xs text-gray-400">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 flex gap-2">
+                  <td className="px-2 py-3 flex gap-1 flex-wrap">
                     {e.assignedUserId && e.assignedUserPhone && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleSendNotification(e)}
-                        className="border-green-600 text-green-600 hover:bg-green-50"
+                        className="border-green-600 text-green-600 hover:bg-green-50 text-xs px-2 py-1 h-auto"
+                        title="Notificar"
                       >
-                        <MessageCircle className="w-3 h-3 mr-1" />
-                        Notificar
+                        <MessageCircle className="w-3 h-3" />
                       </Button>
                     )}
                     {e.neop === "4º NEOP" && (
@@ -369,25 +373,24 @@ export default function Dashboard() {
                           variant="outline"
                           size="sm"
                           onClick={() => navigate(`/operation/${e.id}`)}
-                          className="border-orange-600 text-orange-600 hover:bg-orange-50"
+                          className="border-orange-600 text-orange-600 hover:bg-orange-50 text-xs px-2 py-1 h-auto"
+                          title="Operação"
                         >
-                          <FileText className="w-3 h-3 mr-1" />
-                          Operação
+                          <FileText className="w-3 h-3" />
                         </Button>
                         {e.operationId && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => navigate(`/operation-detail/${e.operationId}`)}
-                            className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                            className="border-purple-600 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1 h-auto"
+                            title="Editar"
                           >
-                            <FileText className="w-3 h-3 mr-1" />
-                            Editar
+                            <FileText className="w-3 h-3" />
                           </Button>
                         )}
                       </>
                     )}
-                    {/* Checkbox removido - usar seleção em lote */}
                   </td>
                 </tr>
               ))}
