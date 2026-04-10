@@ -319,3 +319,12 @@
 - [x] Implementar modal de seleção de militar no OperationForm
 - [x] Adicionar campo de data prevista da operação
 - [ ] Testar fluxo completo de atribuição
+
+
+### Sistema de Notificações WhatsApp
+- [x] Criar tabela de notificações para registar histórico
+- [x] Criar procedure tRPC para gerar link WhatsApp pré-formatado
+- [x] Criar procedure tRPC para registar notificação enviada
+- [ ] Criar página/modal de notificações para envio manual
+- [ ] Integrar notificações automáticas após atribuição de operação
+- [ ] Testar fluxo completo de notificações

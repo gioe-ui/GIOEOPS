@@ -25,6 +25,9 @@ import {
   getOperationsByMonth,
   getOperationMonths,
   deleteOperations,
+  createNotification,
+  getNotificationsByOperation,
+  markNotificationAsSent,
 } from "./db";
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
@@ -488,6 +491,44 @@ export const appRouter = router({
           })
           .where(eq(operations.id, input.operationId));
         
+        return { success: true };
+      }),
+
+    sendNotification: protectedProcedure
+      .input(z.object({
+        operationId: z.number().int(),
+        userId: z.number().int(),
+        phoneNumber: z.string(),
+        militarName: z.string(),
+        scheduledDate: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const message = `Olá ${input.militarName},\n\nFoi-lhe atribuída uma operação GIOE para a data de ${input.scheduledDate}.\n\nPor favor, preencha o relatório da operação no sistema.\n\nObrigado!`;
+        const encodedMessage = encodeURIComponent(message);
+        const phoneClean = input.phoneNumber.replace(/[^0-9]/g, '');
+        const whatsappLink = `https://wa.me/${phoneClean}?text=${encodedMessage}`;
+        
+        const notification = await createNotification({
+          operationId: input.operationId,
+          userId: input.userId,
+          phoneNumber: input.phoneNumber,
+          message,
+          whatsappLink,
+        });
+        
+        return notification;
+      }),
+
+    getNotifications: protectedProcedure
+      .input(z.object({ operationId: z.number().int() }))
+      .query(async ({ input }) => {
+        return getNotificationsByOperation(input.operationId);
+      }),
+
+    markNotificationAsSent: protectedProcedure
+      .input(z.object({ notificationId: z.number().int() }))
+      .mutation(async ({ input }) => {
+        await markNotificationAsSent(input.notificationId);
         return { success: true };
       }),
   }),

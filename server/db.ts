@@ -1,6 +1,6 @@
-import { and, desc, eq, gte, like, lte, or, sql, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation } from "../drizzle/schema";
+import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation, notifications, Notification } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -306,4 +306,37 @@ export async function deleteOperations(ids: number[]) {
   if (ids.length === 0) return;
   
   await db.delete(operations).where(inArray(operations.id, ids));
+}
+
+export async function createNotification(data: {
+  operationId: number;
+  userId: number;
+  phoneNumber: string;
+  message: string;
+  whatsappLink: string;
+}): Promise<Notification> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(notifications).values(data);
+  const id = (result as any).insertId;
+  
+  const notification = await db.select().from(notifications).where(eq(notifications.id, id)).limit(1);
+  return notification[0];
+}
+
+export async function getNotificationsByOperation(operationId: number): Promise<Notification[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(notifications).where(eq(notifications.operationId, operationId));
+}
+
+export async function markNotificationAsSent(notificationId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(notifications)
+    .set({ sent: 1, sentAt: new Date() })
+    .where(eq(notifications.id, notificationId));
 }

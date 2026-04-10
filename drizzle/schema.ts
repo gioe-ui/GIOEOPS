@@ -164,3 +164,18 @@ export const operations = mysqlTable("operations", {
 
 export type Operation = typeof operations.$inferSelect;
 export type InsertOperation = typeof operations.$inferInsert;
+
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  operationId: int("operationId").notNull(),
+  userId: int("userId").notNull(),
+  phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
+  message: text("message").notNull(),
+  whatsappLink: text("whatsappLink").notNull(),
+  sent: tinyint("sent").default(0).notNull(),
+  sentAt: timestamp("sentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
