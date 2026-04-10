@@ -339,3 +339,11 @@
 - [ ] Adicionar filtro por status no dashboard
 - [ ] Integrar botão de notificação WhatsApp no dashboard para reservas sinalizadas
 - [ ] Testar fluxo completo de sinalização e notificação
+
+
+### Interface de Sinalização - Coluna Visual e Notificações
+- [x] Criar componente visual de status de preenchimento (ícones e cores)
+- [x] Adicionar coluna de status à tabela de operações
+- [x] Adicionar botão "Enviar Notificação" para operações sinalizadas
+- [x] Implementar modal de envio de notificação WhatsApp
+- [ ] Testar fluxo completo de notificação

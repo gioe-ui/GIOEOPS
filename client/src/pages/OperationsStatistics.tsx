@@ -19,6 +19,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Download, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const MONTHS_ORDER = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
 
@@ -27,6 +35,9 @@ export default function OperationsStatistics() {
   const [isExporting, setIsExporting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [selectedOperation, setSelectedOperation] = useState<any>(null);
+  const [notificationSending, setNotificationSending] = useState(false);
 
   const { data: months, isLoading: monthsLoading } = trpc.operations.getMonths.useQuery();
   const { data: operations, isLoading: operationsLoading, refetch } = trpc.operations.getByMonth.useQuery({
@@ -44,6 +55,43 @@ export default function OperationsStatistics() {
       toast.error(`Erro ao eliminar: ${error.message}`);
     },
   });
+
+  const sendNotificationMutation = trpc.operations.sendNotification.useMutation({
+    onSuccess: (result) => {
+      toast.success("Notificação registada! Abra o WhatsApp para enviar a mensagem.");
+      if (result.whatsappLink) {
+        window.open(result.whatsappLink, "_blank");
+      }
+      setShowNotificationModal(false);
+      setSelectedOperation(null);
+    },
+    onError: (error) => {
+      toast.error(`Erro ao enviar notificação: ${error.message}`);
+    },
+  });
+
+  const handleSendNotification = (operation: any) => {
+    setSelectedOperation(operation);
+    setShowNotificationModal(true);
+  };
+
+  const confirmSendNotification = async () => {
+    if (!selectedOperation) return;
+    setNotificationSending(true);
+    try {
+      await sendNotificationMutation.mutateAsync({
+        operationId: selectedOperation.id,
+        userId: selectedOperation.assignedUserId,
+        phoneNumber: selectedOperation.assignedUserPhone || "",
+        militarName: selectedOperation.assignedUserName || "Militar",
+        scheduledDate: selectedOperation.scheduledDate || new Date().toISOString().split('T')[0],
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setNotificationSending(false);
+    }
+  };
 
   const sortedMonths = useMemo(() => {
     if (!months) return [];
@@ -326,6 +374,8 @@ export default function OperationsStatistics() {
                 <th className="border border-gray-300 p-2 text-left">Custos Comb.</th>
                 <th className="border border-gray-300 p-2 text-left">Custos Port.</th>
                 <th className="border border-gray-300 p-2 text-left">Observações</th>
+                <th className="border border-gray-300 p-2 text-left">Estado</th>
+                <th className="border border-gray-300 p-2 text-left">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -357,6 +407,34 @@ export default function OperationsStatistics() {
                   <td className="border border-gray-300 p-2">{op.custosCombustiveis || "-"}</td>
                   <td className="border border-gray-300 p-2">{op.custosPortagens || "-"}</td>
                   <td className="border border-gray-300 p-2 text-sm">{op.apontamentosNotas || "-"}</td>
+                  <td className="border border-gray-300 p-2">
+                    <div className="flex gap-1">
+                      <span title="Operação" className={`text-lg ${op.operacaoPreenchida ? "✅" : "⭕"}`}>
+                        {op.operacaoPreenchida ? "✅" : "⭕"}
+                      </span>
+                      <span title="Consumos" className={`text-lg ${op.consumosPreenchidos ? "✅" : "⭕"}`}>
+                        {op.consumosPreenchidos ? "✅" : "⭕"}
+                      </span>
+                      <span title="Observações" className={`text-lg ${op.observacoesPreenchidas ? "✅" : "⭕"}`}>
+                        {op.observacoesPreenchidas ? "✅" : "⭕"}
+                      </span>
+                      {op.flaggedForCompletion && (
+                        <span title="Sinalizado" className="text-lg">🚩</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {op.flaggedForCompletion && op.assignedUserId && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSendNotification(op)}
+                        className="text-xs"
+                      >
+                        📱 Notificar
+                      </Button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -383,6 +461,60 @@ export default function OperationsStatistics() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showNotificationModal} onOpenChange={setShowNotificationModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enviar Notificação WhatsApp</DialogTitle>
+            <DialogDescription>
+              Confirme para enviar uma notificação ao militar sobre o preenchimento do relatório da operação.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOperation && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium">Militar:</p>
+                <p className="text-sm text-gray-600">{selectedOperation.assignedUserName || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Telefone:</p>
+                <p className="text-sm text-gray-600">{selectedOperation.assignedUserPhone || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Data Prevista:</p>
+                <p className="text-sm text-gray-600">{selectedOperation.scheduledDate || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Mensagem:</p>
+                <p className="text-sm bg-gray-100 p-2 rounded">
+                  Olá {selectedOperation.assignedUserName || "Militar"},
+                  <br />
+                  <br />
+                  Foi-lhe atribuída uma operação GIOE para a data de {selectedOperation.scheduledDate || "[data]"}.
+                  <br />
+                  <br />
+                  Por favor, preencha o relatório da operação no sistema.
+                  <br />
+                  <br />
+                  Obrigado!
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNotificationModal(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={confirmSendNotification}
+              disabled={notificationSending}
+              style={{ background: "#1a472a" }}
+            >
+              {notificationSending ? "A enviar..." : "Enviar via WhatsApp"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
