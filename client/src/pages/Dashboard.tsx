@@ -330,15 +330,6 @@ export default function Dashboard() {
                       </>
                     )}
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/print/${e.id}`)}
-                      className="border-blue-600 text-blue-600 hover:bg-blue-50"
-                    >
-                      <Printer className="w-3 h-3 mr-1" />
-                      Imprimir
-                    </Button>
-                    <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(e.id)}
