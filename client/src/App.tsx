@@ -8,12 +8,14 @@ import Home from "./pages/Home";
 import PrintEvaluation from "./pages/PrintEvaluation";
 import OperationForm from "./pages/OperationForm";
 import PrintOperation from "./pages/PrintOperation";
+import Profile from "./pages/Profile";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/profile" component={Profile} />
       <Route path="/print/:id" component={PrintEvaluation} />
       <Route path="/operation/:evaluationId" component={OperationForm} />
       <Route path="/print-operation/:id" component={PrintOperation} />

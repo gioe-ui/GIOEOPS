@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { LogOut, FileText, BarChart2, PieChart, Users, CheckCircle } from "lucide-react";
+import { LogOut, FileText, BarChart2, PieChart, Users, CheckCircle, User } from "lucide-react";
+import { Link } from "wouter";
 import EvaluationForm from "./EvaluationForm";
 import Dashboard from "./Dashboard";
 import { StatisticsPage } from "./Statistics";
@@ -47,15 +48,27 @@ export default function AppLayout() {
               )}
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={logout}
-            className="border-white/60 text-white hover:bg-white/20 bg-transparent"
-          >
-            <LogOut className="w-4 h-4 mr-1" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href="/profile">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/60 text-white hover:bg-white/20 bg-transparent"
+              >
+                <User className="w-4 h-4 mr-1" />
+                Perfil
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={logout}
+              className="border-white/60 text-white hover:bg-white/20 bg-transparent"
+            >
+              <LogOut className="w-4 h-4 mr-1" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 

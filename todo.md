@@ -303,3 +303,10 @@
 - [ ] Agendar notificações automáticas de 2 em 2 dias após data da operação
 - [ ] Criar interface para enviar notificações manualmente aos militares
 - [ ] Testar fluxo completo de atribuição → notificação → preenchimento de relatório
+
+### Página de Perfil de Utilizador
+- [x] Criar procedure tRPC para atualizar perfil (updateProfile)
+- [x] Criar página Profile.tsx com formulário de edição
+- [x] Adicionar rota /profile no App.tsx
+- [x] Adicionar link para perfil na navegação/menu
+- [x] Testar edição de informações pessoais

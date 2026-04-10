@@ -28,6 +28,13 @@ const loginInput = z.object({
   password: z.string().min(1, "Password é obrigatório"),
 });
 
+const updateProfileInput = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres").optional(),
+  phoneNumber: z.string().min(9, "Número de telefone inválido").optional(),
+  mecanographicNumber: z.string().regex(/^\d{7}$/, "Número mecanográfico deve ter 7 dígitos").optional(),
+  rank: z.string().min(1, "Posto é obrigatório").optional(),
+});
+
 // ─── Auth Router ──────────────────────────────────────────────────────────────
 export const authRouter = router({
   me: publicProcedure.query((opts) => opts.ctx.user),
@@ -113,5 +120,30 @@ export const authRouter = router({
     return { success: true, user };
   }),
 
+  updateProfile: protectedProcedure.input(updateProfileInput).mutation(async ({ input, ctx }) => {
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+    // Atualizar apenas os campos fornecidos
+    const updateData: Record<string, any> = {};
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.phoneNumber !== undefined) updateData.phoneNumber = input.phoneNumber;
+    if (input.mecanographicNumber !== undefined) updateData.mecanographicNumber = input.mecanographicNumber;
+    if (input.rank !== undefined) updateData.rank = input.rank;
+
+    if (Object.keys(updateData).length === 0) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Nenhum campo para atualizar" });
+    }
+
+    await db.update(users).set(updateData).where(eq(users.id, ctx.user.id));
+
+    // Retornar utilizador atualizado
+    const updatedUser = await db.select().from(users).where(eq(users.id, ctx.user.id)).limit(1);
+    if (updatedUser.length === 0) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Falha ao atualizar perfil" });
+    }
+
+    return { success: true, user: updatedUser[0] };
+  }),
 
 });
