@@ -12,7 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, Trash2, Search, Printer, FileText } from "lucide-react";
+import { Download, Trash2, Search, Printer, FileText, MessageCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const NEOP_COLORS: Record<string, string> = {
   "2º NEOP": "#1a472a",
@@ -26,6 +34,9 @@ export default function Dashboard() {
   const [filterAvaliador, setFilterAvaliador] = useState("");
   const [avaliadorInput, setAvaliadorInput] = useState("");
   const [filterCter, setFilterCter] = useState("all");
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
+  const [notificationSending, setNotificationSending] = useState(false);
   const utils = trpc.useUtils();
 
   const { data: evaluations, isLoading } = trpc.evaluations.list.useQuery({
@@ -45,9 +56,51 @@ export default function Dashboard() {
     onError: (e) => toast.error("Erro: " + e.message),
   });
 
+  const sendNotificationMutation = trpc.operations.sendNotification.useMutation({
+    onSuccess: (result) => {
+      toast.success("Notificação registada! Abra o WhatsApp para enviar a mensagem.");
+      if (result.whatsappLink) {
+        window.open(result.whatsappLink, "_blank");
+      }
+      setShowNotificationModal(false);
+      setSelectedEvaluation(null);
+    },
+    onError: (error) => {
+      toast.error(`Erro ao enviar notificação: ${error.message}`);
+    },
+  });
+
   const handleDelete = (id: number) => {
     if (confirm("Tem a certeza que deseja eliminar esta avaliação?")) {
       deleteMutation.mutate({ id });
+    }
+  };
+
+  const handleSendNotification = (evaluation: any) => {
+    setSelectedEvaluation(evaluation);
+    setShowNotificationModal(true);
+  };
+
+  const confirmSendNotification = async () => {
+    if (!selectedEvaluation) return;
+    setNotificationSending(true);
+    try {
+      console.log("Sending notification with:", {
+        operationId: selectedEvaluation.operationId,
+        userId: selectedEvaluation.assignedUserId,
+        phoneNumber: selectedEvaluation.assignedUserPhone,
+      });
+      await sendNotificationMutation.mutateAsync({
+        operationId: selectedEvaluation.operationId,
+        userId: selectedEvaluation.assignedUserId,
+        phoneNumber: selectedEvaluation.assignedUserPhone || "",
+        militarName: selectedEvaluation.assignedUserName || "Militar",
+        scheduledDate: selectedEvaluation.scheduledDate || new Date().toISOString().split('T')[0],
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setNotificationSending(false);
     }
   };
 
@@ -212,6 +265,17 @@ export default function Dashboard() {
                       : "—"}
                   </td>
                   <td className="px-4 py-3 flex gap-2">
+                    {e.assignedUserId && e.assignedUserPhone && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSendNotification(e)}
+                        className="border-green-600 text-green-600 hover:bg-green-50"
+                      >
+                        <MessageCircle className="w-3 h-3 mr-1" />
+                        Notificar
+                      </Button>
+                    )}
                     {e.neop === "4º NEOP" && (
                       <Button
                         variant="outline"
@@ -251,6 +315,61 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Notification Modal */}
+      <Dialog open={showNotificationModal} onOpenChange={setShowNotificationModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Notificar Militar por WhatsApp</DialogTitle>
+            <DialogDescription>
+              Envie uma notificação ao militar atribuído sobre a operação.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedEvaluation && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-semibold">Militar</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedEvaluation.assignedUserRank} {selectedEvaluation.assignedUserName}
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold">Telefone</Label>
+                <p className="text-sm text-gray-600">{selectedEvaluation.assignedUserPhone}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold">Data Prevista da Operação</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedEvaluation.scheduledDate
+                    ? new Date(selectedEvaluation.scheduledDate).toLocaleDateString("pt-PT")
+                    : "Não definida"}
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold">Mensagem</Label>
+                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-gray-200">
+                  Operação atribuída: {selectedEvaluation.id}. Data prevista: {selectedEvaluation.scheduledDate ? new Date(selectedEvaluation.scheduledDate).toLocaleDateString("pt-PT") : "A definir"}. Por favor, confirme receção.
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowNotificationModal(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={confirmSendNotification}
+              disabled={notificationSending}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {notificationSending ? "A enviar..." : "Enviar no WhatsApp"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

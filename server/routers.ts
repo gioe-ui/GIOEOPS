@@ -525,7 +525,7 @@ export const appRouter = router({
           whatsappLink,
         });
         
-        return notification;
+        return { ...notification, whatsappLink };
       }),
 
     getNotifications: protectedProcedure
