@@ -310,3 +310,12 @@
 - [x] Adicionar rota /profile no App.tsx
 - [x] Adicionar link para perfil na navegação/menu
 - [x] Testar edição de informações pessoais
+
+
+### Atribuição de Operações a Militares
+- [x] Adicionar campos assignedUserId e scheduledDate na tabela operations
+- [x] Criar procedure tRPC para atribuir operação a militar
+- [x] Criar procedure tRPC para listar militares disponíveis
+- [x] Implementar modal de seleção de militar no OperationForm
+- [x] Adicionar campo de data prevista da operação
+- [ ] Testar fluxo completo de atribuição

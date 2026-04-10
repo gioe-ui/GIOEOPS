@@ -29,6 +29,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
+import { operations } from "../drizzle/schema";
 
 // ─── Scoring helper ───────────────────────────────────────────────────────────
 const TIPO_SCORES: Record<string, number> = {
@@ -454,6 +455,40 @@ export const appRouter = router({
       .input(z.object({ ids: z.array(z.number().int()) }))
       .mutation(async ({ input }) => {
         return deleteOperations(input.ids);
+      }),
+
+    listMilitares: protectedProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      const militares = await db.select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        rank: users.rank,
+        phoneNumber: users.phoneNumber,
+        mecanographicNumber: users.mecanographicNumber,
+      }).from(users).where(eq(users.approved, 1));
+      return militares;
+    }),
+
+    assignToMilitar: protectedProcedure
+      .input(z.object({
+        operationId: z.number().int(),
+        assignedUserId: z.number().int(),
+        scheduledDate: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+        
+        await db.update(operations)
+          .set({
+            assignedUserId: input.assignedUserId,
+            scheduledDate: input.scheduledDate,
+          })
+          .where(eq(operations.id, input.operationId));
+        
+        return { success: true };
       }),
   }),
 });

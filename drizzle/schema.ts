@@ -103,6 +103,9 @@ export const operations = mysqlTable("operations", {
   cmdtForcaReuniao: varchar("cmdtForcaReuniao", { length: 255 }),
   indicativoRadioReuniao: varchar("indicativoRadioReuniao", { length: 50 }),
   efetivTotalReuniao: varchar("efetivTotalReuniao", { length: 50 }),
+  // Atribuição de Operação
+  assignedUserId: int("assignedUserId"),
+  scheduledDate: varchar("scheduledDate", { length: 20 }),
   // Viaturas Reunião
   viaturasCaracterizadasReuniao: int("viaturasCaracterizadasReuniao").default(0),
   viaturasDescaracterizadasReuniao: int("viaturasDescaracterizadasReuniao").default(0),

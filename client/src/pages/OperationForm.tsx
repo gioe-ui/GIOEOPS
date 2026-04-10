@@ -7,8 +7,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, ArrowLeft, Printer, Save } from "lucide-react";
+import { Loader2, ArrowLeft, Printer, Save, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type MilitarInfo = {
+  id: number;
+  name: string | null;
+  email: string | null;
+  rank: string | null;
+  phoneNumber: string | null;
+  mecanographicNumber: string | null;
+};
 
 type FormState = {
   // Referência
@@ -184,10 +207,43 @@ export default function OperationForm() {
     }
   };
 
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedMilitar, setSelectedMilitar] = useState<string>("");
+  const [scheduledDate, setScheduledDate] = useState<string>(new Date().toISOString().split("T")[0]);
+
   const getOperationQuery = trpc.operations.getByEvaluationId.useQuery(
     { evaluationId: evaluationId ? parseInt(evaluationId) : 0 },
     { enabled: !!evaluationId }
   );
+
+  const getEvaluationQuery = trpc.evaluations.getById.useQuery(
+    { id: evaluationId ? parseInt(evaluationId) : 0 },
+    { enabled: !!evaluationId }
+  );
+
+  const listMilitaresQuery = trpc.operations.listMilitares.useQuery();
+  
+  const assignMutation = trpc.operations.assignToMilitar.useMutation({
+    onSuccess: () => {
+      toast.success("Operação atribuída com sucesso!");
+      setShowAssignModal(false);
+      getOperationQuery.refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleAssign = () => {
+    if (!getOperationQuery.data || !selectedMilitar) {
+      toast.error("Selecione um militar");
+      return;
+    }
+
+    assignMutation.mutate({
+      operationId: getOperationQuery.data.id,
+      assignedUserId: parseInt(selectedMilitar),
+      scheduledDate,
+    });
+  };
 
   const handlePrint = () => {
     if (getOperationQuery.data) {
@@ -225,6 +281,16 @@ export default function OperationForm() {
               <Printer className="w-4 h-4 mr-2" />
               Imprimir
             </Button>
+            {getEvaluationQuery.data?.neop === "4º NEOP" && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowAssignModal(true)}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Atribuir Militar
+              </Button>
+            )}
             <Button
               size="sm"
               onClick={handleSave}
@@ -867,6 +933,53 @@ export default function OperationForm() {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Modal de Atribuição */}
+        <Dialog open={showAssignModal} onOpenChange={setShowAssignModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Atribuir Operação a Militar</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="militar-select">Selecione o Militar</Label>
+                <Select value={selectedMilitar} onValueChange={setSelectedMilitar}>
+                  <SelectTrigger id="militar-select">
+                    <SelectValue placeholder="Escolha um militar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {listMilitaresQuery.data?.map((militar) => (
+                      <SelectItem key={militar.id} value={militar.id.toString()}>
+                        {militar.name} - {militar.rank}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="scheduled-date">Data Prevista da Operação</Label>
+                <Input
+                  id="scheduled-date"
+                  type="date"
+                  value={scheduledDate}
+                  onChange={(e) => setScheduledDate(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAssignModal(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleAssign}
+                disabled={assignMutation.isPending}
+                style={{ background: "#1a472a" }}
+              >
+                {assignMutation.isPending ? "A atribuir..." : "Atribuir"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
