@@ -146,7 +146,7 @@ export function OperationDetail() {
           {/* Referência */}
           <TabsContent value="referencia" className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label>Ref. Filedoc</Label>
                 <Input
                   value={form.refFiledoc || ""}
@@ -154,7 +154,7 @@ export function OperationDetail() {
                   placeholder="Referência do Filedoc"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Número da Operação</Label>
                 <Input
                   value={form.operacaoNumero || ""}
@@ -162,7 +162,7 @@ export function OperationDetail() {
                   placeholder="Número da operação"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Preenchimento SEC Op</Label>
                 <Input
                   value={form.preenchimentoSecOp || ""}
@@ -170,7 +170,7 @@ export function OperationDetail() {
                   placeholder="Preenchimento SEC Op"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Cmdt Op</Label>
                 <Input
                   value={form.cmdtOp || ""}
@@ -178,7 +178,7 @@ export function OperationDetail() {
                   placeholder="Comandante da operação"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Data da Operação</Label>
                 <Input
                   type="date"
@@ -186,7 +186,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("dataOp", e.target.value)}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Tipo de Empenho</Label>
                 <Input
                   value={form.tipoEmpenho || ""}
@@ -195,7 +195,7 @@ export function OperationDetail() {
                 />
               </div>
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Missão</Label>
               <Textarea
                 value={form.missao || ""}
@@ -204,7 +204,7 @@ export function OperationDetail() {
                 rows={4}
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Entidade Solicitadora</Label>
               <Input
                 value={form.entidadeSolicitadora || ""}
@@ -217,7 +217,7 @@ export function OperationDetail() {
           {/* Reunião Coordenação */}
           <TabsContent value="reuniao" className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label>Local</Label>
                 <Input
                   value={form.local || ""}
@@ -225,7 +225,7 @@ export function OperationDetail() {
                   placeholder="Local da reunião"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>GDH Saída UI</Label>
                 <Input
                   value={form.gdhSaidaUI || ""}
@@ -233,7 +233,7 @@ export function OperationDetail() {
                   placeholder="GDH Saída UI"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>GDH Entrada UI</Label>
                 <Input
                   value={form.gdhEntradaUI || ""}
@@ -241,7 +241,7 @@ export function OperationDetail() {
                   placeholder="GDH Entrada UI"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Cmdt Força Reunião</Label>
                 <Input
                   value={form.cmdtForcaReuniao || ""}
@@ -249,7 +249,7 @@ export function OperationDetail() {
                   placeholder="Comandante da força"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Indicativo Rádio</Label>
                 <Input
                   value={form.indicativoRadioReuniao || ""}
@@ -257,7 +257,7 @@ export function OperationDetail() {
                   placeholder="Indicativo rádio"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Efetivo Total</Label>
                 <Input
                   value={form.efetivTotalReuniao || ""}
@@ -265,7 +265,7 @@ export function OperationDetail() {
                   placeholder="Efetivo total"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Viaturas Caracterizadas</Label>
                 <Input
                   type="number"
@@ -273,7 +273,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("viaturasCaracterizadasReuniao", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Viaturas Descaracterizadas</Label>
                 <Input
                   type="number"
@@ -281,7 +281,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("viaturasDescaracterizadasReuniao", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Viaturas Especiais</Label>
                 <Input
                   type="number"
@@ -289,7 +289,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("viaturasEspeciaisReuniao", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>KM Totais</Label>
                 <Input
                   value={form.kmTotaisReuniao || ""}
@@ -298,8 +298,8 @@ export function OperationDetail() {
                 />
               </div>
             </div>
-            <div>
-              <Label>Observações Reunião</Label>
+            <div className="space-y-2">
+                <Label>Observações Reunião</Label>
               <Textarea
                 value={form.obsReuniao || ""}
                 onChange={(e) => handleInputChange("obsReuniao", e.target.value)}
@@ -312,7 +312,7 @@ export function OperationDetail() {
           {/* Dados Operação */}
           <TabsContent value="operacao" className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label>CTer Operação</Label>
                 <Input
                   value={form.cterOperacao || ""}
@@ -320,7 +320,7 @@ export function OperationDetail() {
                   placeholder="CTer da operação"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>DTer Operação</Label>
                 <Input
                   value={form.dterOperacao || ""}
@@ -328,7 +328,7 @@ export function OperationDetail() {
                   placeholder="DTer da operação"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>PTer/ZA Operação</Label>
                 <Input
                   value={form.pterZaOperacao || ""}
@@ -336,7 +336,7 @@ export function OperationDetail() {
                   placeholder="PTer/ZA da operação"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>GDH Início Operação</Label>
                 <Input
                   value={form.gdhInicioOperacao || ""}
@@ -344,7 +344,7 @@ export function OperationDetail() {
                   placeholder="GDH Início"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>GDH Chegada UI</Label>
                 <Input
                   value={form.gdhChegadaUIOperacao || ""}
@@ -352,7 +352,7 @@ export function OperationDetail() {
                   placeholder="GDH Chegada UI"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Cmdt Força Operação</Label>
                 <Input
                   value={form.cmdtForcaOperacao || ""}
@@ -360,7 +360,7 @@ export function OperationDetail() {
                   placeholder="Comandante da força"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Indicativo Rádio</Label>
                 <Input
                   value={form.indicativoRadioOperacao || ""}
@@ -368,7 +368,7 @@ export function OperationDetail() {
                   placeholder="Indicativo rádio"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Efetivo Total</Label>
                 <Input
                   value={form.efetivTotalOperacao || ""}
@@ -376,7 +376,7 @@ export function OperationDetail() {
                   placeholder="Efetivo total"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>ITP Tipo</Label>
                 <Input
                   value={form.itpTipo || ""}
@@ -384,7 +384,7 @@ export function OperationDetail() {
                   placeholder="Tipo de ITP"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>GDH Início ITP</Label>
                 <Input
                   value={form.gdhInicioITP || ""}
@@ -392,7 +392,7 @@ export function OperationDetail() {
                   placeholder="GDH Início ITP"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>GDH Fim ITP</Label>
                 <Input
                   value={form.gdhFimITP || ""}
@@ -400,7 +400,7 @@ export function OperationDetail() {
                   placeholder="GDH Fim ITP"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Força Titular Inquéritos</Label>
                 <Input
                   type="number"
@@ -410,7 +410,7 @@ export function OperationDetail() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label>Custos Portagens</Label>
                 <Textarea
                   value={form.custosPortagens || ""}
@@ -419,7 +419,7 @@ export function OperationDetail() {
                   rows={3}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Custos Combustíveis</Label>
                 <Textarea
                   value={form.custosCombustiveis || ""}
@@ -429,8 +429,8 @@ export function OperationDetail() {
                 />
               </div>
             </div>
-            <div>
-              <Label>Obs Visados</Label>
+            <div className="space-y-2">
+                <Label>Obs Visados</Label>
               <Textarea
                 value={form.obsVisados || ""}
                 onChange={(e) => handleInputChange("obsVisados", e.target.value)}
@@ -443,7 +443,7 @@ export function OperationDetail() {
           {/* Consumos */}
           <TabsContent value="consumos" className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Armas Auto 7.62</Label>
                 <Input
                   type="number"
@@ -451,7 +451,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesArmasAuto762", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Armas Auto 9mm</Label>
                 <Input
                   type="number"
@@ -459,7 +459,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesArmasAuto9mm", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Armas Auto 7.62mm</Label>
                 <Input
                   type="number"
@@ -467,7 +467,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesArmasAuto762mm", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Armas Auto 5.56mm</Label>
                 <Input
                   type="number"
@@ -475,7 +475,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesArmasAuto556mm", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Armas Auto 5.56</Label>
                 <Input
                   type="number"
@@ -483,7 +483,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesArmasAuto556", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Caçadeira Barraca</Label>
                 <Input
                   type="number"
@@ -491,7 +491,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesCacadeiraBarracha", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Caçadeira Chumbo</Label>
                 <Input
                   type="number"
@@ -499,7 +499,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesCacadeiraChumbo", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Caçadeira Beam Bag</Label>
                 <Input
                   type="number"
@@ -507,7 +507,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesCacadeiraBeamBag", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Caçadeira Zagalote</Label>
                 <Input
                   type="number"
@@ -515,7 +515,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesCacadeiraZagalote", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Caçadeira Zinco</Label>
                 <Input
                   type="number"
@@ -523,7 +523,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesCacadeiraZinco", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Munições Revolver ASP</Label>
                 <Input
                   type="number"
@@ -531,7 +531,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("municoesRevolverASP", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Taser Carga X26</Label>
                 <Input
                   type="number"
@@ -539,7 +539,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("taserCargaX26", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Taser Granada FlashBang 1 Estalo</Label>
                 <Input
                   type="number"
@@ -547,7 +547,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("taserGranadaFlashBang1Estalo", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Taser Granada FlashBang 1 Estalo 2 Bang</Label>
                 <Input
                   type="number"
@@ -555,7 +555,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("taserGranadaFlashBang1Estalo2Bang", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Taser Granada FlashBang 2 Estalos 2 Bangs</Label>
                 <Input
                   type="number"
@@ -563,7 +563,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("taserGranadaFlashBang2Estalos2Bangs", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Taser Granada FlashBang Múltiplos</Label>
                 <Input
                   type="number"
@@ -571,7 +571,7 @@ export function OperationDetail() {
                   onChange={(e) => handleInputChange("taserGranadaFlashBangMultiplos", parseInt(e.target.value))}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>Taser Algemas</Label>
                 <Input
                   value={form.taserAlgemas || ""}
@@ -580,8 +580,8 @@ export function OperationDetail() {
                 />
               </div>
             </div>
-            <div>
-              <Label>Observações Consumos</Label>
+            <div className="space-y-2">
+                <Label>Observações Consumos</Label>
               <Textarea
                 value={form.obsConsumos || ""}
                 onChange={(e) => handleInputChange("obsConsumos", e.target.value)}
@@ -593,8 +593,8 @@ export function OperationDetail() {
 
           {/* Observações */}
           <TabsContent value="observacoes" className="p-6 space-y-4">
-            <div>
-              <Label>Obs SEC Op</Label>
+            <div className="space-y-2">
+                <Label>Obs SEC Op</Label>
               <Textarea
                 value={form.obsSECOp || ""}
                 onChange={(e) => handleInputChange("obsSECOp", e.target.value)}
@@ -602,16 +602,16 @@ export function OperationDetail() {
                 rows={4}
               />
             </div>
-            <div>
-              <Label>Reg SEC Op</Label>
+            <div className="space-y-2">
+                <Label>Reg SEC Op</Label>
               <Input
                 value={form.regSECOp || ""}
                 onChange={(e) => handleInputChange("regSECOp", e.target.value)}
                 placeholder="Registo SEC Op"
               />
             </div>
-            <div>
-              <Label>Apontamentos/Notas</Label>
+            <div className="space-y-2">
+                <Label>Apontamentos/Notas</Label>
               <Textarea
                 value={form.apontamentosNotas || ""}
                 onChange={(e) => handleInputChange("apontamentosNotas", e.target.value)}
@@ -619,8 +619,8 @@ export function OperationDetail() {
                 rows={4}
               />
             </div>
-            <div>
-              <Label>Croquis</Label>
+            <div className="space-y-2">
+                <Label>Croquis</Label>
               <Textarea
                 value={form.croquis || ""}
                 onChange={(e) => handleInputChange("croquis", e.target.value)}

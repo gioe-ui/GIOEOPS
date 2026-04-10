@@ -825,7 +825,7 @@ export default function OperationForm() {
                 <h4 className="font-semibold mb-4">Munições Caçadeira</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>Barracha</Label>
+                    <Label>Borracha</Label>
                     <Input
                       type="number"
                       value={form.municoesCacadeiraBarracha}

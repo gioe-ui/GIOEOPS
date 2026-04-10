@@ -56,7 +56,7 @@ export default function AppLayout() {
                 className="border-white/60 text-white hover:bg-white/20 bg-transparent"
               >
                 <BarChart2 className="w-4 h-4 mr-1" />
-                {user?.role === "admin" ? "Dashboard Militar" : "Minhas Operações"}
+                {user?.role === "admin" ? "As Minhas Operações" : "Minhas Operações"}
               </Button>
             </Link>
             <Link href="/profile">
