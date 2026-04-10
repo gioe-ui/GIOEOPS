@@ -28,6 +28,22 @@ const NEOP_COLORS: Record<string, string> = {
   "4º NEOP": "#8b0000",
 };
 
+const getStatusColor = (evaluation: any): { color: string; label: string } => {
+  if (!evaluation.operationId) {
+    return { color: "#dc2626", label: "Sem informação" };
+  }
+  
+  if (!evaluation.operacaoPreenchida && !evaluation.consumosPreenchidos && !evaluation.observacoesPreenchidas) {
+    return { color: "#dc2626", label: "Não iniciada" };
+  }
+  
+  if (!evaluation.operacaoPreenchida || !evaluation.consumosPreenchidos || !evaluation.observacoesPreenchidas) {
+    return { color: "#eab308", label: "Parcialmente preenchida" };
+  }
+  
+  return { color: "#22c55e", label: "Completa" };
+};
+
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const [filterNeop, setFilterNeop] = useState("all");
@@ -224,7 +240,7 @@ export default function Dashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "#1a472a" }}>
-                {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "CTer", "Militar Atribuído", "Ação"].map((h) => (
+                {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "CTer", "Militar Atribuído", "Status", "Ação"].map((h) => (
                   <th key={h} className="text-white text-left px-4 py-3 font-semibold">
                     {h}
                   </th>
@@ -263,6 +279,19 @@ export default function Dashboard() {
                     {e.assignedUserRank && e.assignedUserName
                       ? `${e.assignedUserRank} ${e.assignedUserName}`
                       : "—"}
+                  </td>
+                  <td className="px-4 py-3">
+                    {e.operationId ? (
+                      <div className="flex items-center gap-2" title={getStatusColor(e).label}>
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: getStatusColor(e).color }}
+                        />
+                        <span className="text-xs text-gray-600">{getStatusColor(e).label}</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 flex gap-2">
                     {e.assignedUserId && e.assignedUserPhone && (

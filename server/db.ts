@@ -143,6 +143,9 @@ export async function getEvaluations(filters?: { neop?: string; avaliador?: stri
             assignedUserPhone: users.phoneNumber,
             scheduledDate: operations.scheduledDate,
             operationId: operations.id,
+            operacaoPreenchida: operations.operacaoPreenchida,
+            consumosPreenchidos: operations.consumosPreenchidos,
+            observacoesPreenchidas: operations.observacoesPreenchidas,
           })
           .from(evaluations)
           .leftJoin(operations, eq(evaluations.id, operations.evaluationId))
@@ -193,6 +196,9 @@ export async function getEvaluations(filters?: { neop?: string; avaliador?: stri
             assignedUserPhone: users.phoneNumber,
             scheduledDate: operations.scheduledDate,
             operationId: operations.id,
+            operacaoPreenchida: operations.operacaoPreenchida,
+            consumosPreenchidos: operations.consumosPreenchidos,
+            observacoesPreenchidas: operations.observacoesPreenchidas,
           })
           .from(evaluations)
           .leftJoin(operations, eq(evaluations.id, operations.evaluationId))
