@@ -226,26 +226,89 @@ export default function OperationForm() {
   
   const assignMutation = trpc.operations.assignToMilitar.useMutation({
     onSuccess: () => {
+      console.log("assignMutation onSuccess!");
       toast.success("Operação atribuída com sucesso!");
       setShowAssignModal(false);
       setSelectedMilitar("");
       setScheduledDate(new Date().toISOString().split("T")[0]);
       getOperationQuery.refetch();
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => {
+      console.error("assignMutation onError:", e);
+      toast.error(e.message);
+    },
   });
 
-  const handleAssign = () => {
-    if (!getOperationQuery.data || !selectedMilitar) {
+  const handleAssign = async () => {
+    console.log("=== handleAssign iniciado ===");
+    console.log("selectedMilitar:", selectedMilitar);
+    console.log("scheduledDate:", scheduledDate);
+    
+    if (!selectedMilitar) {
+      console.error("Erro: selectedMilitar eh vazio");
       toast.error("Selecione um militar");
       return;
     }
 
-    assignMutation.mutate({
-      operationId: getOperationQuery.data.id,
-      assignedUserId: parseInt(selectedMilitar),
-      scheduledDate,
-    });
+    const parsedUserId = parseInt(selectedMilitar);
+    if (isNaN(parsedUserId)) {
+      console.error("Erro: parsedUserId nao eh um numero valido");
+      toast.error("ID do militar invalido");
+      return;
+    }
+
+    // Se a operacao ja existe, atribuir diretamente
+    if (getOperationQuery.data) {
+      console.log("Operacao ja existe, atribuindo...");
+      assignMutation.mutate({
+        operationId: getOperationQuery.data.id,
+        assignedUserId: parsedUserId,
+        scheduledDate,
+      });
+      return;
+    }
+
+    // Se a operacao nao existe, guardar primeiro e depois atribuir
+    if (!evaluationId) {
+      toast.error("ID de avaliacao nao encontrado");
+      return;
+    }
+
+    console.log("Operacao nao existe, guardando primeiro...");
+    try {
+      await createOperationMutation.mutateAsync({
+        evaluationId: parseInt(evaluationId),
+        ...form,
+        excelSECOp: form.excelSECOp ? 1 : 0,
+      });
+      
+      console.log("Operacao criada");
+      toast.success("Operacao guardada com sucesso!");
+      
+      // Recarregar a operacao criada
+      const { data: operationData } = await getOperationQuery.refetch();
+      
+      if (operationData) {
+        console.log("Operacao recarregada:", operationData);
+        console.log("Chamando assignMutation com:", {
+          operationId: operationData.id,
+          assignedUserId: parsedUserId,
+          scheduledDate,
+        });
+        // Agora atribuir a operacao ao militar
+        assignMutation.mutate({
+          operationId: operationData.id,
+          assignedUserId: parsedUserId,
+          scheduledDate,
+        });
+        console.log("assignMutation chamada");
+      } else {
+        toast.error("Erro ao recarregar operacao criada");
+      }
+    } catch (error) {
+      console.error("Erro ao guardar operacao:", error);
+      toast.error("Erro ao guardar operacao");
+    }
   };
 
   const handlePrint = () => {
@@ -952,7 +1015,10 @@ export default function OperationForm() {
                 {listMilitaresQuery.isLoading ? (
                   <div className="p-2 text-sm text-gray-500">A carregar militares...</div>
                 ) : listMilitaresQuery.data && listMilitaresQuery.data.length > 0 ? (
-                  <Select value={selectedMilitar} onValueChange={setSelectedMilitar}>
+                  <Select value={selectedMilitar} onValueChange={(value) => {
+                    console.log("Militar selecionado:", value);
+                    setSelectedMilitar(value);
+                  }}>
                     <SelectTrigger id="militar-select">
                       <SelectValue placeholder="Escolha um militar" />
                     </SelectTrigger>
@@ -983,7 +1049,11 @@ export default function OperationForm() {
                 Cancelar
               </Button>
               <Button
-                onClick={handleAssign}
+                type="button"
+                onClick={() => {
+                  console.log("Botão Atribuir clicado!");
+                  handleAssign();
+                }}
                 disabled={assignMutation.isPending}
                 style={{ background: "#1a472a" }}
               >

@@ -363,3 +363,10 @@
 - [x] Adicionar rota /militar-dashboard no App.tsx
 - [x] Adicionar link para dashboard na navegação
 - [ ] Testar funcionalidade completa
+
+
+### Bugs e Melhorias - Atribuição e Notificações
+- [ ] Corrigir erro: operação não está sendo atribuída ao militar selecionado
+- [ ] Criar botão de notificação WhatsApp no dashboard do militar
+- [ ] Implementar notificação para solicitar preenchimento de dados em falta
+- [ ] Testar fluxo completo de atribuição e notificação
