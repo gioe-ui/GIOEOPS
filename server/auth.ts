@@ -18,6 +18,9 @@ const registerInput = z.object({
   email: emailValidator,
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   password: z.string().min(6, "Password deve ter pelo menos 6 caracteres"),
+  phoneNumber: z.string().min(9, "Número de telefone inválido"),
+  mecanographicNumber: z.string().regex(/^\d{7}$/, "Número mecanográfico deve ter 7 dígitos"),
+  rank: z.string().min(1, "Posto é obrigatório"),
 });
 
 const loginInput = z.object({
@@ -62,6 +65,9 @@ export const authRouter = router({
       loginMethod: "local",
       role: isAdmin ? "admin" : "user",
       approved,
+      phoneNumber: input.phoneNumber,
+      mecanographicNumber: input.mecanographicNumber,
+      rank: input.rank,
       lastSignedIn: new Date(),
     });
 

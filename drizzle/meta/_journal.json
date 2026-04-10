@@ -64,6 +64,20 @@
       "when": 1775658424541,
       "tag": "0008_outgoing_nextwave",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1775814765732,
+      "tag": "0009_low_hardball",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1775815173243,
+      "tag": "0010_jittery_amazoness",
+      "breakpoints": true
     }
   ]
 }

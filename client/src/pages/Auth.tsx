@@ -17,6 +17,9 @@ export default function Auth() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [mecanographicNumber, setMecanographicNumber] = useState("");
+  const [rank, setRank] = useState("");
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: () => {
@@ -39,7 +42,7 @@ export default function Auth() {
   });
 
   const handleRegister = () => {
-    if (!email || !name || !password || !confirmPassword) {
+    if (!email || !name || !password || !confirmPassword || !phoneNumber || !mecanographicNumber || !rank) {
       toast.error("Preencha todos os campos.");
       return;
     }
@@ -55,7 +58,11 @@ export default function Auth() {
       toast.error("Password deve ter pelo menos 6 caracteres.");
       return;
     }
-    registerMutation.mutate({ email, name, password });
+    if (!/^\d{7}$/.test(mecanographicNumber)) {
+      toast.error("Número mecanográfico deve ter 7 dígitos.");
+      return;
+    }
+    registerMutation.mutate({ email, name, password, phoneNumber, mecanographicNumber, rank });
   };
 
   const handleLogin = () => {
@@ -223,6 +230,56 @@ export default function Auth() {
                   onKeyDown={(e) => e.key === "Enter" && handleRegister()}
                   className="border-2 focus:border-[#1a472a]"
                 />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold text-gray-600 mb-1 block">
+                  Número de Telefone
+                </Label>
+                <Input
+                  type="tel"
+                  placeholder="Ex: 912345678"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="border-2 focus:border-[#1a472a]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold text-gray-600 mb-1 block">
+                  Número Mecanográfico
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="Ex: 2000057 (7 dígitos)"
+                  value={mecanographicNumber}
+                  onChange={(e) => setMecanographicNumber(e.target.value)}
+                  className="border-2 focus:border-[#1a472a]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold text-gray-600 mb-1 block">
+                  Posto
+                </Label>
+                <select
+                  value={rank}
+                  onChange={(e) => setRank(e.target.value)}
+                  className="w-full border-2 border-gray-300 rounded-md px-3 py-2 focus:border-[#1a472a] focus:outline-none"
+                >
+                  <option value="">Selecione um posto</option>
+                  <option value="Guarda">Guarda</option>
+                  <option value="Guarda-Principal">Guarda-Principal</option>
+                  <option value="Cabo">Cabo</option>
+                  <option value="Cabo-Chefe">Cabo-Chefe</option>
+                  <option value="Cabo-Mor">Cabo-Mor</option>
+                  <option value="2º Sargento">2º Sargento</option>
+                  <option value="1º Sargento">1º Sargento</option>
+                  <option value="Sargento-Ajudante">Sargento-Ajudante</option>
+                  <option value="Sargento-Chefe">Sargento-Chefe</option>
+                  <option value="Alferes">Alferes</option>
+                  <option value="Tenente">Tenente</option>
+                  <option value="Capitão">Capitão</option>
+                  <option value="Major">Major</option>
+                  <option value="Tenente Coronel">Tenente Coronel</option>
+                </select>
               </div>
               <Button
                 onClick={handleRegister}

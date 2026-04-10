@@ -288,3 +288,18 @@
 - [x] Analisar formato esperado do Excel (27 colunas com cabeçalhos específicos)
 - [x] Atualizar estrutura de exportação para corresponder exatamente ao ficheiro de referência
 - [x] Testar exportação com dados reais
+
+
+### Novas Funcionalidades - Sistema de Gestão de Operações Avançado
+- [x] Adicionar campos na tabela users: phoneNumber, mecanographicNumber, rank (dropdown)
+- [x] Atualizar formulário de registo com campos obrigatórios: telefone, mecanográfico, posto
+- [x] Adicionar campos NUIPC e Entidade Solicitadora na tabela evaluations
+- [ ] Criar página de perfil de utilizador com campo de posto editável
+- [ ] Adicionar campo NUIPC no formulário de avaliação (antes de POC E DESPACHO)
+- [ ] Adicionar campo "Entidade Solicitadora" com checkboxes (CO, CTer, PSP, PJ, Outra)
+- [ ] Implementar atribuição de operação a militar quando avaliação é 4º NEOP
+- [ ] Adicionar campo "Data Prevista da Operação" no separador "Dados Reunião Coordenação"
+- [ ] Implementar sistema de notificações WhatsApp manual com link pré-formatado
+- [ ] Agendar notificações automáticas de 2 em 2 dias após data da operação
+- [ ] Criar interface para enviar notificações manualmente aos militares
+- [ ] Testar fluxo completo de atribuição → notificação → preenchimento de relatório

@@ -17,6 +17,10 @@ export const users = mysqlTable("users", {
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   approved: tinyint("approved").default(0).notNull(),
+  // Novos campos de perfil
+  phoneNumber: varchar("phoneNumber", { length: 20 }),
+  mecanographicNumber: varchar("mecanographicNumber", { length: 10 }),
+  rank: varchar("rank", { length: 50 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -28,6 +32,9 @@ export type InsertUser = typeof users.$inferInsert;
 export const evaluations = mysqlTable("evaluations", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
+  // NUIPC e Entidade Solicitadora
+  nuipc: varchar("nuipc", { length: 50 }),
+  entidadeSolicitadora: varchar("entidadeSolicitadora", { length: 100 }),
   // POC e Despacho
   pocPosto: varchar("pocPosto", { length: 255 }),
   pocNome: varchar("pocNome", { length: 255 }),
