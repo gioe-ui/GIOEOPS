@@ -348,6 +348,13 @@
 - [x] Implementar modal de envio de notificação WhatsApp
 - [ ] Testar fluxo completo de notificação
 
+### Persistência de Dados nas Operações
+- [ ] Criar página de visualização/edição de operações (OperationDetail.tsx)
+- [ ] Implementar função para carregar dados de uma operação específica
+- [ ] Implementar função para atualizar dados de uma operação
+- [ ] Adicionar link no Dashboard para visualizar/editar operação
+- [ ] Testar fluxo: preencher → guardar → consultar → editar
+
 
 ### Bugs - Atribuição de Militar
 - [x] Corrigir erro: sistema continua a pedir para selecionar um militar mesmo após seleção

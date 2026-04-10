@@ -10,6 +10,7 @@ import OperationForm from "./pages/OperationForm";
 import PrintOperation from "./pages/PrintOperation";
 import Profile from "./pages/Profile";
 import MilitarDashboard from "./pages/MilitarDashboard";
+import { OperationDetail } from "./pages/OperationDetail";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/print/:id" component={PrintEvaluation} />
       <Route path="/operation/:evaluationId" component={OperationForm} />
       <Route path="/print-operation/:id" component={PrintOperation} />
+      <Route path="/operation-detail/:id" component={OperationDetail} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

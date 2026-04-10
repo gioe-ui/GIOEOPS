@@ -306,15 +306,28 @@ export default function Dashboard() {
                       </Button>
                     )}
                     {e.neop === "4º NEOP" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/operation/${e.id}`)}
-                        className="border-orange-600 text-orange-600 hover:bg-orange-50"
-                      >
-                        <FileText className="w-3 h-3 mr-1" />
-                        Operação
-                      </Button>
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/operation/${e.id}`)}
+                          className="border-orange-600 text-orange-600 hover:bg-orange-50"
+                        >
+                          <FileText className="w-3 h-3 mr-1" />
+                          Operação
+                        </Button>
+                        {e.operationId && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/operation-detail/${e.operationId}`)}
+                            className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                          >
+                            <FileText className="w-3 h-3 mr-1" />
+                            Editar
+                          </Button>
+                        )}
+                      </>
                     )}
                     <Button
                       variant="outline"
