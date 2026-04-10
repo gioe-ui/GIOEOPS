@@ -557,6 +557,31 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    listMilitarOperations: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return [];
+      try {
+        const militarOperations = await db.select({
+          id: operations.id,
+          operacaoNumero: operations.operacaoNumero,
+          dataOp: operations.dataOp,
+          scheduledDate: operations.scheduledDate,
+          operacaoPreenchida: operations.operacaoPreenchida,
+          consumosPreenchidos: operations.consumosPreenchidos,
+          observacoesPreenchidas: operations.observacoesPreenchidas,
+          flaggedForCompletion: operations.flaggedForCompletion,
+          flaggedAt: operations.flaggedAt,
+          preenchimentoSecOp: operations.preenchimentoSecOp,
+          cmdtOp: operations.cmdtOp,
+          efetivTotalOperacao: operations.efetivTotalOperacao,
+        }).from(operations).where(eq(operations.assignedUserId, ctx.user.id));
+        return militarOperations;
+      } catch (error) {
+        console.error("Erro ao listar operações do militar:", error);
+        return [];
+      }
+    }),
+
     flagIncompleteOperations: protectedProcedure
       .mutation(async () => {
         const count = await flagIncompleteOperations();

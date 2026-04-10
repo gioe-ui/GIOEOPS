@@ -353,3 +353,13 @@
 - [x] Corrigir erro: sistema continua a pedir para selecionar um militar mesmo após seleção
 - [x] Verificar lógica de validação no modal de atribuição
 - [x] Testar fluxo completo de atribuição e salvamento
+
+
+### Dashboard do Militar
+- [x] Criar procedure tRPC para listar operações atribuídas ao militar
+- [x] Criar página MilitarDashboard com tabela de operações
+- [x] Adicionar coluna de status de preenchimento (operação, consumos, observações)
+- [x] Adicionar botão para abrir e editar operação
+- [x] Adicionar rota /militar-dashboard no App.tsx
+- [x] Adicionar link para dashboard na navegação
+- [ ] Testar funcionalidade completa
