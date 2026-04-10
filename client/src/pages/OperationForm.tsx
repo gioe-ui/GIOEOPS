@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -223,6 +223,77 @@ export default function OperationForm() {
   );
 
   const listMilitaresQuery = trpc.operations.listMilitares.useQuery();
+  
+  // Carregar dados da operação quando disponível
+  useEffect(() => {
+    if (getOperationQuery.data) {
+      const data = getOperationQuery.data as any;
+      setForm((prev) => ({
+        ...prev,
+        refFiledoc: data.refFiledoc || "",
+        operacaoNumero: data.operacaoNumero || "",
+        preenchimentoSecOp: data.preenchimentoSecOp || "",
+        cmdtOp: data.cmdtOp || "",
+        dataOp: data.dataOp || "",
+        tipoEmpenho: data.tipoEmpenho || "",
+        missao: data.missao || "",
+        entidadeSolicitadora: data.entidadeSolicitadora || "",
+        local: data.local || "",
+        obsReuniao: data.obsReuniao || "",
+        gdhSaidaUI: data.gdhSaidaUI || "",
+        gdhEntradaUI: data.gdhEntradaUI || "",
+        cmdtForcaReuniao: data.cmdtForcaReuniao || "",
+        indicativoRadioReuniao: data.indicativoRadioReuniao || "",
+        efetivTotalReuniao: data.efetivTotalReuniao || "",
+        viaturasCaracterizadasReuniao: data.viaturasCaracterizadasReuniao || 0,
+        viaturasDescaracterizadasReuniao: data.viaturasDescaracterizadasReuniao || 0,
+        viaturasEspeciaisReuniao: data.viaturasEspeciaisReuniao || 0,
+        kmTotaisReuniao: data.kmTotaisReuniao || "",
+        cterOperacao: data.cterOperacao || "",
+        dterOperacao: data.dterOperacao || "",
+        pterZaOperacao: data.pterZaOperacao || "",
+        gdhInicioOperacao: data.gdhInicioOperacao || "",
+        gdhChegadaUIOperacao: data.gdhChegadaUIOperacao || "",
+        cmdtForcaOperacao: data.cmdtForcaOperacao || "",
+        indicativoRadioOperacao: data.indicativoRadioOperacao || "",
+        efetivTotalOperacao: data.efetivTotalOperacao || "",
+        viaturasCaracterizadasOperacao: data.viaturasCaracterizadasOperacao || 0,
+        viaturasDescaracterizadasOperacao: data.viaturasDescaracterizadasOperacao || 0,
+        viaturasEspeciaisOperacao: data.viaturasEspeciaisOperacao || 0,
+        kmTotaisOperacao: data.kmTotaisOperacao || "",
+        itpTipo: data.itpTipo || "",
+        gdhInicioITP: data.gdhInicioITP || "",
+        gdhFimITP: data.gdhFimITP || "",
+        forcaTitularInqueritos: data.forcaTitularInqueritos || 0,
+        custosPortagens: data.custosPortagens || "",
+        custosCombustiveis: data.custosCombustiveis || "",
+        obsVisados: data.obsVisados || "",
+        municoesArmasAuto762: data.municoesArmasAuto762 || 0,
+        municoesArmasAuto9mm: data.municoesArmasAuto9mm || 0,
+        municoesArmasAuto762mm: data.municoesArmasAuto762mm || 0,
+        municoesArmasAuto556mm: data.municoesArmasAuto556mm || 0,
+        municoesArmasAuto556: data.municoesArmasAuto556 || 0,
+        municoesCacadeiraBarracha: data.municoesCacadeiraBarracha || 0,
+        municoesCacadeiraChumbo: data.municoesCacadeiraChumbo || 0,
+        municoesCacadeiraBeamBag: data.municoesCacadeiraBeamBag || 0,
+        municoesCacadeiraZagalote: data.municoesCacadeiraZagalote || 0,
+        municoesCacadeiraZinco: data.municoesCacadeiraZinco || 0,
+        municoesRevolverASP: data.municoesRevolverASP || 0,
+        taserCargaX26: data.taserCargaX26 || 0,
+        taserGranadaFlashBang1Estalo: data.taserGranadaFlashBang1Estalo || 0,
+        taserGranadaFlashBang1Estalo2Bang: data.taserGranadaFlashBang1Estalo2Bang || 0,
+        taserGranadaFlashBang2Estalos2Bangs: data.taserGranadaFlashBang2Estalos2Bangs || 0,
+        taserGranadaFlashBangMultiplos: data.taserGranadaFlashBangMultiplos || 0,
+        taserAlgemas: data.taserAlgemas || "",
+        obsConsumos: data.obsConsumos || "",
+        obsSECOp: data.obsSECOp || "",
+        regSECOp: data.regSECOp || "",
+        excelSECOp: data.excelSECOp ? true : false,
+        apontamentosNotas: data.apontamentosNotas || "",
+        croquis: data.croquis || "",
+      }));
+    }
+  }, [getOperationQuery.data]);
   
   const assignMutation = trpc.operations.assignToMilitar.useMutation({
     onSuccess: () => {

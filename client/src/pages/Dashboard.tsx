@@ -53,6 +53,7 @@ export default function Dashboard() {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
   const [notificationSending, setNotificationSending] = useState(false);
+  const [selectedEvaluations, setSelectedEvaluations] = useState<Set<number>>(new Set());
   const utils = trpc.useUtils();
 
   const { data: evaluations, isLoading } = trpc.evaluations.list.useQuery({
@@ -89,6 +90,37 @@ export default function Dashboard() {
   const handleDelete = (id: number) => {
     if (confirm("Tem a certeza que deseja eliminar esta avaliação?")) {
       deleteMutation.mutate({ id });
+    }
+  };
+
+  const handleSelectEvaluation = (id: number) => {
+    const newSelected = new Set(selectedEvaluations);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedEvaluations(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && evaluations) {
+      setSelectedEvaluations(new Set(evaluations.map(e => e.id)));
+    } else {
+      setSelectedEvaluations(new Set());
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedEvaluations.size === 0) {
+      toast.error("Selecione pelo menos uma avaliação para eliminar");
+      return;
+    }
+    if (confirm(`Tem a certeza que deseja eliminar ${selectedEvaluations.size} avaliação(s)?`)) {
+      selectedEvaluations.forEach(id => {
+        deleteMutation.mutate({ id });
+      });
+      setSelectedEvaluations(new Set());
     }
   };
 
@@ -221,10 +253,22 @@ export default function Dashboard() {
               className="border-2 focus:border-[#1a472a]"
             />
           </div>
-          <Button onClick={applyFilter} style={{ background: "#1a472a" }}>
-            <Search className="w-4 h-4 mr-2" />
-            Pesquisar
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={applyFilter} style={{ background: "#1a472a" }}>
+              <Search className="w-4 h-4 mr-2" />
+              Pesquisar
+            </Button>
+            {selectedEvaluations.size > 0 && (
+              <Button
+                onClick={handleDeleteSelected}
+                variant="destructive"
+                disabled={deleteMutation.isPending}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Eliminar ({selectedEvaluations.size})
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -240,6 +284,13 @@ export default function Dashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "#1a472a" }}>
+                <th className="text-white text-left px-4 py-3 font-semibold w-8">
+                  <input
+                    type="checkbox"
+                    checked={selectedEvaluations.size > 0 && evaluations && selectedEvaluations.size === evaluations.length}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                  />
+                </th>
                 {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "CTer", "Militar Atribuído", "Status", "Ação"].map((h) => (
                   <th key={h} className="text-white text-left px-4 py-3 font-semibold">
                     {h}
@@ -255,6 +306,13 @@ export default function Dashboard() {
                     i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                   }`}
                 >
+                  <td className="px-4 py-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={selectedEvaluations.has(e.id)}
+                      onChange={() => handleSelectEvaluation(e.id)}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-gray-600">
                     {new Date(e.createdAt).toLocaleDateString("pt-PT")}
                   </td>
@@ -329,15 +387,7 @@ export default function Dashboard() {
                         )}
                       </>
                     )}
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(e.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="w-3 h-3 mr-1" />
-                      Eliminar
-                    </Button>
+                    {/* Checkbox removido - usar seleção em lote */}
                   </td>
                 </tr>
               ))}
