@@ -228,6 +228,8 @@ export default function OperationForm() {
     onSuccess: () => {
       toast.success("Operação atribuída com sucesso!");
       setShowAssignModal(false);
+      setSelectedMilitar("");
+      setScheduledDate(new Date().toISOString().split("T")[0]);
       getOperationQuery.refetch();
     },
     onError: (e) => toast.error(e.message),
@@ -947,18 +949,24 @@ export default function OperationForm() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="militar-select">Selecione o Militar</Label>
-                <Select value={selectedMilitar} onValueChange={setSelectedMilitar}>
-                  <SelectTrigger id="militar-select">
-                    <SelectValue placeholder="Escolha um militar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {listMilitaresQuery.data?.map((militar) => (
-                      <SelectItem key={militar.id} value={militar.id.toString()}>
-                        {militar.name} - {militar.rank}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {listMilitaresQuery.isLoading ? (
+                  <div className="p-2 text-sm text-gray-500">A carregar militares...</div>
+                ) : listMilitaresQuery.data && listMilitaresQuery.data.length > 0 ? (
+                  <Select value={selectedMilitar} onValueChange={setSelectedMilitar}>
+                    <SelectTrigger id="militar-select">
+                      <SelectValue placeholder="Escolha um militar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {listMilitaresQuery.data.map((militar) => (
+                        <SelectItem key={militar.id} value={militar.id.toString()}>
+                          {militar.name} - {militar.rank}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="p-2 text-sm text-red-500">Nenhum militar disponível. Verifique se existem utilizadores aprovados.</div>
+                )}
               </div>
               <div>
                 <Label htmlFor="scheduled-date">Data Prevista da Operação</Label>

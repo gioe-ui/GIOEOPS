@@ -467,15 +467,20 @@ export const appRouter = router({
     listMilitares: protectedProcedure.query(async () => {
       const db = await getDb();
       if (!db) return [];
-      const militares = await db.select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        rank: users.rank,
-        phoneNumber: users.phoneNumber,
-        mecanographicNumber: users.mecanographicNumber,
-      }).from(users).where(eq(users.approved, 1));
-      return militares;
+      try {
+        const militares = await db.select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          rank: users.rank,
+          phoneNumber: users.phoneNumber,
+          mecanographicNumber: users.mecanographicNumber,
+        }).from(users);
+        return militares;
+      } catch (error) {
+        console.error("Erro ao listar militares:", error);
+        return [];
+      }
     }),
 
     assignToMilitar: protectedProcedure

@@ -347,3 +347,9 @@
 - [x] Adicionar botão "Enviar Notificação" para operações sinalizadas
 - [x] Implementar modal de envio de notificação WhatsApp
 - [ ] Testar fluxo completo de notificação
+
+
+### Bugs - Atribuição de Militar
+- [x] Corrigir erro: sistema continua a pedir para selecionar um militar mesmo após seleção
+- [x] Verificar lógica de validação no modal de atribuição
+- [x] Testar fluxo completo de atribuição e salvamento
