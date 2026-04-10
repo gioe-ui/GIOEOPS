@@ -349,8 +349,18 @@ export async function getNeop4ByCter(startDate?: Date, endDate?: Date) {
 export async function createOperation(data: InsertOperation) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const result = await db.insert(operations).values(data);
-  return result;
+  const result = await db.insert(operations).values(data) as any;
+  // Retornar a operação criada
+  let insertedId = null;
+  if (result.insertId) {
+    insertedId = Number(result.insertId);
+  } else if (result[0]?.insertId) {
+    insertedId = Number(result[0].insertId);
+  }
+  if (insertedId) {
+    return await getOperationById(insertedId);
+  }
+  return null;
 }
 
 export async function getOperationByEvaluationId(evaluationId: number) {

@@ -364,6 +364,9 @@ export const appRouter = router({
         excelSECOp: z.number().optional(),
         apontamentosNotas: z.string().optional(),
         croquis: z.string().optional(),
+        operacaoPreenchida: z.number().optional(),
+        consumosPreenchidos: z.number().optional(),
+        observacoesPreenchidas: z.number().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const { evaluationId, ...rest } = input;
@@ -451,6 +454,9 @@ export const appRouter = router({
         excelSECOp: z.number().optional(),
         apontamentosNotas: z.string().optional(),
         croquis: z.string().optional(),
+        operacaoPreenchida: z.number().optional(),
+        consumosPreenchidos: z.number().optional(),
+        observacoesPreenchidas: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
         const { id, ...data } = input;

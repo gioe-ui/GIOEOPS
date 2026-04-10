@@ -180,6 +180,7 @@ export default function OperationForm() {
   });
 
   const createOperationMutation = trpc.operations.create.useMutation();
+  const updateOperationMutation = trpc.operations.update.useMutation();
 
   const handleInputChange = useCallback((field: keyof FormState, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -193,12 +194,41 @@ export default function OperationForm() {
 
     setIsSaving(true);
     try {
-      await createOperationMutation.mutateAsync({
-        evaluationId: parseInt(evaluationId),
-        ...form,
-        excelSECOp: form.excelSECOp ? 1 : 0,
-      });
-      toast.success("Registo de operação guardado com sucesso!");
+      // Calcular status de preenchimento
+      const hasOperacaoData = form.cterOperacao || form.dterOperacao || form.pterZaOperacao || form.gdhInicioOperacao;
+      const hasConsumos = form.municoesArmasAuto762 > 0 || form.municoesArmasAuto9mm > 0 || form.taserCargaX26 > 0;
+      const hasObservacoes = form.obsSECOp || form.apontamentosNotas;
+      
+      const operacaoPreenchida = hasOperacaoData ? 1 : 0;
+      const consumosPreenchidos = hasConsumos ? 1 : 0;
+      const observacoesPreenchidas = hasObservacoes ? 1 : 0;
+      
+      // Se a operação já existe, atualizar
+      if (getOperationQuery.data?.id) {
+        await updateOperationMutation.mutateAsync({
+          id: getOperationQuery.data.id,
+          ...form,
+          excelSECOp: form.excelSECOp ? 1 : 0,
+          operacaoPreenchida,
+          consumosPreenchidos,
+          observacoesPreenchidas,
+        });
+        toast.success("Registo de operação atualizado com sucesso!");
+      } else {
+        // Se não existe, criar
+        await createOperationMutation.mutateAsync({
+          evaluationId: parseInt(evaluationId),
+          ...form,
+          excelSECOp: form.excelSECOp ? 1 : 0,
+          operacaoPreenchida,
+          consumosPreenchidos,
+          observacoesPreenchidas,
+        });
+        toast.success("Registo de operação guardado com sucesso!");
+      }
+      
+      // Recarregar dados
+      await getOperationQuery.refetch();
       navigate("/");
     } catch (error) {
       toast.error("Erro ao guardar registo de operação");
