@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, like, lte, inArray, or } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, inArray, or, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation, notifications, Notification } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -100,11 +100,96 @@ export async function getEvaluations(filters?: { neop?: string; avaliador?: stri
   const rows =
     conditions.length > 0
       ? await db
-          .select()
+          .select({
+            id: evaluations.id,
+            userId: evaluations.userId,
+            nuipc: evaluations.nuipc,
+            entidadeSolicitadora: evaluations.entidadeSolicitadora,
+            pocPosto: evaluations.pocPosto,
+            pocNome: evaluations.pocNome,
+            pocContacto: evaluations.pocContacto,
+            despacho: evaluations.despacho,
+            mandadoDetencao: evaluations.mandadoDetencao,
+            mandadoBusca: evaluations.mandadoBusca,
+            quantidadeSuspeitos: evaluations.quantidadeSuspeitos,
+            modalidadeIsolado: evaluations.modalidadeIsolado,
+            modalidadeAssociacao: evaluations.modalidadeAssociacao,
+            tipoCriminal: evaluations.tipoCriminal,
+            antecedentesContraPessoas: evaluations.antecedentesContraPessoas,
+            antecedentesContraPatrimonio: evaluations.antecedentesContraPatrimonio,
+            antecedentesOutros: evaluations.antecedentesOutros,
+            antecedentesFSS: evaluations.antecedentesFSS,
+            posseArma: evaluations.posseArma,
+            usoArma: evaluations.usoArma,
+            tipologiaApartamento: evaluations.tipologiaApartamento,
+            tipologiaMoradia: evaluations.tipologiaMoradia,
+            tipologiaOutro: evaluations.tipologiaOutro,
+            contextoIsolado: evaluations.contextoIsolado,
+            contextoBairroSocial: evaluations.contextoBairroSocial,
+            contextoMeioUrbano: evaluations.contextoMeioUrbano,
+            contextoMeioRural: evaluations.contextoMeioRural,
+            segurancaCaes: evaluations.segurancaCaes,
+            segurancaPortaBlindada: evaluations.segurancaPortaBlindada,
+            segurancaOutrasMedidas: evaluations.segurancaOutrasMedidas,
+            avaliador: evaluations.avaliador,
+            dataAvaliacao: evaluations.dataAvaliacao,
+            parecer: evaluations.parecer,
+            pontuacao: evaluations.pontuacao,
+            neop: evaluations.neop,
+            createdAt: evaluations.createdAt,
+            assignedUserName: users.name,
+            assignedUserRank: users.rank,
+          })
           .from(evaluations)
+          .leftJoin(operations, eq(evaluations.id, operations.evaluationId))
+          .leftJoin(users, eq(operations.assignedUserId, users.id))
           .where(and(...conditions))
           .orderBy(desc(evaluations.createdAt))
-      : await db.select().from(evaluations).orderBy(desc(evaluations.createdAt));
+      : await db
+          .select({
+            id: evaluations.id,
+            userId: evaluations.userId,
+            nuipc: evaluations.nuipc,
+            entidadeSolicitadora: evaluations.entidadeSolicitadora,
+            pocPosto: evaluations.pocPosto,
+            pocNome: evaluations.pocNome,
+            pocContacto: evaluations.pocContacto,
+            despacho: evaluations.despacho,
+            mandadoDetencao: evaluations.mandadoDetencao,
+            mandadoBusca: evaluations.mandadoBusca,
+            quantidadeSuspeitos: evaluations.quantidadeSuspeitos,
+            modalidadeIsolado: evaluations.modalidadeIsolado,
+            modalidadeAssociacao: evaluations.modalidadeAssociacao,
+            tipoCriminal: evaluations.tipoCriminal,
+            antecedentesContraPessoas: evaluations.antecedentesContraPessoas,
+            antecedentesContraPatrimonio: evaluations.antecedentesContraPatrimonio,
+            antecedentesOutros: evaluations.antecedentesOutros,
+            antecedentesFSS: evaluations.antecedentesFSS,
+            posseArma: evaluations.posseArma,
+            usoArma: evaluations.usoArma,
+            tipologiaApartamento: evaluations.tipologiaApartamento,
+            tipologiaMoradia: evaluations.tipologiaMoradia,
+            tipologiaOutro: evaluations.tipologiaOutro,
+            contextoIsolado: evaluations.contextoIsolado,
+            contextoBairroSocial: evaluations.contextoBairroSocial,
+            contextoMeioUrbano: evaluations.contextoMeioUrbano,
+            contextoMeioRural: evaluations.contextoMeioRural,
+            segurancaCaes: evaluations.segurancaCaes,
+            segurancaPortaBlindada: evaluations.segurancaPortaBlindada,
+            segurancaOutrasMedidas: evaluations.segurancaOutrasMedidas,
+            avaliador: evaluations.avaliador,
+            dataAvaliacao: evaluations.dataAvaliacao,
+            parecer: evaluations.parecer,
+            pontuacao: evaluations.pontuacao,
+            neop: evaluations.neop,
+            createdAt: evaluations.createdAt,
+            assignedUserName: users.name,
+            assignedUserRank: users.rank,
+          })
+          .from(evaluations)
+          .leftJoin(operations, eq(evaluations.id, operations.evaluationId))
+          .leftJoin(users, eq(operations.assignedUserId, users.id))
+          .orderBy(desc(evaluations.createdAt));
 
   return rows;
 }
@@ -366,15 +451,16 @@ export async function flagIncompleteOperations(): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
   
-  const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-  
+  // Sinalizar operacoes que tem militar atribuido mas ainda nao foram preenchidas
   const incompleteOps = await db.select()
     .from(operations)
     .where(
       and(
-        eq(operations.assignedUserId, operations.assignedUserId),
-        lte(operations.scheduledDate, twoDaysAgo.toISOString().split('T')[0]),
+        // Tem militar atribuido
+        isNotNull(operations.assignedUserId),
+        // Ainda nao foi sinalizada
         eq(operations.flaggedForCompletion, 0),
+        // Pelo menos um campo nao foi preenchido
         or(
           eq(operations.operacaoPreenchida, 0),
           eq(operations.consumosPreenchidos, 0),

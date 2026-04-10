@@ -49,18 +49,16 @@ export default function AppLayout() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {user?.role !== "admin" && (
-              <Link href="/militar-dashboard">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-white/60 text-white hover:bg-white/20 bg-transparent"
-                >
-                  <BarChart2 className="w-4 h-4 mr-1" />
-                  Minhas Operações
-                </Button>
-              </Link>
-            )}
+            <Link href="/militar-dashboard">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/60 text-white hover:bg-white/20 bg-transparent"
+              >
+                <BarChart2 className="w-4 h-4 mr-1" />
+                {user?.role === "admin" ? "Dashboard Militar" : "Minhas Operações"}
+              </Button>
+            </Link>
             <Link href="/profile">
               <Button
                 variant="outline"

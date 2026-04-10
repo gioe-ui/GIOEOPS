@@ -171,7 +171,7 @@ export default function Dashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "#1a472a" }}>
-                {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "CTer", "Ação"].map((h) => (
+                {["Data", "POC", "Pontuação", "NEOP", "Avaliador", "CTer", "Militar Atribuído", "Ação"].map((h) => (
                   <th key={h} className="text-white text-left px-4 py-3 font-semibold">
                     {h}
                   </th>
@@ -206,6 +206,11 @@ export default function Dashboard() {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{e.avaliador || "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{extractCter(e.parecer)}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {e.assignedUserRank && e.assignedUserName
+                      ? `${e.assignedUserRank} ${e.assignedUserName}`
+                      : "—"}
+                  </td>
                   <td className="px-4 py-3 flex gap-2">
                     {e.neop === "4º NEOP" && (
                       <Button
