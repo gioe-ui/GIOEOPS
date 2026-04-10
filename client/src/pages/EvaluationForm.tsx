@@ -34,7 +34,7 @@ const USO_SCORES: Record<string, number> = { haRegisto: 10, naoHaRegisto: 3 };
 const QTD_SCORES: Record<string, number> = { "1": 1, "2": 2, "3": 4, "4+": 6 };
 
 type FormState = {
-  nuipc: string; entidadeSolicitadora: string;
+  nuipc: string; entidadeSolicitadora: string; refFiledoc: string; email: string; ordemVerbal: string;
   pocPosto: string; pocNome: string; pocContacto: string; despacho: string; cterRequerente: string; // Armazenado no parecer
   mandadoDetencao: boolean; mandadoBusca: boolean;
   quantidadeSuspeitos: string;
@@ -50,7 +50,7 @@ type FormState = {
 };
 
 const DEFAULT: FormState = {
-  nuipc: "", entidadeSolicitadora: "",
+  nuipc: "", entidadeSolicitadora: "", refFiledoc: "", email: "", ordemVerbal: "",
   pocPosto: "", pocNome: "", pocContacto: "", despacho: "", cterRequerente: "",
   mandadoDetencao: false, mandadoBusca: false, quantidadeSuspeitos: "1",
   modalidadeIsolado: false, modalidadeAssociacao: false, tipoCriminal: "outro",
@@ -215,6 +215,20 @@ export default function EvaluationForm() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Ref. Filedoc</Label>
+            <Input placeholder="Referência do Filedoc" value={form.refFiledoc} onChange={(e) => set("refFiledoc", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">E-mail</Label>
+            <Input placeholder="E-mail" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Ordem Verbal</Label>
+            <Input placeholder="Ordem Verbal" value={form.ordemVerbal} onChange={(e) => set("ordemVerbal", e.target.value)} className="border-2 focus:border-[#1a472a]" />
           </div>
         </div>
       </Section>
@@ -481,6 +495,9 @@ export default function EvaluationForm() {
               onClick={() => createMutation.mutate({
                 nuipc: form.nuipc,
                 entidadeSolicitadora: form.entidadeSolicitadora,
+                refFiledoc: form.refFiledoc,
+                email: form.email,
+                ordemVerbal: form.ordemVerbal,
                 pocPosto: form.pocPosto,
                 pocNome: form.pocNome,
                 pocContacto: form.pocContacto,

@@ -35,6 +35,9 @@ export const evaluations = mysqlTable("evaluations", {
   // NUIPC e Entidade Solicitadora
   nuipc: varchar("nuipc", { length: 50 }),
   entidadeSolicitadora: varchar("entidadeSolicitadora", { length: 100 }),
+  refFiledoc: varchar("refFiledoc", { length: 255 }),
+  email: varchar("email", { length: 320 }),
+  ordemVerbal: varchar("ordemVerbal", { length: 255 }),
   // POC e Despacho
   pocPosto: varchar("pocPosto", { length: 255 }),
   pocNome: varchar("pocNome", { length: 255 }),

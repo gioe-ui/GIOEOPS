@@ -135,6 +135,9 @@ function calcScore(d: {
 const EvaluationInput = z.object({
   nuipc: z.string().optional(),
   entidadeSolicitadora: z.string().optional(),
+  refFiledoc: z.string().optional(),
+  email: z.string().optional(),
+  ordemVerbal: z.string().optional(),
   pocPosto: z.string().optional(),
   pocNome: z.string().optional(),
   pocContacto: z.string().optional(),
