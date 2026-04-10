@@ -34,6 +34,7 @@ const USO_SCORES: Record<string, number> = { haRegisto: 10, naoHaRegisto: 3 };
 const QTD_SCORES: Record<string, number> = { "1": 1, "2": 2, "3": 4, "4+": 6 };
 
 type FormState = {
+  nuipc: string; entidadeSolicitadora: string;
   pocPosto: string; pocNome: string; pocContacto: string; despacho: string; cterRequerente: string; // Armazenado no parecer
   mandadoDetencao: boolean; mandadoBusca: boolean;
   quantidadeSuspeitos: string;
@@ -49,6 +50,7 @@ type FormState = {
 };
 
 const DEFAULT: FormState = {
+  nuipc: "", entidadeSolicitadora: "",
   pocPosto: "", pocNome: "", pocContacto: "", despacho: "", cterRequerente: "",
   mandadoDetencao: false, mandadoBusca: false, quantidadeSuspeitos: "1",
   modalidadeIsolado: false, modalidadeAssociacao: false, tipoCriminal: "outro",
@@ -190,6 +192,32 @@ export default function EvaluationForm() {
           <div className="text-sm" style={{ color: "#1a472a" }}>Grupo de Intervenção de Operações Especiais</div>
           <div className="text-xs mt-2" style={{ color: "#666" }}>Avaliação de Pedido de Apoio</div>
         </div>
+
+        {/* NUIPC e Entidade Solicitadora */}
+      <Section>
+        <SectionTitle icon={<Crosshair className="w-4 h-4" />} title="Identificação e Entidade Solicitadora" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">NUIPC</Label>
+            <Input placeholder="Número de identificação" value={form.nuipc} onChange={(e) => set("nuipc", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">Entidade Solicitadora</Label>
+            <div className="space-y-2">
+              {["CO", "CTer", "PSP", "PJ", "Outra"].map((entity) => (
+                <div key={entity} className="flex items-center">
+                  <Checkbox
+                    id={`entity-${entity}`}
+                    checked={form.entidadeSolicitadora === entity}
+                    onCheckedChange={() => set("entidadeSolicitadora", form.entidadeSolicitadora === entity ? "" : entity)}
+                  />
+                  <label htmlFor={`entity-${entity}`} className="ml-2 text-sm cursor-pointer">{entity}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Section>
 
         {/* POC e Despacho */}
       <Section>
@@ -451,6 +479,8 @@ export default function EvaluationForm() {
             <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancelar</Button>
             <Button
               onClick={() => createMutation.mutate({
+                nuipc: form.nuipc,
+                entidadeSolicitadora: form.entidadeSolicitadora,
                 pocPosto: form.pocPosto,
                 pocNome: form.pocNome,
                 pocContacto: form.pocContacto,

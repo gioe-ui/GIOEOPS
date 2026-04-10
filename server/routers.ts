@@ -125,6 +125,8 @@ function calcScore(d: {
 
 // ─── Zod schemas ──────────────────────────────────────────────────────────────
 const EvaluationInput = z.object({
+  nuipc: z.string().optional(),
+  entidadeSolicitadora: z.string().optional(),
   pocPosto: z.string().optional(),
   pocNome: z.string().optional(),
   pocContacto: z.string().optional(),

@@ -294,9 +294,9 @@
 - [x] Adicionar campos na tabela users: phoneNumber, mecanographicNumber, rank (dropdown)
 - [x] Atualizar formulário de registo com campos obrigatórios: telefone, mecanográfico, posto
 - [x] Adicionar campos NUIPC e Entidade Solicitadora na tabela evaluations
+- [x] Adicionar campo NUIPC no formulário de avaliação (antes de POC E DESPACHO)
+- [x] Adicionar campo "Entidade Solicitadora" com checkboxes (CO, CTer, PSP, PJ, Outra)
 - [ ] Criar página de perfil de utilizador com campo de posto editável
-- [ ] Adicionar campo NUIPC no formulário de avaliação (antes de POC E DESPACHO)
-- [ ] Adicionar campo "Entidade Solicitadora" com checkboxes (CO, CTer, PSP, PJ, Outra)
 - [ ] Implementar atribuição de operação a militar quando avaliação é 4º NEOP
 - [ ] Adicionar campo "Data Prevista da Operação" no separador "Dados Reunião Coordenação"
 - [ ] Implementar sistema de notificações WhatsApp manual com link pré-formatado
