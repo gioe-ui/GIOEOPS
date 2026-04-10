@@ -37,9 +37,22 @@ export function OperationDetail() {
     try {
       setIsSaving(true);
       if (!id) throw new Error("Operation ID is required");
+      
+      // Calcular status de preenchimento
+      const hasOperacaoData = form.cterOperacao || form.dterOperacao || form.pterZaOperacao || form.gdhInicioOperacao;
+      const hasConsumos = form.municoesArmasAuto762 > 0 || form.municoesArmasAuto9mm > 0 || form.taserCargaX26 > 0;
+      const hasObservacoes = form.obsSECOp || form.apontamentosNotas;
+      
+      const operacaoPreenchida = hasOperacaoData ? 1 : 0;
+      const consumosPreenchidos = hasConsumos ? 1 : 0;
+      const observacoesPreenchidas = hasObservacoes ? 1 : 0;
+      
       await updateMutation.mutateAsync({
         id: parseInt(id),
         ...form,
+        operacaoPreenchida,
+        consumosPreenchidos,
+        observacoesPreenchidas,
       });
       toast.success("Operação guardada com sucesso!");
     } catch (error) {
