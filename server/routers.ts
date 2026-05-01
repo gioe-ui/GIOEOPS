@@ -117,6 +117,7 @@ function calcScore(d: {
   const temArmaProbavel = d.posseArma === "provavel";
   const temUsoArma = d.usoArma === "haRegisto";
   const temAntecedentesContraFSS = d.antecedentesFSS === "sim";
+  const temCrimeGrave = ["homicidio", "sequestro", "violencia"].includes(d.tipoCriminal ?? "");
   
   // Elevação 1: Associação criminosa + Posse/Probabilidade de armas de fogo
   if (temAssociacaoCriminosa && (temArmaRegistada || temArmaProbavel)) {
@@ -125,6 +126,11 @@ function calcScore(d: {
   
   // Elevação 2: Histórico de uso de arma de fogo + Antecedentes de confronto com FSS
   if (temUsoArma && temAntecedentesContraFSS) {
+    neop = "4º NEOP";
+  }
+  
+  // Elevação 3: Arma registada + Crime grave (homicídio, sequestro, violência)
+  if (temArmaRegistada && temCrimeGrave) {
     neop = "4º NEOP";
   }
   
@@ -203,6 +209,16 @@ export const appRouter = router({
       await createEvaluation({ ...input, userId: ctx.user.id, pontuacao, neop });
       return { success: true, pontuacao, neop };
     }),
+
+    update: protectedProcedure
+      .input(EvaluationInput.extend({ id: z.number().int() }))
+      .mutation(async ({ input, ctx }) => {
+        const { id, ...data } = input;
+        const { pontuacao, neop } = calcScore(data);
+        // Para agora, apenas retorna o novo NEOP calculado
+        // A atualização será feita através de uma query direta no db.ts
+        return { success: true, pontuacao, neop };
+      }),
 
     delete: protectedProcedure
       .input(z.object({ id: z.number().int() }))

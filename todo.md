@@ -388,3 +388,10 @@
 - [ ] Filtrar operações por utilizador para utilizadores não-admin
 - [ ] Redirecionar para Dashboard após login (em vez de Home)
 - [ ] Corrigir persistência de dados nos formulários de operação (dados devem aparecer nos separadores)
+
+
+## Sprint 3 - Correção de Bugs Críticos
+
+- [ ] Corrigir lógica de cálculo de NEOP para armas de fogo com uso efetivo em situações graves (violência grave, sequestro) - deveria ser 4º NEOP, não 3º
+- [ ] Implementar recalculo dinâmico de avaliações quando campos são alterados (atualmente não recalcula após primeira avaliação)
+- [x] Adicionar campo de NEOP manual no formulário de avaliação (permitir sobrescrever NEOP calculado)

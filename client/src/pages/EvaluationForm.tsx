@@ -47,6 +47,7 @@ type FormState = {
   contextoIsolado: boolean; contextoBairroSocial: boolean; contextoMeioUrbano: boolean; contextoMeioRural: boolean;
   segurancaCaes: boolean; segurancaPortaBlindada: boolean; segurancaOutrasMedidas: boolean;
   avaliador: string; dataAvaliacao: string; parecer: string;
+  neopManual: string; // Campo para sobrescrever NEOP calculado
 };
 
 const DEFAULT: FormState = {
@@ -60,6 +61,7 @@ const DEFAULT: FormState = {
   contextoIsolado: false, contextoBairroSocial: false, contextoMeioUrbano: false, contextoMeioRural: false,
   segurancaCaes: false, segurancaPortaBlindada: false, segurancaOutrasMedidas: false,
   avaliador: "", dataAvaliacao: new Date().toISOString().split("T")[0], parecer: "",
+  neopManual: "",
 };
 
 function calcScore(f: FormState): { pontuacao: number; neop: string; complexidade: string; descricao: string; neopColor: string } {
@@ -93,6 +95,7 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   const temUsoArma = f.usoArma === "haRegisto";
   const temAntecedentesContraPessoas = f.antecedentesContraPessoas;
   const temAntecedentesContraFSS = f.antecedentesFSS === "sim";
+  const temCrimeGrave = ["homicidio", "sequestro", "violencia"].includes(f.tipoCriminal);
   
   // Elevação 1: Associação criminosa + Posse/Probabilidade de armas de fogo
   if (temAssociacaoCriminosa && (temArmaRegistada || temArmaProbavel)) {
@@ -102,6 +105,16 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   // Elevação 2: Histórico de uso de arma de fogo + Antecedentes de confronto com FSS
   if (temUsoArma && temAntecedentesContraFSS) {
     neop = "4º NEOP";
+  }
+  
+  // Elevação 3: Arma registada + Crime grave (homicídio, sequestro, violência)
+  if (temArmaRegistada && temCrimeGrave) {
+    neop = "4º NEOP";
+  }
+  
+  // Sobrescrever com NEOP manual se fornecido
+  if (f.neopManual && ["2º NEOP", "3º NEOP", "4º NEOP"].includes(f.neopManual)) {
+    neop = f.neopManual;
   }
   
   // Complexidade e cores
@@ -415,7 +428,7 @@ export default function EvaluationForm() {
       {/* Avaliação */}
       <Section>
         <SectionTitle icon={<ClipboardList className="w-4 h-4" />} title="Avaliação" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <Label className="text-sm font-semibold text-gray-600 mb-1 block">Avaliador (Posto/Nome)</Label>
             <Input placeholder="Posto e nome do avaliador" value={form.avaliador} onChange={(e) => set("avaliador", e.target.value)} className="border-2 focus:border-[#1a472a]" />
@@ -423,6 +436,20 @@ export default function EvaluationForm() {
           <div>
             <Label className="text-sm font-semibold text-gray-600 mb-1 block">Data</Label>
             <Input type="date" value={form.dataAvaliacao} onChange={(e) => set("dataAvaliacao", e.target.value)} className="border-2 focus:border-[#1a472a]" />
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-gray-600 mb-1 block">NEOP Manual (Sobrescrever)</Label>
+            <Select value={form.neopManual} onValueChange={(v) => set("neopManual", v)}>
+              <SelectTrigger className="border-2 focus:border-[#1a472a]">
+                <SelectValue placeholder="Usar NEOP calculado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Usar NEOP calculado</SelectItem>
+                <SelectItem value="2º NEOP">2º NEOP</SelectItem>
+                <SelectItem value="3º NEOP">3º NEOP</SelectItem>
+                <SelectItem value="4º NEOP">4º NEOP</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div>
