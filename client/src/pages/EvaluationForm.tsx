@@ -193,19 +193,60 @@ export default function EvaluationForm() {
 
 
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = () => {
     const element = document.getElementById("form-container");
-    if (!element) return;
+    if (!element) {
+      toast.error("Elemento do formulário não encontrado");
+      return;
+    }
     try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      const opt: any = {
-        margin: 10,
-        filename: `avaliacao-${form.nuipc || "sem-nuipc"}.pdf`,
-        image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { orientation: "portrait", unit: "mm", format: "a4" },
-      };
-      html2pdf().set(opt).from(element).save();
+      // Criar uma nova janela para impressão
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        toast.error("Não foi possível abrir a janela de impressão");
+        return;
+      }
+      
+      // Copiar o HTML do formulário
+      const html = element.innerHTML;
+      const styles = Array.from(document.styleSheets)
+        .map(sheet => {
+          try {
+            return Array.from(sheet.cssRules)
+              .map(rule => rule.cssText)
+              .join("\n");
+          } catch {
+            return "";
+          }
+        })
+        .join("\n");
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Avaliação - ${form.nuipc || "sem-nuipc"}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            ${styles}
+            @media print {
+              body { margin: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          ${html}
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      // Aguardar o carregamento e depois imprimir
+      setTimeout(() => {
+        printWindow.print();
+        toast.success("Janela de impressão aberta!");
+      }, 500);
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
       toast.error("Erro ao gerar PDF");
