@@ -112,6 +112,11 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
     neop = "4º NEOP";
   }
   
+  // Elevação 4: Arma provável + Uso com registo
+  if (temArmaProbavel && temUsoArma) {
+    neop = "4º NEOP";
+  }
+  
   // Sobrescrever com NEOP manual se fornecido
   if (f.neopManual && ["2º NEOP", "3º NEOP", "4º NEOP"].includes(f.neopManual)) {
     neop = f.neopManual;

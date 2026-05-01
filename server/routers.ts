@@ -134,6 +134,11 @@ function calcScore(d: {
     neop = "4º NEOP";
   }
   
+  // Elevação 4: Arma provável + Uso com registo
+  if (temArmaProbavel && temUsoArma) {
+    neop = "4º NEOP";
+  }
+  
   return { pontuacao, neop };
 }
 
