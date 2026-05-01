@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, ArrowLeft, Save } from "lucide-react";
+import { Loader2, ArrowLeft, Save, FileDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 
@@ -67,6 +67,36 @@ export function OperationDetail() {
     window.history.back();
   };
 
+  const handleGeneratePDF = async () => {
+    try {
+      const printElement = document.getElementById("print-operation-content");
+      if (!printElement) {
+        toast.error("Nenhum registo de operação encontrado.");
+        return;
+      }
+
+      const html2pdf = (await import("html2pdf.js")).default;
+      const element = printElement.cloneNode(true) as HTMLElement;
+      
+      // Remover elementos não desejados
+      element.querySelectorAll("button, [style*='display: none']").forEach(el => el.remove());
+      
+      const opt = {
+        margin: 10,
+        filename: `operacao_${operation?.operacaoNumero || "sem_numero"}.pdf`,
+        image: { type: "png" as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+        jsPDF: { orientation: "portrait" as const, unit: "mm", format: "a4" },
+      };
+      
+      html2pdf().set(opt).from(element).save();
+      toast.success("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao gerar PDF");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -102,6 +132,15 @@ export function OperationDetail() {
               Operação {operation.operacaoNumero || "Sem número"}
             </h1>
           </div>
+          <Button
+            onClick={handleGeneratePDF}
+            disabled={isSaving}
+            variant="outline"
+            className="border-green-700 text-green-700 hover:bg-green-50"
+          >
+            <FileDown className="w-4 h-4 mr-2" />
+            PDF
+          </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving}

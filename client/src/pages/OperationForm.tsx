@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, ArrowLeft, Printer, Save, Users } from "lucide-react";
+import { Loader2, ArrowLeft, Printer, Save, Users, FileDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -420,6 +420,36 @@ export default function OperationForm() {
     }
   };
 
+  const handleGeneratePDF = async () => {
+    try {
+      const printElement = document.getElementById("print-operation-content");
+      if (!printElement) {
+        toast.error("Nenhum registo de operação encontrado.");
+        return;
+      }
+
+      const html2pdf = (await import("html2pdf.js")).default;
+      const element = printElement.cloneNode(true) as HTMLElement;
+      
+      // Remover elementos não desejados
+      element.querySelectorAll("button, [style*='display: none']").forEach(el => el.remove());
+      
+      const opt = {
+        margin: 10,
+        filename: `operacao_${getOperationQuery.data?.operacaoNumero || "sem_numero"}.pdf`,
+        image: { type: "png" as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+        jsPDF: { orientation: "portrait" as const, unit: "mm", format: "a4" },
+      };
+      
+      html2pdf().set(opt).from(element).save();
+      toast.success("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao gerar PDF");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
@@ -442,13 +472,22 @@ export default function OperationForm() {
             <Button
               variant="outline"
               size="sm"
+              onClick={handleGeneratePDF}
+              disabled={isSaving || !getOperationQuery.data}
+            >
+              <FileDown className="w-4 h-4 mr-2" />
+              PDF
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handlePrint}
               disabled={isSaving}
             >
               <Printer className="w-4 h-4 mr-2" />
               Imprimir
             </Button>
-            {getEvaluationQuery.data?.neop === "4º NEOP" && (
+            {["2º NEOP", "3º NEOP", "4º NEOP"].includes(getEvaluationQuery.data?.neop || "") && (
               <Button
                 size="sm"
                 variant="outline"

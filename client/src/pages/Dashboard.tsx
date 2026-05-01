@@ -367,7 +367,7 @@ export default function Dashboard() {
                         <MessageCircle className="w-3 h-3" />
                       </Button>
                     )}
-                    {e.neop === "4º NEOP" && (
+                    {["2º NEOP", "3º NEOP", "4º NEOP"].includes(e.neop) && (
                       <>
                         <Button
                           variant="outline"

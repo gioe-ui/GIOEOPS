@@ -348,6 +348,12 @@
 - [x] Implementar modal de envio de notificação WhatsApp
 - [ ] Testar fluxo completo de notificação
 
+## Sprint 2 - Novas Funcionalidades
+
+- [x] Adicionar botão para gerar PDF no novo formulário (OperationForm.tsx)
+- [x] Disponibilizar PDF para download na página de situação (OperationDetail.tsx)
+- [x] Tornar todas as operações de 2º, 3º e 4º NEOP editáveis (remover restrição de apenas 4º NEOP)
+
 ### Persistência de Dados nas Operações
 - [ ] Criar página de visualização/edição de operações (OperationDetail.tsx)
 - [ ] Implementar função para carregar dados de uma operação específica
