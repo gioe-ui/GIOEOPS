@@ -193,13 +193,39 @@ export default function EvaluationForm() {
 
 
 
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById("form-container");
+    if (!element) return;
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const opt: any = {
+        margin: 10,
+        filename: `avaliacao-${form.nuipc || "sem-nuipc"}.pdf`,
+        image: { type: "jpeg" as const, quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: "portrait", unit: "mm", format: "a4" },
+      };
+      html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao gerar PDF");
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold" style={{ color: "#1a472a" }}>
           Novo Formulário de Avaliação
         </h2>
-
+        <button
+          onClick={handleDownloadPDF}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-orange-600 border-orange-600 hover:bg-orange-50 transition"
+          title="Descarregar como PDF"
+        >
+          <Download className="w-4 h-4" />
+          PDF
+        </button>
       </div>
 
       <div id="form-container" className="bg-white p-6 rounded-lg">
