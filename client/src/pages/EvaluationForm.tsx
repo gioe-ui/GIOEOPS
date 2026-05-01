@@ -444,7 +444,6 @@ export default function EvaluationForm() {
                 <SelectValue placeholder="Usar NEOP calculado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Usar NEOP calculado</SelectItem>
                 <SelectItem value="2º NEOP">2º NEOP</SelectItem>
                 <SelectItem value="3º NEOP">3º NEOP</SelectItem>
                 <SelectItem value="4º NEOP">4º NEOP</SelectItem>
