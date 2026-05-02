@@ -1,8 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ArrowLeft, Printer } from "lucide-react";
+import { Loader2, ArrowLeft, Printer, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 const TIPO_LABELS: Record<string, string> = {
   trafico: "Tráfico",
@@ -41,6 +56,8 @@ export default function PrintEvaluation() {
   const { id } = useParams();
   const [, navigate] = useLocation();
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isEditingNeop, setIsEditingNeop] = useState(false);
+  const [selectedNeop, setSelectedNeop] = useState<string>("");
 
   const { data: evaluation, isLoading, error } = trpc.evaluations.getById.useQuery(
     { id: parseInt(id || "0") },
@@ -95,6 +112,62 @@ export default function PrintEvaluation() {
     evaluation.contextoMeioRural === 1 || evaluation.segurancaCaes === 1 || evaluation.segurancaPortaBlindada === 1 || 
     evaluation.segurancaOutrasMedidas === 1;
 
+
+  // Mutation para atualizar NEOP
+  const updateMutation = trpc.evaluations.update.useMutation({
+    onSuccess: () => {
+      toast.success("NEOP atualizado com sucesso!");
+      setIsEditingNeop(false);
+      // Recarregar a avaliação
+      utils.evaluations.getById.invalidate({ id: parseInt(id || "0") });
+    },
+    onError: (e) => toast.error("Erro ao atualizar: " + e.message),
+  });
+
+  const utils = trpc.useUtils();
+
+  const handleSaveNeop = () => {
+    if (!selectedNeop || !evaluation) return;
+    updateMutation.mutate({
+      id: evaluation.id,
+      neopManual: selectedNeop,
+      nuipc: evaluation.nuipc,
+      entidadeSolicitadora: evaluation.entidadeSolicitadora,
+      refFiledoc: evaluation.refFiledoc,
+      email: evaluation.email,
+      ordemVerbal: evaluation.ordemVerbal,
+      pocPosto: evaluation.pocPosto,
+      pocNome: evaluation.pocNome,
+      pocContacto: evaluation.pocContacto,
+      despacho: evaluation.despacho,
+      mandadoDetencao: evaluation.mandadoDetencao,
+      mandadoBusca: evaluation.mandadoBusca,
+      quantidadeSuspeitos: evaluation.quantidadeSuspeitos,
+      modalidadeIsolado: evaluation.modalidadeIsolado,
+      modalidadeAssociacao: evaluation.modalidadeAssociacao,
+      tipoCriminal: evaluation.tipoCriminal,
+      antecedentesContraPessoas: evaluation.antecedentesContraPessoas,
+      antecedentesContraPatrimonio: evaluation.antecedentesContraPatrimonio,
+      antecedentesOutros: evaluation.antecedentesOutros,
+      antecedentesFSS: evaluation.antecedentesFSS,
+      posseArma: evaluation.posseArma,
+      usoArma: evaluation.usoArma,
+      tipologiaApartamento: evaluation.tipologiaApartamento,
+      tipologiaMoradia: evaluation.tipologiaMoradia,
+      tipologiaOutro: evaluation.tipologiaOutro,
+      contextoIsolado: evaluation.contextoIsolado,
+      contextoBairroSocial: evaluation.contextoBairroSocial,
+      contextoMeioUrbano: evaluation.contextoMeioUrbano,
+      contextoMeioRural: evaluation.contextoMeioRural,
+      segurancaCaes: evaluation.segurancaCaes,
+      segurancaPortaBlindada: evaluation.segurancaPortaBlindada,
+      segurancaOutrasMedidas: evaluation.segurancaOutrasMedidas,
+      avaliador: evaluation.avaliador,
+      dataAvaliacao: evaluation.dataAvaliacao,
+      parecer: evaluation.parecer,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header - Hidden on Print */}
@@ -108,14 +181,27 @@ export default function PrintEvaluation() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
-          <Button
-            onClick={() => setIsPrinting(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-            size="sm"
-          >
-            <Printer className="w-4 h-4 mr-2" />
-            Imprimir
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                setSelectedNeop(evaluation?.neop || "");
+                setIsEditingNeop(true);
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              size="sm"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Editar NEOP
+            </Button>
+            <Button
+              onClick={() => setIsPrinting(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              size="sm"
+            >
+              <Printer className="w-4 h-4 mr-2" />
+              Imprimir
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -320,6 +406,42 @@ export default function PrintEvaluation() {
           }
         }
       `}</style>
+
+      {/* Modal de Edição de NEOP */}
+      <Dialog open={isEditingNeop} onOpenChange={setIsEditingNeop}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar NEOP</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">NEOP Atual: {evaluation?.neop}</label>
+              <Select value={selectedNeop} onValueChange={setSelectedNeop}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um NEOP" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2º NEOP">2º NEOP</SelectItem>
+                  <SelectItem value="3º NEOP">3º NEOP</SelectItem>
+                  <SelectItem value="4º NEOP">4º NEOP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditingNeop(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveNeop}
+              disabled={updateMutation.isPending}
+              style={{ background: "#1a472a" }}
+            >
+              {updateMutation.isPending ? "A guardar..." : "Guardar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
