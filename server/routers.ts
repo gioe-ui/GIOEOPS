@@ -38,6 +38,8 @@ import { users } from "../drizzle/schema";
 import { eq, sql } from "drizzle-orm";
 import { operations, evaluations } from "../drizzle/schema";
 
+
+
 // ─── Scoring helper ───────────────────────────────────────────────────────────
 const TIPO_SCORES: Record<string, number> = {
   trafico: 7,
@@ -183,9 +185,8 @@ const EvaluationInput = z.object({
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
-  system: systemRouter,
-
   auth: authRouter,
+  system: systemRouter,
 
   evaluations: router({
     list: protectedProcedure

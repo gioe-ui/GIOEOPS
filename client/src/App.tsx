@@ -12,6 +12,7 @@ import PrintOperation from "./pages/PrintOperation";
 import Profile from "./pages/Profile";
 import MilitarDashboard from "./pages/MilitarDashboard";
 import { OperationDetail } from "./pages/OperationDetail";
+import AdminMigration from "./pages/AdminMigration";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/profile" component={Profile} />
       <Route path="/militar-dashboard" component={MilitarDashboard} />
+      <Route path="/admin/migration" component={AdminMigration} />
       <Route path="/print/:id" component={PrintEvaluation} />
       <Route path="/operation/:evaluationId" component={OperationForm} />
       <Route path="/edit-evaluation/:id" component={EditEvaluation} />
