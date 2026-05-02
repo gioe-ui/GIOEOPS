@@ -400,3 +400,11 @@
 
 - [x] Aumentar espaçamento entre títulos e caixas de input (margin-bottom)
 - [x] Corrigir botão "Editar NEOP" que não está a funcionar na página de avaliação
+
+
+## Sprint 5 - Edição Completa de Avaliações
+
+- [ ] Criar página de edição de avaliações (EditEvaluation.tsx) com todos os campos
+- [ ] Adicionar botão "Editar" no Dashboard para abrir página de edição
+- [ ] Implementar recalculo dinâmico de NEOP durante edição
+- [ ] Testar funcionalidade completa de edição

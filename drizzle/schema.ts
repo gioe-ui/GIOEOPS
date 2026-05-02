@@ -76,6 +76,9 @@ export const evaluations = mysqlTable("evaluations", {
   // Resultado
   pontuacao: int("pontuacao").notNull().default(0),
   neop: varchar("neop", { length: 20 }).notNull(),
+  // Rastreamento de edições
+  updatedBy: text("updatedBy"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

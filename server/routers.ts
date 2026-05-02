@@ -35,8 +35,8 @@ import {
 } from "./db";
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
-import { operations } from "../drizzle/schema";
+import { eq, sql } from "drizzle-orm";
+import { operations, evaluations } from "../drizzle/schema";
 
 // ─── Scoring helper ───────────────────────────────────────────────────────────
 const TIPO_SCORES: Record<string, number> = {
@@ -222,9 +222,27 @@ export const appRouter = router({
       .input(EvaluationInput.extend({ id: z.number().int() }))
       .mutation(async ({ input, ctx }) => {
         const { id, ...data } = input;
-        const { pontuacao, neop } = calcScore(data);
-        // Para agora, apenas retorna o novo NEOP calculado
-        // A atualização será feita através de uma query direta no db.ts
+        const { pontuacao, neop: neopCalculado } = calcScore(data);
+        const neop = data.neopManual || neopCalculado;
+        
+        // Build updatedBy string with user name and rank
+        const updatedBy = `${ctx.user.name || 'Unknown'} (${ctx.user.rank || 'N/A'})`;
+        
+        // Update the evaluation in the database
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
+        
+        await db
+          .update(evaluations)
+          .set({
+            ...data,
+            pontuacao,
+            neop,
+            updatedBy,
+            updatedAt: new Date(),
+          })
+          .where(eq(evaluations.id, id))
+        
         return { success: true, pontuacao, neop };
       }),
 

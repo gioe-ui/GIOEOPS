@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, Trash2, Search, Printer, FileText, MessageCircle } from "lucide-react";
+import { Download, Trash2, Search, Printer, FileText, MessageCircle, Edit2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -356,6 +356,15 @@ export default function Dashboard() {
                     )}
                   </td>
                   <td className="px-2 py-3 flex gap-1 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/edit-evaluation/${e.id}`)}
+                      className="border-blue-600 text-blue-600 hover:bg-blue-50 text-xs px-2 py-1 h-auto"
+                      title="Editar Avaliação"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </Button>
                     {e.assignedUserId && e.assignedUserPhone && (
                       <Button
                         variant="outline"

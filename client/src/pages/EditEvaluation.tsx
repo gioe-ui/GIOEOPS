@@ -38,7 +38,7 @@ type FormState = {
   tipologiaApartamento: boolean; tipologiaMoradia: boolean; tipologiaOutro: boolean;
   contextoIsolado: boolean; contextoBairroSocial: boolean; contextoMeioUrbano: boolean; contextoMeioRural: boolean;
   segurancaCaes: boolean; segurancaPortaBlindada: boolean; segurancaOutrasMedidas: boolean;
-  avaliador: string; dataAvaliacao: string; parecer: string;
+  avaliador: string; dataAvaliacao: string; parecer: string; neopManual: string;
 };
 
 function calcScore(f: FormState): { pontuacao: number; neop: string; complexidade: string; descricao: string; neopColor: string } {
@@ -63,6 +63,25 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   if (f.segurancaPortaBlindada) s += 6;
   if (f.segurancaOutrasMedidas) s += 5;
   const pontuacao = Math.min(s, 100);
+  
+  // Se há NEOP manual selecionado, usar esse
+  if (f.neopManual && ["2º NEOP", "3º NEOP", "4º NEOP"].includes(f.neopManual)) {
+    let neop = f.neopManual;
+    let complexidade = "Baixa";
+    let descricao = "Operação de rotina - Procedimentos padrão";
+    let neopColor = "#22c55e";
+    if (neop === "3º NEOP") {
+      complexidade = "Média";
+      descricao = "Operação com risco moderado - Requer coordenação";
+      neopColor = "#f97316";
+    } else if (neop === "4º NEOP") {
+      complexidade = "Alta";
+      descricao = "Necessita de planeamento especializado";
+      neopColor = "#ef4444";
+    }
+    return { pontuacao, neop, complexidade, descricao, neopColor };
+  }
+  
   let neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 75 ? "3º NEOP" : "4º NEOP";
   
   // Critérios que elevam automaticamente para 4º NEOP
@@ -85,6 +104,11 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   
   // Elevação 3: Arma registada + Crime grave (homicídio, sequestro, violência)
   if (temArmaRegistada && temCrimeGrave) {
+    neop = "4º NEOP";
+  }
+  
+  // Elevação 4: Arma provável + Uso com registo
+  if (temArmaProbavel && temUsoArma) {
     neop = "4º NEOP";
   }
   
@@ -162,6 +186,7 @@ export default function EditEvaluation() {
         avaliador: evaluation.avaliador || "",
         dataAvaliacao: evaluation.dataAvaliacao || new Date().toISOString().split("T")[0],
         parecer: evaluation.parecer || "",
+        neopManual: "",
       });
     }
   }, [evaluation, form]);
@@ -174,7 +199,6 @@ export default function EditEvaluation() {
     if (!form || !id) return;
     try {
       setIsSaving(true);
-      const { pontuacao, neop } = calcScore(form);
       await updateMutation.mutateAsync({
         id: parseInt(id),
         ...form,
@@ -272,91 +296,158 @@ export default function EditEvaluation() {
         </div>
 
         {/* Form */}
-        <div className="bg-white p-6 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <Label>NUIPC</Label>
-              <Input
-                value={form.nuipc}
-                onChange={(e) => set("nuipc", e.target.value)}
-                placeholder="NUIPC"
-              />
+        <div className="bg-white p-6 rounded-lg space-y-6">
+          {/* Informação Básica */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Informação Básica</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="block mb-2">NUIPC</Label>
+                <Input
+                  value={form.nuipc}
+                  onChange={(e) => set("nuipc", e.target.value)}
+                  placeholder="NUIPC"
+                />
+              </div>
+              <div>
+                <Label className="block mb-2">Entidade Solicitadora</Label>
+                <Input
+                  value={form.entidadeSolicitadora}
+                  onChange={(e) => set("entidadeSolicitadora", e.target.value)}
+                  placeholder="Entidade"
+                />
+              </div>
+              <div>
+                <Label className="block mb-2">Ref. Filedoc</Label>
+                <Input
+                  value={form.refFiledoc}
+                  onChange={(e) => set("refFiledoc", e.target.value)}
+                  placeholder="Ref. Filedoc"
+                />
+              </div>
+              <div>
+                <Label className="block mb-2">Email</Label>
+                <Input
+                  value={form.email}
+                  onChange={(e) => set("email", e.target.value)}
+                  placeholder="Email"
+                />
+              </div>
             </div>
+          </div>
+
+          {/* Tipo de Crime */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Atividade Criminal</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="block mb-2">Tipo de Crime</Label>
+                <Select value={form.tipoCriminal} onValueChange={(v) => set("tipoCriminal", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="trafico">Tráfico</SelectItem>
+                    <SelectItem value="assalto">Assalto</SelectItem>
+                    <SelectItem value="homicidio">Homicídio</SelectItem>
+                    <SelectItem value="sequestro">Sequestro</SelectItem>
+                    <SelectItem value="violencia">Violência</SelectItem>
+                    <SelectItem value="outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="block mb-2">Quantidade de Suspeitos</Label>
+                <Select value={form.quantidadeSuspeitos} onValueChange={(v) => set("quantidadeSuspeitos", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 suspeito</SelectItem>
+                    <SelectItem value="2">2 suspeitos</SelectItem>
+                    <SelectItem value="3">3 suspeitos</SelectItem>
+                    <SelectItem value="4+">4+ suspeitos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={form.modalidadeIsolado}
+                  onCheckedChange={(v) => set("modalidadeIsolado", !!v)}
+                />
+                <Label>Modalidade Isolado</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={form.modalidadeAssociacao}
+                  onCheckedChange={(v) => set("modalidadeAssociacao", !!v)}
+                />
+                <Label>Associação Criminosa</Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Meios */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Meios</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="block mb-2">Posse de Arma</Label>
+                <Select value={form.posseArma} onValueChange={(v) => set("posseArma", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="improvavel">Improvável</SelectItem>
+                    <SelectItem value="provavel">Provável</SelectItem>
+                    <SelectItem value="registada">Registada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="block mb-2">Uso de Arma</Label>
+                <Select value={form.usoArma} onValueChange={(v) => set("usoArma", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="naoHaRegisto">Não Há Registo</SelectItem>
+                    <SelectItem value="haRegisto">Há Registo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* NEOP Manual */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">NEOP Manual (Opcional)</h2>
             <div>
-              <Label>Tipo de Crime</Label>
-              <Select value={form.tipoCriminal} onValueChange={(v) => set("tipoCriminal", v)}>
+              <Label className="block mb-2">Selecione um NEOP para sobrescrever o calculado</Label>
+              <Select value={form.neopManual} onValueChange={(v) => set("neopManual", v)}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Sem seleção (usar calculado)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="trafico">Tráfico</SelectItem>
-                  <SelectItem value="assalto">Assalto</SelectItem>
-                  <SelectItem value="homicidio">Homicídio</SelectItem>
-                  <SelectItem value="sequestro">Sequestro</SelectItem>
-                  <SelectItem value="violencia">Violência</SelectItem>
-                  <SelectItem value="outro">Outro</SelectItem>
+                  <SelectItem value="2º NEOP">2º NEOP</SelectItem>
+                  <SelectItem value="3º NEOP">3º NEOP</SelectItem>
+                  <SelectItem value="4º NEOP">4º NEOP</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <Label>Posse de Arma</Label>
-              <Select value={form.posseArma} onValueChange={(v) => set("posseArma", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="improvavel">Improvável</SelectItem>
-                  <SelectItem value="provavel">Provável</SelectItem>
-                  <SelectItem value="registada">Registada</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Uso de Arma</Label>
-              <Select value={form.usoArma} onValueChange={(v) => set("usoArma", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="naoHaRegisto">Não Há Registo</SelectItem>
-                  <SelectItem value="haRegisto">Há Registo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={form.mandadoDetencao}
-                onCheckedChange={(v) => set("mandadoDetencao", !!v)}
-              />
-              <Label>Mandado de Detenção</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={form.mandadoBusca}
-                onCheckedChange={(v) => set("mandadoBusca", !!v)}
-              />
-              <Label>Mandado de Busca</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={form.modalidadeAssociacao}
-                onCheckedChange={(v) => set("modalidadeAssociacao", !!v)}
-              />
-              <Label>Associação Criminosa</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={form.antecedentesContraPessoas}
-                onCheckedChange={(v) => set("antecedentesContraPessoas", !!v)}
-              />
-              <Label>Antecedentes Contra Pessoas</Label>
-            </div>
+          {/* Parecer */}
+          <div>
+            <Label className="block mb-2">Parecer</Label>
+            <Textarea
+              value={form.parecer}
+              onChange={(e) => set("parecer", e.target.value)}
+              placeholder="Parecer da avaliação"
+              rows={4}
+            />
           </div>
         </div>
       </div>
