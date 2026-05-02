@@ -178,6 +178,7 @@ const EvaluationInput = z.object({
   avaliador: z.string().optional(),
   dataAvaliacao: z.string().optional(),
   parecer: z.string().optional(),
+  neopManual: z.string().optional(),
 });
 
 // ─── App Router ───────────────────────────────────────────────────────────────
@@ -210,7 +211,9 @@ export const appRouter = router({
       }),
 
     create: protectedProcedure.input(EvaluationInput).mutation(async ({ input, ctx }) => {
-      const { pontuacao, neop } = calcScore(input);
+      const { pontuacao, neop: neopCalculado } = calcScore(input);
+      // Usar NEOP manual se fornecido, caso contrário usar o calculado
+      const neop = input.neopManual || neopCalculado;
       await createEvaluation({ ...input, userId: ctx.user.id, pontuacao, neop });
       return { success: true, pontuacao, neop };
     }),
