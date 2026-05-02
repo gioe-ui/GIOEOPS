@@ -395,3 +395,8 @@
 - [ ] Corrigir lógica de cálculo de NEOP para armas de fogo com uso efetivo em situações graves (violência grave, sequestro) - deveria ser 4º NEOP, não 3º
 - [ ] Implementar recalculo dinâmico de avaliações quando campos são alterados (atualmente não recalcula após primeira avaliação)
 - [x] Adicionar campo de NEOP manual no formulário de avaliação (permitir sobrescrever NEOP calculado)
+
+## Sprint 4 - Correções de UI e Bugs
+
+- [x] Aumentar espaçamento entre títulos e caixas de input (margin-bottom)
+- [x] Corrigir botão "Editar NEOP" que não está a funcionar na página de avaliação

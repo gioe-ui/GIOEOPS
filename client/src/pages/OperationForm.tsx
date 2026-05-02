@@ -533,7 +533,7 @@ export default function OperationForm() {
             <TabsContent value="referencia" className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Ref. Filedoc/E-Mail/Ordem Verbal</Label>
+                  <Label className="mb-3 block">Ref. Filedoc/E-Mail/Ordem Verbal</Label>
                   <Input
                     value={form.refFiledoc}
                     onChange={(e) => handleInputChange("refFiledoc", e.target.value)}
@@ -541,7 +541,7 @@ export default function OperationForm() {
                   />
                 </div>
                 <div>
-                  <Label>Operação Nº</Label>
+                  <Label className="mb-3 block">Operação Nº</Label>
                   <Input
                     value={form.operacaoNumero}
                     onChange={(e) => handleInputChange("operacaoNumero", e.target.value)}
@@ -549,21 +549,21 @@ export default function OperationForm() {
                   />
                 </div>
                 <div>
-                  <Label>Preenchimento SECOp</Label>
+                  <Label className="mb-3 block">Preenchimento SECOp</Label>
                   <Input
                     value={form.preenchimentoSecOp}
                     onChange={(e) => handleInputChange("preenchimentoSecOp", e.target.value)}
                   />
                 </div>
                 <div>
-                  <Label>CMDT Op</Label>
+                  <Label className="mb-3 block">CMDT Op</Label>
                   <Input
                     value={form.cmdtOp}
                     onChange={(e) => handleInputChange("cmdtOp", e.target.value)}
                   />
                 </div>
                 <div>
-                  <Label>Data Op</Label>
+                  <Label className="mb-3 block">Data Op</Label>
                   <Input
                     type="date"
                     value={form.dataOp}
@@ -631,7 +631,7 @@ export default function OperationForm() {
               <h3 className="font-bold text-lg">Dados Reunião Coordenação / Reconhecimento</h3>
 
               <div>
-                <Label>Local</Label>
+                <Label className="mb-3 block">Local</Label>
                 <Textarea
                   value={form.local}
                   onChange={(e) => handleInputChange("local", e.target.value)}
@@ -641,7 +641,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label>Observações</Label>
+                <Label className="mb-3 block">Observações</Label>
                 <Textarea
                   value={form.obsReuniao}
                   onChange={(e) => handleInputChange("obsReuniao", e.target.value)}
@@ -652,7 +652,7 @@ export default function OperationForm() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>GDH Saída UI</Label>
+                  <Label className="mb-3 block">GDH Saída UI</Label>
                   <Input
                     type="time"
                     value={form.gdhSaidaUI}
@@ -660,7 +660,7 @@ export default function OperationForm() {
                   />
                 </div>
                 <div>
-                  <Label>GDH Entrada UI</Label>
+                  <Label className="mb-3 block">GDH Entrada UI</Label>
                   <Input
                     type="time"
                     value={form.gdhEntradaUI}
@@ -670,7 +670,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label>CMDT Força</Label>
+                <Label className="mb-3 block">CMDT Força</Label>
                 <Input
                   value={form.cmdtForcaReuniao}
                   onChange={(e) => handleInputChange("cmdtForcaReuniao", e.target.value)}
@@ -679,14 +679,14 @@ export default function OperationForm() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Indicativo Rádio</Label>
+                  <Label className="mb-3 block">Indicativo Rádio</Label>
                   <Input
                     value={form.indicativoRadioReuniao}
                     onChange={(e) => handleInputChange("indicativoRadioReuniao", e.target.value)}
                   />
                 </div>
                 <div>
-                  <Label>Efetivo Total</Label>
+                  <Label className="mb-3 block">Efetivo Total</Label>
                   <Input
                     type="number"
                     value={form.efetivTotalReuniao}
@@ -699,7 +699,7 @@ export default function OperationForm() {
                 <h3 className="font-bold mb-4">Viaturas</h3>
                 <div className="grid grid-cols-4 gap-4">
                   <div>
-                    <Label>Caracterizadas</Label>
+                    <Label className="mb-3 block">Caracterizadas</Label>
                     <Input
                       type="number"
                       value={form.viaturasCaracterizadasReuniao}
@@ -707,7 +707,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Descaracterizadas</Label>
+                    <Label className="mb-3 block">Descaracterizadas</Label>
                     <Input
                       type="number"
                       value={form.viaturasDescaracterizadasReuniao}
@@ -715,7 +715,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Especiais</Label>
+                    <Label className="mb-3 block">Especiais</Label>
                     <Input
                       type="number"
                       value={form.viaturasEspeciaisReuniao}
@@ -723,7 +723,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Km Totais</Label>
+                    <Label className="mb-3 block">Km Totais</Label>
                     <Input
                       value={form.kmTotaisReuniao}
                       onChange={(e) => handleInputChange("kmTotaisReuniao", e.target.value)}
@@ -739,21 +739,21 @@ export default function OperationForm() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label>CTer</Label>
+                  <Label className="mb-3 block">CTer</Label>
                   <Input
                     value={form.cterOperacao}
                     onChange={(e) => handleInputChange("cterOperacao", e.target.value)}
                   />
                 </div>
                 <div>
-                  <Label>DTer</Label>
+                  <Label className="mb-3 block">DTer</Label>
                   <Input
                     value={form.dterOperacao}
                     onChange={(e) => handleInputChange("dterOperacao", e.target.value)}
                   />
                 </div>
                 <div>
-                  <Label>PTer/ZA</Label>
+                  <Label className="mb-3 block">PTer/ZA</Label>
                   <Input
                     value={form.pterZaOperacao}
                     onChange={(e) => handleInputChange("pterZaOperacao", e.target.value)}
@@ -763,7 +763,7 @@ export default function OperationForm() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>GDH Início</Label>
+                  <Label className="mb-3 block">GDH Início</Label>
                   <Input
                     type="time"
                     value={form.gdhInicioOperacao}
@@ -771,7 +771,7 @@ export default function OperationForm() {
                   />
                 </div>
                 <div>
-                  <Label>GDH Chegada UI</Label>
+                  <Label className="mb-3 block">GDH Chegada UI</Label>
                   <Input
                     type="time"
                     value={form.gdhChegadaUIOperacao}
@@ -781,7 +781,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label>CMDT Força</Label>
+                <Label className="mb-3 block">CMDT Força</Label>
                 <Input
                   value={form.cmdtForcaOperacao}
                   onChange={(e) => handleInputChange("cmdtForcaOperacao", e.target.value)}
@@ -790,14 +790,14 @@ export default function OperationForm() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Indicativo Rádio</Label>
+                  <Label className="mb-3 block">Indicativo Rádio</Label>
                   <Input
                     value={form.indicativoRadioOperacao}
                     onChange={(e) => handleInputChange("indicativoRadioOperacao", e.target.value)}
                   />
                 </div>
                 <div>
-                  <Label>Efetivo Total</Label>
+                  <Label className="mb-3 block">Efetivo Total</Label>
                   <Input
                     type="number"
                     value={form.efetivTotalOperacao}
@@ -810,7 +810,7 @@ export default function OperationForm() {
                 <h3 className="font-bold mb-4">Viaturas</h3>
                 <div className="grid grid-cols-4 gap-4">
                   <div>
-                    <Label>Caracterizadas</Label>
+                    <Label className="mb-3 block">Caracterizadas</Label>
                     <Input
                       type="number"
                       value={form.viaturasCaracterizadasOperacao}
@@ -818,7 +818,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Descaracterizadas</Label>
+                    <Label className="mb-3 block">Descaracterizadas</Label>
                     <Input
                       type="number"
                       value={form.viaturasDescaracterizadasOperacao}
@@ -826,7 +826,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Especiais</Label>
+                    <Label className="mb-3 block">Especiais</Label>
                     <Input
                       type="number"
                       value={form.viaturasEspeciaisOperacao}
@@ -834,7 +834,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Km Totais</Label>
+                    <Label className="mb-3 block">Km Totais</Label>
                     <Input
                       value={form.kmTotaisOperacao}
                       onChange={(e) => handleInputChange("kmTotaisOperacao", e.target.value)}
@@ -847,14 +847,14 @@ export default function OperationForm() {
                 <h3 className="font-bold mb-4">Tempo Resolução ITP</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>ITP Tipo</Label>
+                    <Label className="mb-3 block">ITP Tipo</Label>
                     <Input
                       value={form.itpTipo}
                       onChange={(e) => handleInputChange("itpTipo", e.target.value)}
                     />
                   </div>
                   <div>
-                    <Label>GDH Início</Label>
+                    <Label className="mb-3 block">GDH Início</Label>
                     <Input
                       type="time"
                       value={form.gdhInicioITP}
@@ -862,7 +862,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>GDH Fim</Label>
+                    <Label className="mb-3 block">GDH Fim</Label>
                     <Input
                       type="time"
                       value={form.gdhFimITP}
@@ -876,7 +876,7 @@ export default function OperationForm() {
                 <h3 className="font-bold mb-4">Força Titular do Inquérito</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>Número Visados Detidos</Label>
+                    <Label className="mb-3 block">Número Visados Detidos</Label>
                     <Input
                       type="number"
                       value={form.forcaTitularInqueritos}
@@ -884,14 +884,14 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Custos Portagens</Label>
+                    <Label className="mb-3 block">Custos Portagens</Label>
                     <Input
                       value={form.custosPortagens}
                       onChange={(e) => handleInputChange("custosPortagens", e.target.value)}
                     />
                   </div>
                   <div>
-                    <Label>Custos Combustíveis</Label>
+                    <Label className="mb-3 block">Custos Combustíveis</Label>
                     <Input
                       value={form.custosCombustiveis}
                       onChange={(e) => handleInputChange("custosCombustiveis", e.target.value)}
@@ -901,7 +901,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label>Observações Visados</Label>
+                <Label className="mb-3 block">Observações Visados</Label>
                 <Textarea
                   value={form.obsVisados}
                   onChange={(e) => handleInputChange("obsVisados", e.target.value)}
@@ -919,7 +919,7 @@ export default function OperationForm() {
                 <h4 className="font-semibold mb-4">Munições Armas Auto</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>7.62mm</Label>
+                    <Label className="mb-3 block">7.62mm</Label>
                     <Input
                       type="number"
                       value={form.municoesArmasAuto762}
@@ -927,7 +927,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>9mm</Label>
+                    <Label className="mb-3 block">9mm</Label>
                     <Input
                       type="number"
                       value={form.municoesArmasAuto9mm}
@@ -935,7 +935,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>7.62mm (alt)</Label>
+                    <Label className="mb-3 block">7.62mm (alt)</Label>
                     <Input
                       type="number"
                       value={form.municoesArmasAuto762mm}
@@ -943,7 +943,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>5.56mm</Label>
+                    <Label className="mb-3 block">5.56mm</Label>
                     <Input
                       type="number"
                       value={form.municoesArmasAuto556mm}
@@ -951,7 +951,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>5.56</Label>
+                    <Label className="mb-3 block">5.56</Label>
                     <Input
                       type="number"
                       value={form.municoesArmasAuto556}
@@ -965,7 +965,7 @@ export default function OperationForm() {
                 <h4 className="font-semibold mb-4">Munições Caçadeira</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>Borracha</Label>
+                    <Label className="mb-3 block">Borracha</Label>
                     <Input
                       type="number"
                       value={form.municoesCacadeiraBarracha}
@@ -973,7 +973,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Chumbo</Label>
+                    <Label className="mb-3 block">Chumbo</Label>
                     <Input
                       type="number"
                       value={form.municoesCacadeiraChumbo}
@@ -981,7 +981,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Beam Bag</Label>
+                    <Label className="mb-3 block">Beam Bag</Label>
                     <Input
                       type="number"
                       value={form.municoesCacadeiraBeamBag}
@@ -989,7 +989,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Zagalote</Label>
+                    <Label className="mb-3 block">Zagalote</Label>
                     <Input
                       type="number"
                       value={form.municoesCacadeiraZagalote}
@@ -997,7 +997,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Zinco</Label>
+                    <Label className="mb-3 block">Zinco</Label>
                     <Input
                       type="number"
                       value={form.municoesCacadeiraZinco}
@@ -1011,7 +1011,7 @@ export default function OperationForm() {
                 <h4 className="font-semibold mb-4">Munições Revólver / TASER</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>Revólver ASP</Label>
+                    <Label className="mb-3 block">Revólver ASP</Label>
                     <Input
                       type="number"
                       value={form.municoesRevolverASP}
@@ -1019,7 +1019,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>TASER Carga X26</Label>
+                    <Label className="mb-3 block">TASER Carga X26</Label>
                     <Input
                       type="number"
                       value={form.taserCargaX26}
@@ -1033,7 +1033,7 @@ export default function OperationForm() {
                 <h4 className="font-semibold mb-4">Granadas Flash Bang</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>1 Estalo 1 Bang</Label>
+                    <Label className="mb-3 block">1 Estalo 1 Bang</Label>
                     <Input
                       type="number"
                       value={form.taserGranadaFlashBang1Estalo}
@@ -1041,7 +1041,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>1 Estalo 2 Bang</Label>
+                    <Label className="mb-3 block">1 Estalo 2 Bang</Label>
                     <Input
                       type="number"
                       value={form.taserGranadaFlashBang1Estalo2Bang}
@@ -1049,7 +1049,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>2 Estalos 2 Bangs</Label>
+                    <Label className="mb-3 block">2 Estalos 2 Bangs</Label>
                     <Input
                       type="number"
                       value={form.taserGranadaFlashBang2Estalos2Bangs}
@@ -1057,7 +1057,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label>Múltiplos Bangs</Label>
+                    <Label className="mb-3 block">Múltiplos Bangs</Label>
                     <Input
                       type="number"
                       value={form.taserGranadaFlashBangMultiplos}
@@ -1068,7 +1068,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label>Algemas</Label>
+                <Label className="mb-3 block">Algemas</Label>
                 <Input
                   value={form.taserAlgemas}
                   onChange={(e) => handleInputChange("taserAlgemas", e.target.value)}
@@ -1076,7 +1076,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label>Observações Consumos</Label>
+                <Label className="mb-3 block">Observações Consumos</Label>
                 <Textarea
                   value={form.obsConsumos}
                   onChange={(e) => handleInputChange("obsConsumos", e.target.value)}
@@ -1089,7 +1089,7 @@ export default function OperationForm() {
             {/* Observações Tab */}
             <TabsContent value="observacoes" className="space-y-6">
               <div>
-                <Label>Observações SECOp</Label>
+                <Label className="mb-3 block">Observações SECOp</Label>
                 <Textarea
                   value={form.obsSECOp}
                   onChange={(e) => handleInputChange("obsSECOp", e.target.value)}
@@ -1100,7 +1100,7 @@ export default function OperationForm() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Reg. SECOp</Label>
+                  <Label className="mb-3 block">Reg. SECOp</Label>
                   <Input
                     value={form.regSECOp}
                     onChange={(e) => handleInputChange("regSECOp", e.target.value)}
@@ -1118,7 +1118,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label>Apontamentos / Notas Relevantes</Label>
+                <Label className="mb-3 block">Apontamentos / Notas Relevantes</Label>
                 <Textarea
                   value={form.apontamentosNotas}
                   onChange={(e) => handleInputChange("apontamentosNotas", e.target.value)}
@@ -1128,7 +1128,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label>Croquis</Label>
+                <Label className="mb-3 block">Croquis</Label>
                 <Textarea
                   value={form.croquis}
                   onChange={(e) => handleInputChange("croquis", e.target.value)}

@@ -131,8 +131,8 @@ export default function PrintEvaluation() {
     updateMutation.mutate({
       id: evaluation.id,
       neopManual: selectedNeop,
-      nuipc: evaluation.nuipc,
-      entidadeSolicitadora: evaluation.entidadeSolicitadora,
+      nuipc: evaluation.nuipc || "",
+      entidadeSolicitadora: evaluation.entidadeSolicitadora || "",
       refFiledoc: evaluation.refFiledoc,
       email: evaluation.email,
       ordemVerbal: evaluation.ordemVerbal,
@@ -162,9 +162,9 @@ export default function PrintEvaluation() {
       segurancaCaes: evaluation.segurancaCaes,
       segurancaPortaBlindada: evaluation.segurancaPortaBlindada,
       segurancaOutrasMedidas: evaluation.segurancaOutrasMedidas,
-      avaliador: evaluation.avaliador,
-      dataAvaliacao: evaluation.dataAvaliacao,
-      parecer: evaluation.parecer,
+      avaliador: evaluation.avaliador || "",
+      dataAvaliacao: evaluation.dataAvaliacao || "",
+      parecer: evaluation.parecer || "",
     });
   };
 
@@ -369,7 +369,7 @@ export default function PrintEvaluation() {
             {evaluation.parecer && (
               <div>
                 <div className="text-xs font-semibold text-gray-600 mb-1">Parecer</div>
-                <div className="text-sm whitespace-pre-wrap">{evaluation.parecer.replace(/CTer:.*?(?=\n|$)/gi, '').trim()}</div>
+                <div className="text-sm whitespace-pre-wrap">{evaluation.parecer.replace(/CTer:.*?(?=\n|$)/gi || "", '').trim()}</div>
               </div>
             )}
           </div>
