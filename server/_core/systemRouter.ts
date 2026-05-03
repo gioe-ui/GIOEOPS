@@ -44,9 +44,15 @@ export const systemRouter = router({
 
       try {
         // Add audit columns if they don't exist
+        // First add updatedBy column
         await db.execute(sql.raw(`
           ALTER TABLE evaluations 
-          ADD COLUMN IF NOT EXISTS updatedBy TEXT AFTER parecer,
+          ADD COLUMN IF NOT EXISTS updatedBy TEXT AFTER parecer
+        `));
+        
+        // Then add updatedAt column
+        await db.execute(sql.raw(`
+          ALTER TABLE evaluations 
           ADD COLUMN IF NOT EXISTS updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER updatedBy
         `));
 
