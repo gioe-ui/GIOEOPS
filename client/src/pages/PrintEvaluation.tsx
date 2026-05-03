@@ -64,6 +64,17 @@ export default function PrintEvaluation() {
     { enabled: !!id }
   );
 
+  const utils = trpc.useUtils();
+
+  const updateMutation = trpc.evaluations.update.useMutation({
+    onSuccess: () => {
+      toast.success("NEOP atualizado com sucesso!");
+      setIsEditingNeop(false);
+      utils.evaluations.getById.invalidate({ id: parseInt(id || "0") });
+    },
+    onError: (e) => toast.error("Erro ao atualizar: " + e.message),
+  });
+
   useEffect(() => {
     if (isPrinting) {
       window.print();
@@ -112,19 +123,6 @@ export default function PrintEvaluation() {
     evaluation.contextoMeioRural === 1 || evaluation.segurancaCaes === 1 || evaluation.segurancaPortaBlindada === 1 || 
     evaluation.segurancaOutrasMedidas === 1;
 
-
-  // Mutation para atualizar NEOP
-  const updateMutation = trpc.evaluations.update.useMutation({
-    onSuccess: () => {
-      toast.success("NEOP atualizado com sucesso!");
-      setIsEditingNeop(false);
-      // Recarregar a avaliação
-      utils.evaluations.getById.invalidate({ id: parseInt(id || "0") });
-    },
-    onError: (e) => toast.error("Erro ao atualizar: " + e.message),
-  });
-
-  const utils = trpc.useUtils();
 
   const handleSaveNeop = () => {
     if (!selectedNeop || !evaluation) return;

@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -14,10 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import { ChangeEvent } from "react";
 
-// ─── Scoring ─────────────────────────────────────────────────────────────────
 const TIPO_SCORES: Record<string, number> = {
   trafico: 7, assalto: 6, homicidio: 10, sequestro: 9, violencia: 8, outro: 4,
 };
@@ -27,7 +25,7 @@ const QTD_SCORES: Record<string, number> = { "1": 1, "2": 2, "3": 4, "4+": 6 };
 
 type FormState = {
   nuipc: string; entidadeSolicitadora: string; refFiledoc: string; email: string; ordemVerbal: string;
-  pocPosto: string; pocNome: string; pocContacto: string; despacho: string; cterRequerente: string;
+  pocPosto: string; pocNome: string; pocContacto: string; despacho: string;
   mandadoDetencao: boolean; mandadoBusca: boolean;
   quantidadeSuspeitos: string;
   modalidadeIsolado: boolean; modalidadeAssociacao: boolean;
@@ -64,7 +62,6 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   if (f.segurancaOutrasMedidas) s += 5;
   const pontuacao = Math.min(s, 100);
   
-  // Se há NEOP manual selecionado, usar esse
   if (f.neopManual && ["2º NEOP", "3º NEOP", "4º NEOP"].includes(f.neopManual)) {
     let neop = f.neopManual;
     let complexidade = "Baixa";
@@ -83,8 +80,6 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   }
   
   let neop = pontuacao <= 25 ? "2º NEOP" : pontuacao <= 75 ? "3º NEOP" : "4º NEOP";
-  
-  // Critérios que elevam automaticamente para 4º NEOP
   const temAssociacaoCriminosa = f.modalidadeAssociacao;
   const temArmaRegistada = f.posseArma === "registada";
   const temArmaProbavel = f.posseArma === "provavel";
@@ -92,45 +87,25 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   const temAntecedentesContraFSS = f.antecedentesFSS === "sim";
   const temCrimeGrave = ["homicidio", "sequestro", "violencia"].includes(f.tipoCriminal);
   
-  // Elevação 1: Associação criminosa + Posse/Probabilidade de armas de fogo
   if (temAssociacaoCriminosa && (temArmaRegistada || temArmaProbavel)) {
     neop = "4º NEOP";
   }
-  
-  // Elevação 2: Histórico de uso de arma de fogo + Antecedentes de confronto com FSS
   if (temUsoArma && temAntecedentesContraFSS) {
     neop = "4º NEOP";
   }
-  
-  // Elevação 3: Arma registada + Crime grave (homicídio, sequestro, violência)
-  if (temArmaRegistada && temCrimeGrave) {
+  if (temCrimeGrave && temUsoArma) {
     neop = "4º NEOP";
   }
   
-  // Elevação 4: Arma provável + Uso com registo
-  if (temArmaProbavel && temUsoArma) {
-    neop = "4º NEOP";
-  }
-  
-  // Complexidade e cores
-  let complexidade = "Baixa";
-  let descricao = "Operação de rotina - Procedimentos padrão";
-  let neopColor = "#22c55e"; // Verde para 2º NEOP
-  if (neop === "3º NEOP") {
-    complexidade = "Média";
-    descricao = "Operação com risco moderado - Requer coordenação";
-    neopColor = "#f97316"; // Laranja para 3º NEOP
-  } else if (neop === "4º NEOP") {
-    complexidade = "Alta";
-    descricao = "Necessita de planeamento especializado";
-    neopColor = "#ef4444"; // Vermelho para 4º NEOP
-  }
+  let complexidade = neop === "2º NEOP" ? "Baixa" : neop === "3º NEOP" ? "Média" : "Alta";
+  let descricao = neop === "2º NEOP" ? "Operação de rotina - Procedimentos padrão" : neop === "3º NEOP" ? "Operação com risco moderado - Requer coordenação" : "Necessita de planeamento especializado";
+  let neopColor = neop === "2º NEOP" ? "#22c55e" : neop === "3º NEOP" ? "#f97316" : "#ef4444";
   
   return { pontuacao, neop, complexidade, descricao, neopColor };
 }
 
 export default function EditEvaluation() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const [, navigate] = useLocation();
   const [form, setForm] = useState<FormState | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -142,10 +117,12 @@ export default function EditEvaluation() {
 
   const updateMutation = trpc.evaluations.update.useMutation({
     onSuccess: () => {
-      toast.success("Avaliação atualizada com sucesso!");
+      toast.success("Avaliação guardada com sucesso!");
       navigate("/");
     },
-    onError: (e: any) => toast.error("Erro ao atualizar: " + e.message),
+    onError: (error) => {
+      toast.error(`Erro ao guardar: ${error.message}`);
+    },
   });
 
   useEffect(() => {
@@ -160,7 +137,6 @@ export default function EditEvaluation() {
         pocNome: evaluation.pocNome || "",
         pocContacto: evaluation.pocContacto || "",
         despacho: evaluation.despacho || "",
-        cterRequerente: "",
         mandadoDetencao: evaluation.mandadoDetencao === 1,
         mandadoBusca: evaluation.mandadoBusca === 1,
         quantidadeSuspeitos: evaluation.quantidadeSuspeitos || "1",
@@ -241,12 +217,11 @@ export default function EditEvaluation() {
     );
   }
 
-  const { pontuacao, neop, complexidade, descricao, neopColor } = calcScore(form);
+  const { pontuacao, neop, complexidade, neopColor } = calcScore(form);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <Button
@@ -279,7 +254,6 @@ export default function EditEvaluation() {
           </Button>
         </div>
 
-        {/* Score Display */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg border-l-4 border-green-700">
             <div className="text-sm text-gray-600">Pontuação</div>
@@ -295,7 +269,6 @@ export default function EditEvaluation() {
           </div>
         </div>
 
-        {/* Form */}
         <div className="bg-white p-6 rounded-lg space-y-6">
           {/* Informação Básica */}
           <div>
@@ -303,40 +276,66 @@ export default function EditEvaluation() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="block mb-2">NUIPC</Label>
-                <Input
-                  value={form.nuipc}
-                  onChange={(e) => set("nuipc", e.target.value)}
-                  placeholder="NUIPC"
-                />
+                <Input value={form.nuipc} onChange={(e) => set("nuipc", e.target.value)} placeholder="NUIPC" />
               </div>
               <div>
                 <Label className="block mb-2">Entidade Solicitadora</Label>
-                <Input
-                  value={form.entidadeSolicitadora}
-                  onChange={(e) => set("entidadeSolicitadora", e.target.value)}
-                  placeholder="Entidade"
-                />
+                <Input value={form.entidadeSolicitadora} onChange={(e) => set("entidadeSolicitadora", e.target.value)} placeholder="Entidade" />
               </div>
               <div>
                 <Label className="block mb-2">Ref. Filedoc</Label>
-                <Input
-                  value={form.refFiledoc}
-                  onChange={(e) => set("refFiledoc", e.target.value)}
-                  placeholder="Ref. Filedoc"
-                />
+                <Input value={form.refFiledoc} onChange={(e) => set("refFiledoc", e.target.value)} placeholder="Ref. Filedoc" />
               </div>
               <div>
                 <Label className="block mb-2">Email</Label>
-                <Input
-                  value={form.email}
-                  onChange={(e) => set("email", e.target.value)}
-                  placeholder="Email"
-                />
+                <Input value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="Email" />
+              </div>
+              <div>
+                <Label className="block mb-2">Ordem Verbal</Label>
+                <Input value={form.ordemVerbal} onChange={(e) => set("ordemVerbal", e.target.value)} placeholder="Ordem Verbal" />
+              </div>
+              <div>
+                <Label className="block mb-2">Despacho</Label>
+                <Input value={form.despacho} onChange={(e) => set("despacho", e.target.value)} placeholder="Despacho" />
               </div>
             </div>
           </div>
 
-          {/* Tipo de Crime */}
+          {/* Ponto de Contacto */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Ponto de Contacto</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label className="block mb-2">Posto</Label>
+                <Input value={form.pocPosto} onChange={(e) => set("pocPosto", e.target.value)} placeholder="Posto" />
+              </div>
+              <div>
+                <Label className="block mb-2">Nome</Label>
+                <Input value={form.pocNome} onChange={(e) => set("pocNome", e.target.value)} placeholder="Nome" />
+              </div>
+              <div>
+                <Label className="block mb-2">Contacto</Label>
+                <Input value={form.pocContacto} onChange={(e) => set("pocContacto", e.target.value)} placeholder="Contacto" />
+              </div>
+            </div>
+          </div>
+
+          {/* Mandados */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Mandados</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.mandadoDetencao} onCheckedChange={(v) => set("mandadoDetencao", !!v)} />
+                <Label>Mandado de Detenção</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.mandadoBusca} onCheckedChange={(v) => set("mandadoBusca", !!v)} />
+                <Label>Mandado de Busca</Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Atividade Criminal */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Atividade Criminal</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -373,18 +372,43 @@ export default function EditEvaluation() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={form.modalidadeIsolado}
-                  onCheckedChange={(v) => set("modalidadeIsolado", !!v)}
-                />
+                <Checkbox checked={form.modalidadeIsolado} onCheckedChange={(v) => set("modalidadeIsolado", !!v)} />
                 <Label>Modalidade Isolado</Label>
               </div>
               <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={form.modalidadeAssociacao}
-                  onCheckedChange={(v) => set("modalidadeAssociacao", !!v)}
-                />
+                <Checkbox checked={form.modalidadeAssociacao} onCheckedChange={(v) => set("modalidadeAssociacao", !!v)} />
                 <Label>Associação Criminosa</Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Antecedentes */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Antecedentes</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.antecedentesContraPessoas} onCheckedChange={(v) => set("antecedentesContraPessoas", !!v)} />
+                <Label>Contra Pessoas</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.antecedentesContraPatrimonio} onCheckedChange={(v) => set("antecedentesContraPatrimonio", !!v)} />
+                <Label>Contra Património</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.antecedentesOutros} onCheckedChange={(v) => set("antecedentesOutros", !!v)} />
+                <Label>Outros</Label>
+              </div>
+              <div>
+                <Label className="block mb-2">Antecedentes FSS</Label>
+                <Select value={form.antecedentesFSS} onValueChange={(v) => set("antecedentesFSS", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="sim">Sim</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -421,22 +445,96 @@ export default function EditEvaluation() {
             </div>
           </div>
 
+          {/* Tipologia */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Tipologia</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.tipologiaApartamento} onCheckedChange={(v) => set("tipologiaApartamento", !!v)} />
+                <Label>Apartamento</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.tipologiaMoradia} onCheckedChange={(v) => set("tipologiaMoradia", !!v)} />
+                <Label>Moradia</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.tipologiaOutro} onCheckedChange={(v) => set("tipologiaOutro", !!v)} />
+                <Label>Outro</Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Contexto */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Contexto</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.contextoIsolado} onCheckedChange={(v) => set("contextoIsolado", !!v)} />
+                <Label>Isolado</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.contextoBairroSocial} onCheckedChange={(v) => set("contextoBairroSocial", !!v)} />
+                <Label>Bairro Social</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.contextoMeioUrbano} onCheckedChange={(v) => set("contextoMeioUrbano", !!v)} />
+                <Label>Meio Urbano</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.contextoMeioRural} onCheckedChange={(v) => set("contextoMeioRural", !!v)} />
+                <Label>Meio Rural</Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Segurança */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Segurança</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.segurancaCaes} onCheckedChange={(v) => set("segurancaCaes", !!v)} />
+                <Label>Cães</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.segurancaPortaBlindada} onCheckedChange={(v) => set("segurancaPortaBlindada", !!v)} />
+                <Label>Porta Blindada</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.segurancaOutrasMedidas} onCheckedChange={(v) => set("segurancaOutrasMedidas", !!v)} />
+                <Label>Outras Medidas</Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Avaliador e Data */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Informação da Avaliação</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="block mb-2">Avaliador</Label>
+                <Input value={form.avaliador} onChange={(e) => set("avaliador", e.target.value)} placeholder="Avaliador" />
+              </div>
+              <div>
+                <Label className="block mb-2">Data da Avaliação</Label>
+                <Input type="date" value={form.dataAvaliacao} onChange={(e) => set("dataAvaliacao", e.target.value)} />
+              </div>
+            </div>
+          </div>
+
           {/* NEOP Manual */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">NEOP Manual (Opcional)</h2>
-            <div>
-              <Label className="block mb-2">Selecione um NEOP para sobrescrever o calculado</Label>
-              <Select value={form.neopManual} onValueChange={(v) => set("neopManual", v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sem seleção (usar calculado)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2º NEOP">2º NEOP</SelectItem>
-                  <SelectItem value="3º NEOP">3º NEOP</SelectItem>
-                  <SelectItem value="4º NEOP">4º NEOP</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={form.neopManual || "none"} onValueChange={(v) => set("neopManual", v === "none" ? "" : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sem seleção (usar calculado)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem seleção (usar calculado)</SelectItem>
+                <SelectItem value="2º NEOP">2º NEOP</SelectItem>
+                <SelectItem value="3º NEOP">3º NEOP</SelectItem>
+                <SelectItem value="4º NEOP">4º NEOP</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Parecer */}
