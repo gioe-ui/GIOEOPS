@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, ArrowLeft, Save } from "lucide-react";
+import { Loader2, ArrowLeft, Save, FileText } from "lucide-react";
 
 const TIPO_SCORES: Record<string, number> = {
   trafico: 7, assalto: 6, homicidio: 10, sequestro: 9, violencia: 8, outro: 4,
@@ -235,23 +235,32 @@ export default function EditEvaluation() {
             </Button>
             <h1 className="text-2xl font-bold text-gray-900">Editar Avaliação</h1>
           </div>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-green-700 hover:bg-green-800 text-white"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Guardar
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-green-700 hover:bg-green-800 text-white"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Guardar
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={() => navigate(`/print/${id}`)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Gerar PDF
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-6">
