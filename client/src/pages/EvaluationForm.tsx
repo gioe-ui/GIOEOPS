@@ -48,6 +48,8 @@ type FormState = {
   segurancaCaes: boolean; segurancaPortaBlindada: boolean; segurancaOutrasMedidas: boolean;
   avaliador: string; dataAvaliacao: string; parecer: string;
   neopManual: string; // Campo para sobrescrever NEOP calculado
+  observacoes: string; // Observações após Local
+  outrasObservacoes: string; // Outras observações antes do Parecer
 };
 
 const DEFAULT: FormState = {
@@ -62,6 +64,8 @@ const DEFAULT: FormState = {
   segurancaCaes: false, segurancaPortaBlindada: false, segurancaOutrasMedidas: false,
   avaliador: "", dataAvaliacao: new Date().toISOString().split("T")[0], parecer: "",
   neopManual: "",
+  observacoes: "",
+  outrasObservacoes: "",
 };
 
 function calcScore(f: FormState): { pontuacao: number; neop: string; complexidade: string; descricao: string; neopColor: string } {
@@ -497,6 +501,14 @@ export default function EvaluationForm() {
         </div>
       </Section>
 
+      {/* Observações após Local */}
+      <Section>
+        <div>
+          <Label className="text-sm font-semibold text-gray-600 mb-1 block">Observações</Label>
+          <Textarea placeholder="Registe aqui observações sobre o local..." value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} className="min-h-[80px] border-2 focus:border-[#1a472a]" />
+        </div>
+      </Section>
+
       {/* Avaliação */}
       <Section>
         <SectionTitle icon={<ClipboardList className="w-4 h-4" />} title="Avaliação" />
@@ -522,6 +534,10 @@ export default function EvaluationForm() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div>
+          <Label className="text-sm font-semibold text-gray-600 mb-1 block">Outras Observações</Label>
+          <Textarea placeholder="Registe aqui outras observações..." value={form.outrasObservacoes} onChange={(e) => set("outrasObservacoes", e.target.value)} className="min-h-[80px] border-2 focus:border-[#1a472a]" />
         </div>
         <div>
           <Label className="text-sm font-semibold text-gray-600 mb-1 block">Parecer</Label>
