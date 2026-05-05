@@ -364,6 +364,18 @@ export default function PrintEvaluation() {
                 <div className="text-sm">{evaluation.avaliador}</div>
               </div>
             )}
+            {evaluation.observacoes && (
+              <div className="mb-4">
+                <div className="text-xs font-semibold text-gray-600 mb-1">Observações</div>
+                <div className="text-sm whitespace-pre-wrap">{evaluation.observacoes}</div>
+              </div>
+            )}
+            {evaluation.outrasObservacoes && (
+              <div className="mb-4">
+                <div className="text-xs font-semibold text-gray-600 mb-1">Outras Observações</div>
+                <div className="text-sm whitespace-pre-wrap">{evaluation.outrasObservacoes}</div>
+              </div>
+            )}
             {evaluation.parecer && (
               <div>
                 <div className="text-xs font-semibold text-gray-600 mb-1">Parecer</div>

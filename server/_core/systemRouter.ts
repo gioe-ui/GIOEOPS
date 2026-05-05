@@ -56,6 +56,17 @@ export const systemRouter = router({
           ADD COLUMN IF NOT EXISTS updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER updatedBy
         `));
 
+        // Add observation columns
+        await db.execute(sql.raw(`
+          ALTER TABLE evaluations 
+          ADD COLUMN IF NOT EXISTS observacoes TEXT AFTER parecer
+        `));
+        
+        await db.execute(sql.raw(`
+          ALTER TABLE evaluations 
+          ADD COLUMN IF NOT EXISTS outrasObservacoes TEXT AFTER observacoes
+        `));
+
         return { success: true, message: "Migration completed successfully" };
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);

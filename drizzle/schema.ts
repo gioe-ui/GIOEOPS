@@ -73,6 +73,8 @@ export const evaluations = mysqlTable("evaluations", {
   avaliador: varchar("avaliador", { length: 255 }),
   dataAvaliacao: varchar("dataAvaliacao", { length: 20 }),
   parecer: text("parecer"),
+  observacoes: text("observacoes"),
+  outrasObservacoes: text("outrasObservacoes"),
   // Resultado
   pontuacao: int("pontuacao").notNull().default(0),
   neop: varchar("neop", { length: 20 }).notNull(),

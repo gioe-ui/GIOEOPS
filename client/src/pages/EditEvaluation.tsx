@@ -36,6 +36,7 @@ type FormState = {
   tipologiaApartamento: boolean; tipologiaMoradia: boolean; tipologiaOutro: boolean;
   contextoIsolado: boolean; contextoBairroSocial: boolean; contextoMeioUrbano: boolean; contextoMeioRural: boolean;
   segurancaCaes: boolean; segurancaPortaBlindada: boolean; segurancaOutrasMedidas: boolean;
+  observacoes: string; outrasObservacoes: string;
   avaliador: string; dataAvaliacao: string; parecer: string; neopManual: string;
 };
 
@@ -159,6 +160,8 @@ export default function EditEvaluation() {
         segurancaCaes: evaluation.segurancaCaes === 1,
         segurancaPortaBlindada: evaluation.segurancaPortaBlindada === 1,
         segurancaOutrasMedidas: evaluation.segurancaOutrasMedidas === 1,
+        observacoes: (evaluation as any).observacoes || "",
+        outrasObservacoes: (evaluation as any).outrasObservacoes || "",
         avaliador: evaluation.avaliador || "",
         dataAvaliacao: evaluation.dataAvaliacao || new Date().toISOString().split("T")[0],
         parecer: evaluation.parecer || "",
@@ -515,6 +518,17 @@ export default function EditEvaluation() {
             </div>
           </div>
 
+          {/* Observações */}
+          <div>
+            <Label className="block mb-2">Observações</Label>
+            <Textarea
+              value={form.observacoes}
+              onChange={(e) => set("observacoes", e.target.value)}
+              placeholder="Registe aqui observações sobre o local..."
+              rows={3}
+            />
+          </div>
+
           {/* Avaliador e Data */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Informação da Avaliação</h2>
@@ -544,6 +558,17 @@ export default function EditEvaluation() {
                 <SelectItem value="4º NEOP">4º NEOP</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Outras Observações */}
+          <div>
+            <Label className="block mb-2">Outras Observações</Label>
+            <Textarea
+              value={form.outrasObservacoes}
+              onChange={(e) => set("outrasObservacoes", e.target.value)}
+              placeholder="Registe aqui outras observações..."
+              rows={3}
+            />
           </div>
 
           {/* Parecer */}
