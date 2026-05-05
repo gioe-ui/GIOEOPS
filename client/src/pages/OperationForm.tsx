@@ -981,7 +981,7 @@ export default function OperationForm() {
                     />
                   </div>
                   <div>
-                    <Label className="mb-3 block">Beam Bag</Label>
+                    <Label className="mb-3 block">Bean Bag</Label>
                     <Input
                       type="number"
                       value={form.municoesCacadeiraBeamBag}
@@ -1011,7 +1011,7 @@ export default function OperationForm() {
                 <h4 className="font-semibold mb-4">Munições Revólver / TASER</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label className="mb-3 block">Revólver ASP</Label>
+                    <Label className="mb-3 block">Revólver</Label>
                     <Input
                       type="number"
                       value={form.municoesRevolverASP}
@@ -1068,7 +1068,7 @@ export default function OperationForm() {
               </div>
 
               <div>
-                <Label className="mb-3 block">Algemas</Label>
+                <Label className="mb-3 block">Algemas ASP</Label>
                 <Input
                   value={form.taserAlgemas}
                   onChange={(e) => handleInputChange("taserAlgemas", e.target.value)}

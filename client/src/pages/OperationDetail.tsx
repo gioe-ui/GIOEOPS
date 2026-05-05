@@ -552,7 +552,7 @@ export function OperationDetail() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Munições Caçadeira Beam Bag</Label>
+                <Label>Munições Caçadeira Bean Bag</Label>
                 <Input
                   type="number"
                   value={form.municoesCacadeiraBeamBag || 0}
@@ -624,7 +624,7 @@ export function OperationDetail() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Taser Algemas</Label>
+                <Label>Algemas ASP</Label>
                 <Input
                   value={form.taserAlgemas || ""}
                   onChange={(e) => handleInputChange("taserAlgemas", e.target.value)}

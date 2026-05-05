@@ -181,19 +181,19 @@ export default function PrintOperation() {
         {renderSection("CONSUMOS - MUNIÇÕES CAÇADEIRA", [
           ["Barracha", operation.municoesCacadeiraBarracha],
           ["Chumbo", operation.municoesCacadeiraChumbo],
-          ["Beam Bag", operation.municoesCacadeiraBeamBag],
+          ["Bean Bag", operation.municoesCacadeiraBeamBag],
           ["Zagalote", operation.municoesCacadeiraZagalote],
           ["Zinco", operation.municoesCacadeiraZinco],
         ])}
 
         {renderSection("CONSUMOS - MUNIÇÕES REVÓLVER / TASER", [
-          ["Revólver ASP", operation.municoesRevolverASP],
+          ["Revólver", operation.municoesRevolverASP],
           ["TASER Carga X26", operation.taserCargaX26],
           ["Granada Flash Bang 1 Estalo 1 Bang", operation.taserGranadaFlashBang1Estalo],
           ["Granada Flash Bang 1 Estalo 2 Bang", operation.taserGranadaFlashBang1Estalo2Bang],
           ["Granada Flash Bang 2 Estalos 2 Bangs", operation.taserGranadaFlashBang2Estalos2Bangs],
           ["Granada Flash Bang Múltiplos", operation.taserGranadaFlashBangMultiplos],
-          ["Algemas", operation.taserAlgemas],
+          ["Algemas ASP", operation.taserAlgemas],
           ["Observações", operation.obsConsumos],
         ])}
 
