@@ -179,6 +179,8 @@ const EvaluationInput = z.object({
   segurancaOutrasMedidas: z.number().int().default(0),
   avaliador: z.string().optional(),
   dataAvaliacao: z.string().optional(),
+  observacoes: z.string().optional(),
+  outrasObservacoes: z.string().optional(),
   parecer: z.string().optional(),
   neopManual: z.string().optional(),
 });
