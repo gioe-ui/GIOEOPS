@@ -332,6 +332,14 @@ export default function PrintEvaluation() {
             </div>
           )}
 
+          {/* Observações */}
+          {evaluation.observacoes && (
+            <div className="bg-gray-50 rounded-xl p-5 mb-5 border-l-4" style={{ borderColor: "#1a472a" }}>
+              <div className="text-sm font-semibold text-gray-600 mb-2">Observações</div>
+              <div className="text-sm whitespace-pre-wrap">{evaluation.observacoes}</div>
+            </div>
+          )}
+
           {/* Classificação e Parecer */}
           <div className="bg-gray-50 rounded-xl p-5 mb-5 border-l-4" style={{ borderColor: "#1a472a" }}>
             <div className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#1a472a" }}>
@@ -362,12 +370,6 @@ export default function PrintEvaluation() {
               <div className="mb-4">
                 <div className="text-xs font-semibold text-gray-600 mb-1">Avaliador</div>
                 <div className="text-sm">{evaluation.avaliador}</div>
-              </div>
-            )}
-            {evaluation.observacoes && (
-              <div className="mb-4">
-                <div className="text-xs font-semibold text-gray-600 mb-1">Observações</div>
-                <div className="text-sm whitespace-pre-wrap">{evaluation.observacoes}</div>
               </div>
             )}
             {evaluation.outrasObservacoes && (
