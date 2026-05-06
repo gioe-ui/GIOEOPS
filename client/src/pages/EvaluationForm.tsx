@@ -641,7 +641,9 @@ export default function EvaluationForm() {
                 usoArma: form.usoArma,
                 avaliador: form.avaliador,
                 dataAvaliacao: form.dataAvaliacao,
-                neopManual: form.neopManual,
+                neopManual: form.neopManual || "",
+                observacoes: form.observacoes,
+                outrasObservacoes: form.outrasObservacoes,
               })}
               disabled={createMutation.isPending}
               style={{ background: "#1a472a" }}

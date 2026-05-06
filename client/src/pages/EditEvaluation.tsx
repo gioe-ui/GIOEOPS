@@ -198,6 +198,9 @@ export default function EditEvaluation() {
         segurancaCaes: form.segurancaCaes ? 1 : 0,
         segurancaPortaBlindada: form.segurancaPortaBlindada ? 1 : 0,
         segurancaOutrasMedidas: form.segurancaOutrasMedidas ? 1 : 0,
+        observacoes: form.observacoes,
+        outrasObservacoes: form.outrasObservacoes,
+        neopManual: form.neopManual || "",
       });
     } finally {
       setIsSaving(false);

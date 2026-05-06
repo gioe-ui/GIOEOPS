@@ -16,7 +16,9 @@ describe("Evaluation Update and Audit Tracking", () => {
       pontuacao: 50,
       neop: "3º NEOP",
     });
-    testEvaluationId = result.id;
+    // Get the ID from the result - it could be an evaluation object or have insertId
+    testEvaluationId = (result as any).id || ((result as any).insertId ? Number((result as any).insertId) : undefined);
+    if (!testEvaluationId) throw new Error("Failed to create test evaluation");
   });
 
   afterAll(async () => {

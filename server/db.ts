@@ -78,7 +78,18 @@ export async function getUserByOpenId(openId: string) {
 export async function createEvaluation(data: InsertEvaluation) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const result = await db.insert(evaluations).values(data);
+  const result = await db.insert(evaluations).values(data) as any;
+  // Get the insertId from the result
+  let insertedId = null;
+  if (result.insertId) {
+    insertedId = Number(result.insertId);
+  } else if (result[0]?.insertId) {
+    insertedId = Number(result[0].insertId);
+  }
+  if (insertedId) {
+    const inserted = await getEvaluationById(insertedId);
+    return inserted || result;
+  }
   return result;
 }
 
