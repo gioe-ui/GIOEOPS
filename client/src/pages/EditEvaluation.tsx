@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, ArrowLeft, Save, FileText } from "lucide-react";
+import { SuspectForm, Suspect } from "@/components/SuspectForm";
 
 const TIPO_SCORES: Record<string, number> = {
   trafico: 7, assalto: 6, homicidio: 10, sequestro: 9, violencia: 8, outro: 4,
@@ -110,14 +111,44 @@ export default function EditEvaluation() {
   const [, navigate] = useLocation();
   const [form, setForm] = useState<FormState | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [suspects, setSuspects] = useState<Suspect[]>([]);
 
   const { data: evaluation, isLoading } = trpc.evaluations.getById.useQuery(
     { id: parseInt(id || "0") },
     { enabled: !!id }
   );
 
+  const { data: suspectsList } = trpc.suspects.getByEvaluationId.useQuery(
+    { evaluationId: parseInt(id || "0") },
+    { enabled: !!id }
+  );
+
+  const suspectsMutation = trpc.suspects.createBatch.useMutation();
+  const suspectsDeleteMutation = trpc.suspects.deleteByEvaluationId.useMutation();
+
   const updateMutation = trpc.evaluations.update.useMutation({
     onSuccess: () => {
+      // Atualizar suspeitos
+      if (id) {
+        const evaluationId = parseInt(id);
+        // Deletar suspeitos antigos
+        suspectsDeleteMutation.mutate({ evaluationId });
+        // Criar novos suspeitos
+        if (suspects.length > 0) {
+          suspectsMutation.mutate({
+            evaluationId,
+            suspects: suspects.map(s => ({
+              nome: s.nome,
+              dataNascimento: s.dataNascimento,
+              nacionalidade: s.nacionalidade,
+              nif: s.nif,
+              cc: s.cc,
+              morada: s.morada,
+              observacoes: s.observacoes,
+            })),
+          });
+        }
+      }
       toast.success("Avaliação guardada com sucesso!");
       navigate("/");
     },
@@ -169,6 +200,21 @@ export default function EditEvaluation() {
       });
     }
   }, [evaluation, form]);
+
+  useEffect(() => {
+    if (suspectsList && suspectsList.length > 0) {
+      setSuspects(suspectsList.map(s => ({
+        id: s.id,
+        nome: s.nome || "",
+        dataNascimento: s.dataNascimento || "",
+        nacionalidade: s.nacionalidade || "",
+        nif: s.nif || "",
+        cc: s.cc || "",
+        morada: s.morada || "",
+        observacoes: s.observacoes || "",
+      })));
+    }
+  }, [suspectsList]);
 
   const set = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => prev ? { ...prev, [key]: value } : null);
@@ -384,6 +430,10 @@ export default function EditEvaluation() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="mt-6 pt-6 border-t">
+              <h3 className="text-md font-semibold text-gray-900 mb-4">Identificação de Suspeito(s)</h3>
+              <SuspectForm suspects={suspects} onSuspectsChange={setSuspects} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div className="flex items-center gap-2">

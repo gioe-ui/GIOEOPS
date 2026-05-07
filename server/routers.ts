@@ -32,6 +32,11 @@ import {
   flagIncompleteOperations,
   getFlaggedOperations,
   getOperationWithAssignedUser,
+  createSuspect,
+  getSuspectsByEvaluationId,
+  updateSuspect,
+  deleteSuspect,
+  deleteSuspectsByEvaluationId,
 } from "./db";
 import { TRPCError } from "@trpc/server";
 import { users } from "../drizzle/schema";
@@ -217,8 +222,8 @@ export const appRouter = router({
       const { pontuacao, neop: neopCalculado } = calcScore(input);
       // Usar NEOP manual se fornecido, caso contrário usar o calculado
       const neop = input.neopManual || neopCalculado;
-      await createEvaluation({ ...input, userId: ctx.user.id, pontuacao, neop });
-      return { success: true, pontuacao, neop };
+      const result = await createEvaluation({ ...input, userId: ctx.user.id, pontuacao, neop });
+      return { success: true, pontuacao, neop, evaluationId: result?.id };
     }),
 
     update: protectedProcedure
@@ -656,6 +661,70 @@ export const appRouter = router({
       .input(z.object({ operationId: z.number().int() }))
       .query(async ({ input }) => {
         return getOperationWithAssignedUser(input.operationId);
+      }),
+  }),
+
+  suspects: router({
+    createBatch: protectedProcedure
+      .input(z.object({
+        evaluationId: z.number().int(),
+        suspects: z.array(z.object({
+          nome: z.string().optional(),
+          dataNascimento: z.string().optional(),
+          nacionalidade: z.string().optional(),
+          nif: z.string().optional(),
+          cc: z.string().optional(),
+          morada: z.string().optional(),
+          observacoes: z.string().optional(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        const created = [];
+        for (const suspect of input.suspects) {
+          const result = await createSuspect({
+            evaluationId: input.evaluationId,
+            ...suspect,
+          });
+          if (result) created.push(result);
+        }
+        return created;
+      }),
+
+    getByEvaluationId: protectedProcedure
+      .input(z.object({ evaluationId: z.number().int() }))
+      .query(async ({ input }) => {
+        return getSuspectsByEvaluationId(input.evaluationId);
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int(),
+        nome: z.string().optional(),
+        dataNascimento: z.string().optional(),
+        nacionalidade: z.string().optional(),
+        nif: z.string().optional(),
+        cc: z.string().optional(),
+        morada: z.string().optional(),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updateSuspect(id, data);
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ input }) => {
+        await deleteSuspect(input.id);
+        return { success: true };
+      }),
+
+    deleteByEvaluationId: protectedProcedure
+      .input(z.object({ evaluationId: z.number().int() }))
+      .mutation(async ({ input }) => {
+        await deleteSuspectsByEvaluationId(input.evaluationId);
+        return { success: true };
       }),
   }),
 });

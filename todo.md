@@ -350,6 +350,14 @@
 
 ## Sprint 2 - Novas Funcionalidades
 
+- [x] Adicionar campos de identificação de suspeitos com múltiplos registos
+  - [x] Criar tabela de suspeitos na base de dados
+  - [x] Atualizar formulários (Create e Edit) com campos de suspeito
+  - [x] Implementar adição/remoção dinâmica de suspeitos
+  - [x] Guardar dados de suspeitos na base de dados
+  - [x] Exibir dados de suspeitos no PDF
+  - [x] Testar persistência de dados de suspeitos
+
 - [x] Adicionar botão para gerar PDF no novo formulário (OperationForm.tsx)
 - [x] Disponibilizar PDF para download na página de situação (OperationDetail.tsx)
 - [x] Tornar todas as operações de 2º, 3º e 4º NEOP editáveis (remover restrição de apenas 4º NEOP)

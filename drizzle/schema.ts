@@ -192,3 +192,22 @@ export const notifications = mysqlTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+export const suspects = mysqlTable("suspects", {
+  id: int("id").autoincrement().primaryKey(),
+  evaluationId: int("evaluationId").notNull(),
+  // Identificação do Suspeito
+  nome: varchar("nome", { length: 255 }),
+  dataNascimento: varchar("dataNascimento", { length: 20 }),
+  nacionalidade: varchar("nacionalidade", { length: 100 }),
+  nif: varchar("nif", { length: 20 }),
+  cc: varchar("cc", { length: 20 }),
+  morada: text("morada"),
+  // Observações
+  observacoes: text("observacoes"),
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Suspect = typeof suspects.$inferSelect;
+export type InsertSuspect = typeof suspects.$inferInsert;

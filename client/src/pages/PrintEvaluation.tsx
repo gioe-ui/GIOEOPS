@@ -64,6 +64,11 @@ export default function PrintEvaluation() {
     { enabled: !!id }
   );
 
+  const { data: suspects = [] } = trpc.suspects.getByEvaluationId.useQuery(
+    { evaluationId: parseInt(id || "0") },
+    { enabled: !!id }
+  );
+
   const utils = trpc.useUtils();
 
   const updateMutation = trpc.evaluations.update.useMutation({
@@ -113,7 +118,7 @@ export default function PrintEvaluation() {
   const cter = extractCter(evaluation.parecer);
 
   // Helper para verificar se uma seção tem conteúdo
-  const hasSuspectosContent = evaluation.mandadoDetencao === 1 || evaluation.mandadoBusca === 1 || evaluation.quantidadeSuspeitos !== "1";
+  const hasSuspectosContent = evaluation.mandadoDetencao === 1 || evaluation.mandadoBusca === 1 || evaluation.quantidadeSuspeitos !== "1" || suspects.length > 0;
   const hasAtividadeCriminalContent = evaluation.modalidadeIsolado === 1 || evaluation.modalidadeAssociacao === 1 || evaluation.tipoCriminal || 
     evaluation.antecedentesContraPessoas === 1 || evaluation.antecedentesContraPatrimonio === 1 || 
     evaluation.antecedentesOutros === 1 || evaluation.antecedentesFSS;
@@ -265,7 +270,7 @@ export default function PrintEvaluation() {
           </div>
 
           {/* Suspeitos */}
-          {hasSuspectosContent && (
+          {(hasSuspectosContent || suspects.length > 0) && (
             <div className="bg-gray-50 rounded-xl p-5 mb-5 border-l-4" style={{ borderColor: "#1a472a" }}>
               <div className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#1a472a" }}>
                 Suspeitos
@@ -273,7 +278,24 @@ export default function PrintEvaluation() {
               {evaluation.mandadoDetencao === 1 && <div className="text-sm mb-2">✓ Mandado de Detenção</div>}
               {evaluation.mandadoBusca === 1 && <div className="text-sm mb-2">✓ Mandado de Busca</div>}
               {evaluation.quantidadeSuspeitos && evaluation.quantidadeSuspeitos !== "1" && (
-                <div className="text-sm">Quantidade: {QTD_LABELS[evaluation.quantidadeSuspeitos] || evaluation.quantidadeSuspeitos}</div>
+                <div className="text-sm mb-4">Quantidade: {QTD_LABELS[evaluation.quantidadeSuspeitos] || evaluation.quantidadeSuspeitos}</div>
+              )}
+              {suspects.length > 0 && (
+                <div className="mt-4 pt-4 border-t">
+                  <div className="text-sm font-semibold mb-3">Identificação de Suspeitos:</div>
+                  {suspects.map((suspect, index) => (
+                    <div key={index} className="mb-4 p-3 bg-white rounded border border-gray-200">
+                      <div className="text-sm font-semibold mb-2">Suspeito {index + 1}</div>
+                      {suspect.nome && <div className="text-sm"><strong>Nome:</strong> {suspect.nome}</div>}
+                      {suspect.dataNascimento && <div className="text-sm"><strong>Data Nascimento:</strong> {suspect.dataNascimento}</div>}
+                      {suspect.nacionalidade && <div className="text-sm"><strong>Nacionalidade:</strong> {suspect.nacionalidade}</div>}
+                      {suspect.nif && <div className="text-sm"><strong>NIF:</strong> {suspect.nif}</div>}
+                      {suspect.cc && <div className="text-sm"><strong>CC:</strong> {suspect.cc}</div>}
+                      {suspect.morada && <div className="text-sm"><strong>Morada:</strong> {suspect.morada}</div>}
+                      {suspect.observacoes && <div className="text-sm"><strong>Observações:</strong> {suspect.observacoes}</div>}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           )}

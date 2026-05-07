@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, like, lte, inArray, or, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation, notifications, Notification } from "../drizzle/schema";
+import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation, notifications, Notification, suspects, InsertSuspect, Suspect } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -545,4 +545,56 @@ export async function getOperationWithAssignedUser(operationId: number): Promise
     .limit(1);
   
   return { operation: op[0], user: user?.[0] };
+}
+
+// ─── Suspects ────────────────────────────────────────────────────────────────
+
+export async function createSuspect(data: InsertSuspect): Promise<Suspect | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(suspects).values(data) as any;
+  
+  let insertedId = null;
+  if (result.insertId) {
+    insertedId = Number(result.insertId);
+  } else if (result[0]?.insertId) {
+    insertedId = Number(result[0].insertId);
+  }
+  
+  if (insertedId) {
+    const inserted = await getSuspectById(insertedId);
+    return inserted || null;
+  }
+  return null;
+}
+
+export async function getSuspectById(id: number): Promise<Suspect | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(suspects).where(eq(suspects.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getSuspectsByEvaluationId(evaluationId: number): Promise<Suspect[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(suspects).where(eq(suspects.evaluationId, evaluationId));
+}
+
+export async function updateSuspect(id: number, data: Partial<InsertSuspect>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(suspects).set(data).where(eq(suspects.id, id));
+}
+
+export async function deleteSuspect(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(suspects).where(eq(suspects.id, id));
+}
+
+export async function deleteSuspectsByEvaluationId(evaluationId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(suspects).where(eq(suspects.evaluationId, evaluationId));
 }

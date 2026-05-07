@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Save, User, AlertTriangle, Crosshair, MapPin, ClipboardList, Download } from "lucide-react";
+import { SuspectForm, Suspect } from "@/components/SuspectForm";
 
 
 // ─── Scoring ─────────────────────────────────────────────────────────────────
@@ -173,16 +173,35 @@ const CheckItem = ({
 export default function EvaluationForm() {
   const [form, setForm] = useState<FormState>(DEFAULT);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [suspects, setSuspects] = useState<Suspect[]>([]);
   const utils = trpc.useUtils();
 
   const { pontuacao, neop, complexidade, descricao, neopColor: neopColorFromCalc } = calcScore(form);
 
 
 
+  const suspectsMutation = trpc.suspects.createBatch.useMutation();
+
   const createMutation = trpc.evaluations.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (result: any) => {
+      // Guardar suspeitos se existirem
+      if (suspects.length > 0 && result?.evaluationId) {
+        suspectsMutation.mutate({
+          evaluationId: result.evaluationId,
+          suspects: suspects.map(s => ({
+            nome: s.nome,
+            dataNascimento: s.dataNascimento,
+            nacionalidade: s.nacionalidade,
+            nif: s.nif,
+            cc: s.cc,
+            morada: s.morada,
+            observacoes: s.observacoes,
+          })),
+        });
+      }
       toast.success("Avaliação guardada com sucesso!");
       setForm({ ...DEFAULT, dataAvaliacao: new Date().toISOString().split("T")[0] });
+      setSuspects([]);
       setShowConfirm(false);
       utils.evaluations.list.invalidate();
       utils.statistics.get.invalidate();
@@ -194,6 +213,8 @@ export default function EvaluationForm() {
   const set = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   }, []);
+
+
 
 
 
@@ -374,7 +395,7 @@ export default function EvaluationForm() {
       {/* Suspeitos */}
       <Section>
         <SectionTitle icon={<AlertTriangle className="w-4 h-4" />} title="Suspeito(s)" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <Label className="text-sm font-semibold text-gray-600 mb-2 block">Mandados</Label>
             <CheckItem id="mandadoDetencao" label="Mandado de detenção (+5)" checked={form.mandadoDetencao} onCheckedChange={(v) => set("mandadoDetencao", v as boolean)} />
@@ -392,6 +413,9 @@ export default function EvaluationForm() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div className="border-t pt-6">
+          <SuspectForm suspects={suspects} onSuspectsChange={setSuspects} />
         </div>
       </Section>
 
