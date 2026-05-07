@@ -50,7 +50,7 @@ export const evaluations = mysqlTable("evaluations", {
   // Atividade Criminal
   modalidadeIsolado: int("modalidadeIsolado").default(0),
   modalidadeAssociacao: int("modalidadeAssociacao").default(0),
-  tipoCriminal: varchar("tipoCriminal", { length: 50 }),
+  tipoCriminal: varchar("tipoCriminal", { length: 255 }),
   antecedentesContraPessoas: int("antecedentesContraPessoas").default(0),
   antecedentesContraPatrimonio: int("antecedentesContraPatrimonio").default(0),
   antecedentesOutros: int("antecedentesOutros").default(0),

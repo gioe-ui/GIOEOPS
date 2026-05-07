@@ -1,0 +1,1 @@
+ALTER TABLE `evaluations` MODIFY COLUMN `tipoCriminal` varchar(255);

@@ -30,7 +30,7 @@ type FormState = {
   mandadoDetencao: boolean; mandadoBusca: boolean;
   quantidadeSuspeitos: string;
   modalidadeIsolado: boolean; modalidadeAssociacao: boolean;
-  tipoCriminal: string;
+  tipoCriminal: string[];
   antecedentesContraPessoas: boolean; antecedentesContraPatrimonio: boolean; antecedentesOutros: boolean;
   antecedentesFSS: string;
   posseArma: string; usoArma: string;
@@ -48,7 +48,9 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   s += QTD_SCORES[f.quantidadeSuspeitos] ?? 1;
   if (f.modalidadeIsolado) s += 2;
   if (f.modalidadeAssociacao) s += 8;
-  s += TIPO_SCORES[f.tipoCriminal] ?? 4;
+  // Somar pontos de todos os tipos de crime selecionados
+  const crimeScores = f.tipoCriminal.map(tipo => TIPO_SCORES[tipo] ?? 4);
+  s += crimeScores.length > 0 ? Math.max(...crimeScores) : 4;
   if (f.antecedentesContraPessoas) s += 8;
   if (f.antecedentesContraPatrimonio) s += 5;
   if (f.antecedentesOutros) s += 3;
@@ -87,7 +89,7 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   const temArmaProbavel = f.posseArma === "provavel";
   const temUsoArma = f.usoArma === "haRegisto";
   const temAntecedentesContraFSS = f.antecedentesFSS === "sim";
-  const temCrimeGrave = ["homicidio", "sequestro", "violencia"].includes(f.tipoCriminal);
+  const temCrimeGrave = f.tipoCriminal.some(tipo => ["homicidio", "sequestro", "violencia"].includes(tipo));
   
   if (temAssociacaoCriminosa && (temArmaRegistada || temArmaProbavel)) {
     neop = "4º NEOP";
@@ -174,7 +176,7 @@ export default function EditEvaluation() {
         quantidadeSuspeitos: evaluation.quantidadeSuspeitos || "1",
         modalidadeIsolado: evaluation.modalidadeIsolado === 1,
         modalidadeAssociacao: evaluation.modalidadeAssociacao === 1,
-        tipoCriminal: evaluation.tipoCriminal || "outro",
+        tipoCriminal: (evaluation.tipoCriminal || "outro").split(",").filter(Boolean),
         antecedentesContraPessoas: evaluation.antecedentesContraPessoas === 1,
         antecedentesContraPatrimonio: evaluation.antecedentesContraPatrimonio === 1,
         antecedentesOutros: evaluation.antecedentesOutros === 1,
@@ -227,6 +229,7 @@ export default function EditEvaluation() {
       await updateMutation.mutateAsync({
         id: parseInt(id),
         ...form,
+        tipoCriminal: form.tipoCriminal.join(","),
         mandadoDetencao: form.mandadoDetencao ? 1 : 0,
         mandadoBusca: form.mandadoBusca ? 1 : 0,
         modalidadeIsolado: form.modalidadeIsolado ? 1 : 0,
@@ -402,19 +405,50 @@ export default function EditEvaluation() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="block mb-2">Tipo de Crime</Label>
-                <Select value={form.tipoCriminal} onValueChange={(v) => set("tipoCriminal", v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="trafico">Tráfico</SelectItem>
-                    <SelectItem value="assalto">Assalto</SelectItem>
-                    <SelectItem value="homicidio">Homicídio</SelectItem>
-                    <SelectItem value="sequestro">Sequestro</SelectItem>
-                    <SelectItem value="violencia">Violência</SelectItem>
-                    <SelectItem value="outro">Outro</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 py-1">
+                    <Checkbox id="trafico" checked={form.tipoCriminal.includes("trafico")} onCheckedChange={(v) => {
+                      if (v) set("tipoCriminal", [...form.tipoCriminal, "trafico"]);
+                      else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "trafico"));
+                    }} className="data-[state=checked]:bg-[#1a472a] data-[state=checked]:border-[#1a472a]" />
+                    <label htmlFor="trafico" className="text-sm cursor-pointer text-gray-700">Tráfico (+7)</label>
+                  </div>
+                  <div className="flex items-center gap-2 py-1">
+                    <Checkbox id="assalto" checked={form.tipoCriminal.includes("assalto")} onCheckedChange={(v) => {
+                      if (v) set("tipoCriminal", [...form.tipoCriminal, "assalto"]);
+                      else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "assalto"));
+                    }} className="data-[state=checked]:bg-[#1a472a] data-[state=checked]:border-[#1a472a]" />
+                    <label htmlFor="assalto" className="text-sm cursor-pointer text-gray-700">Assalto/Roubo (+6)</label>
+                  </div>
+                  <div className="flex items-center gap-2 py-1">
+                    <Checkbox id="homicidio" checked={form.tipoCriminal.includes("homicidio")} onCheckedChange={(v) => {
+                      if (v) set("tipoCriminal", [...form.tipoCriminal, "homicidio"]);
+                      else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "homicidio"));
+                    }} className="data-[state=checked]:bg-[#1a472a] data-[state=checked]:border-[#1a472a]" />
+                    <label htmlFor="homicidio" className="text-sm cursor-pointer text-gray-700">Homicídio (+10)</label>
+                  </div>
+                  <div className="flex items-center gap-2 py-1">
+                    <Checkbox id="sequestro" checked={form.tipoCriminal.includes("sequestro")} onCheckedChange={(v) => {
+                      if (v) set("tipoCriminal", [...form.tipoCriminal, "sequestro"]);
+                      else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "sequestro"));
+                    }} className="data-[state=checked]:bg-[#1a472a] data-[state=checked]:border-[#1a472a]" />
+                    <label htmlFor="sequestro" className="text-sm cursor-pointer text-gray-700">Sequestro (+9)</label>
+                  </div>
+                  <div className="flex items-center gap-2 py-1">
+                    <Checkbox id="violencia" checked={form.tipoCriminal.includes("violencia")} onCheckedChange={(v) => {
+                      if (v) set("tipoCriminal", [...form.tipoCriminal, "violencia"]);
+                      else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "violencia"));
+                    }} className="data-[state=checked]:bg-[#1a472a] data-[state=checked]:border-[#1a472a]" />
+                    <label htmlFor="violencia" className="text-sm cursor-pointer text-gray-700">Violência grave (+8)</label>
+                  </div>
+                  <div className="flex items-center gap-2 py-1">
+                    <Checkbox id="outro" checked={form.tipoCriminal.includes("outro")} onCheckedChange={(v) => {
+                      if (v) set("tipoCriminal", [...form.tipoCriminal, "outro"]);
+                      else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "outro"));
+                    }} className="data-[state=checked]:bg-[#1a472a] data-[state=checked]:border-[#1a472a]" />
+                    <label htmlFor="outro" className="text-sm cursor-pointer text-gray-700">Outro (+4)</label>
+                  </div>
+                </div>
               </div>
               <div>
                 <Label className="block mb-2">Quantidade de Suspeitos</Label>

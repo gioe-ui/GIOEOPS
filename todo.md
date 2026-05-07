@@ -416,3 +416,13 @@
 - [ ] Adicionar botão "Editar" no Dashboard para abrir página de edição
 - [ ] Implementar recalculo dinâmico de NEOP durante edição
 - [ ] Testar funcionalidade completa de edição
+
+## Sprint 3 - Alterações de UX
+
+- [x] Alterar "Tipo de atividade" de dropdown para caixas de verificação
+  - [x] Atualizar schema para suportar múltiplos tipos de atividade
+  - [x] Atualizar EvaluationForm com checkboxes para tipos de crime
+  - [x] Atualizar EditEvaluation com checkboxes
+  - [x] Atualizar procedimentos tRPC para guardar múltiplos tipos
+  - [x] Atualizar PrintEvaluation para exibir múltiplos tipos
+  - [x] Testar persistência de múltiplos tipos de atividade

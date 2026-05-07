@@ -39,7 +39,7 @@ type FormState = {
   mandadoDetencao: boolean; mandadoBusca: boolean;
   quantidadeSuspeitos: string;
   modalidadeIsolado: boolean; modalidadeAssociacao: boolean;
-  tipoCriminal: string;
+  tipoCriminal: string[];
   antecedentesContraPessoas: boolean; antecedentesContraPatrimonio: boolean; antecedentesOutros: boolean;
   antecedentesFSS: string;
   posseArma: string; usoArma: string;
@@ -56,7 +56,7 @@ const DEFAULT: FormState = {
   nuipc: "", entidadeSolicitadora: "", refFiledoc: "", email: "", ordemVerbal: "",
   pocPosto: "", pocNome: "", pocContacto: "", despacho: "", cterRequerente: "",
   mandadoDetencao: false, mandadoBusca: false, quantidadeSuspeitos: "1",
-  modalidadeIsolado: false, modalidadeAssociacao: false, tipoCriminal: "outro",
+  modalidadeIsolado: false, modalidadeAssociacao: false, tipoCriminal: ["outro"],
   antecedentesContraPessoas: false, antecedentesContraPatrimonio: false, antecedentesOutros: false,
   antecedentesFSS: "nao", posseArma: "improvavel", usoArma: "naoHaRegisto",
   tipologiaApartamento: false, tipologiaMoradia: false, tipologiaOutro: false,
@@ -75,7 +75,9 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   s += QTD_SCORES[f.quantidadeSuspeitos] ?? 1;
   if (f.modalidadeIsolado) s += 2;
   if (f.modalidadeAssociacao) s += 8;
-  s += TIPO_SCORES[f.tipoCriminal] ?? 4;
+  // Somar pontos de todos os tipos de crime selecionados
+  const crimeScores = f.tipoCriminal.map(tipo => TIPO_SCORES[tipo] ?? 4);
+  s += crimeScores.length > 0 ? Math.max(...crimeScores) : 4;
   if (f.antecedentesContraPessoas) s += 8;
   if (f.antecedentesContraPatrimonio) s += 5;
   if (f.antecedentesOutros) s += 3;
@@ -99,7 +101,7 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   const temUsoArma = f.usoArma === "haRegisto";
   const temAntecedentesContraPessoas = f.antecedentesContraPessoas;
   const temAntecedentesContraFSS = f.antecedentesFSS === "sim";
-  const temCrimeGrave = ["homicidio", "sequestro", "violencia"].includes(f.tipoCriminal);
+  const temCrimeGrave = f.tipoCriminal.some(tipo => ["homicidio", "sequestro", "violencia"].includes(tipo));
   
   // Elevação 1: Associação criminosa + Posse/Probabilidade de armas de fogo
   if (temAssociacaoCriminosa && (temArmaRegistada || temArmaProbavel)) {
@@ -432,17 +434,32 @@ export default function EvaluationForm() {
           </div>
           <div>
             <Label className="text-sm font-semibold text-gray-600 mb-2 block">Tipo de atividade</Label>
-            <Select value={form.tipoCriminal} onValueChange={(v) => set("tipoCriminal", v)}>
-              <SelectTrigger className="border-2 focus:border-[#1a472a]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="trafico">Tráfico de droga (+7)</SelectItem>
-                <SelectItem value="assalto">Assalto/Roubo (+6)</SelectItem>
-                <SelectItem value="homicidio">Homicídio (+10)</SelectItem>
-                <SelectItem value="sequestro">Sequestro (+9)</SelectItem>
-                <SelectItem value="violencia">Violência grave (+8)</SelectItem>
-                <SelectItem value="outro">Outro (+4)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <CheckItem id="trafico" label="Tráfico de droga (+7)" checked={form.tipoCriminal.includes("trafico")} onCheckedChange={(v) => {
+                if (v) set("tipoCriminal", [...form.tipoCriminal, "trafico"]);
+                else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "trafico"));
+              }} />
+              <CheckItem id="assalto" label="Assalto/Roubo (+6)" checked={form.tipoCriminal.includes("assalto")} onCheckedChange={(v) => {
+                if (v) set("tipoCriminal", [...form.tipoCriminal, "assalto"]);
+                else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "assalto"));
+              }} />
+              <CheckItem id="homicidio" label="Homicídio (+10)" checked={form.tipoCriminal.includes("homicidio")} onCheckedChange={(v) => {
+                if (v) set("tipoCriminal", [...form.tipoCriminal, "homicidio"]);
+                else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "homicidio"));
+              }} />
+              <CheckItem id="sequestro" label="Sequestro (+9)" checked={form.tipoCriminal.includes("sequestro")} onCheckedChange={(v) => {
+                if (v) set("tipoCriminal", [...form.tipoCriminal, "sequestro"]);
+                else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "sequestro"));
+              }} />
+              <CheckItem id="violencia" label="Violência grave (+8)" checked={form.tipoCriminal.includes("violencia")} onCheckedChange={(v) => {
+                if (v) set("tipoCriminal", [...form.tipoCriminal, "violencia"]);
+                else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "violencia"));
+              }} />
+              <CheckItem id="outro" label="Outro (+4)" checked={form.tipoCriminal.includes("outro")} onCheckedChange={(v) => {
+                if (v) set("tipoCriminal", [...form.tipoCriminal, "outro"]);
+                else set("tipoCriminal", form.tipoCriminal.filter(t => t !== "outro"));
+              }} />
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -659,7 +676,7 @@ export default function EvaluationForm() {
                 segurancaPortaBlindada: form.segurancaPortaBlindada ? 1 : 0,
                 segurancaOutrasMedidas: form.segurancaOutrasMedidas ? 1 : 0,
                 quantidadeSuspeitos: form.quantidadeSuspeitos,
-                tipoCriminal: form.tipoCriminal,
+                tipoCriminal: form.tipoCriminal.join(","),
                 antecedentesFSS: form.antecedentesFSS,
                 posseArma: form.posseArma,
                 usoArma: form.usoArma,
