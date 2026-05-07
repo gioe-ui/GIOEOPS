@@ -426,3 +426,4 @@
   - [x] Atualizar procedimentos tRPC para guardar múltiplos tipos
   - [x] Atualizar PrintEvaluation para exibir múltiplos tipos
   - [x] Testar persistência de múltiplos tipos de atividade
+  - [x] Verificar exibição em PDF - CONFIRMADO: todos os tipos aparecem corretamente no PDF
