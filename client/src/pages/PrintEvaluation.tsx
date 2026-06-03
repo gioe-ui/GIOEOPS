@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ArrowLeft, Printer, Edit2 } from "lucide-react";
@@ -309,7 +309,12 @@ export default function PrintEvaluation() {
               {evaluation.modalidadeIsolado === 1 && <div className="text-sm mb-2">✓ Modalidade: Isolado</div>}
               {evaluation.modalidadeAssociacao === 1 && <div className="text-sm mb-2">✓ Modalidade: Associação Criminosa</div>}
               {evaluation.tipoCriminal && (
-                <div className="text-sm mb-2">Tipo Criminal: {TIPO_LABELS[evaluation.tipoCriminal] || evaluation.tipoCriminal}</div>
+                <div className="text-sm mb-2">
+                  Tipo Criminal: {evaluation.tipoCriminal
+                    .split(",")
+                    .map((tipo) => TIPO_LABELS[tipo.trim()] || tipo.trim())
+                    .join(", ")}
+                </div>
               )}
               {evaluation.antecedentesContraPessoas === 1 && <div className="text-sm mb-2">✓ Antecedentes Contra Pessoas</div>}
               {evaluation.antecedentesContraPatrimonio === 1 && <div className="text-sm mb-2">✓ Antecedentes Contra Património</div>}

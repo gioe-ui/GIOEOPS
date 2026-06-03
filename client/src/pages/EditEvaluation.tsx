@@ -130,29 +130,41 @@ export default function EditEvaluation() {
 
   const updateMutation = trpc.evaluations.update.useMutation({
     onSuccess: () => {
-      // Atualizar suspeitos
+      // Atualizar suspeitos de forma sequencial
       if (id) {
         const evaluationId = parseInt(id);
-        // Deletar suspeitos antigos
-        suspectsDeleteMutation.mutate({ evaluationId });
-        // Criar novos suspeitos
-        if (suspects.length > 0) {
-          suspectsMutation.mutate({
-            evaluationId,
-            suspects: suspects.map(s => ({
-              nome: s.nome,
-              dataNascimento: s.dataNascimento,
-              nacionalidade: s.nacionalidade,
-              nif: s.nif,
-              cc: s.cc,
-              morada: s.morada,
-              observacoes: s.observacoes,
-            })),
-          });
-        }
+        // Primeiro deletar suspeitos antigos
+        suspectsDeleteMutation.mutateAsync({ evaluationId }).then(() => {
+          // Depois criar novos suspeitos
+          if (suspects.length > 0) {
+            suspectsMutation.mutateAsync({
+              evaluationId,
+              suspects: suspects.map(s => ({
+                nome: s.nome,
+                dataNascimento: s.dataNascimento,
+                nacionalidade: s.nacionalidade,
+                nif: s.nif,
+                cc: s.cc,
+                morada: s.morada,
+                observacoes: s.observacoes,
+              })),
+            }).then(() => {
+              toast.success("Avaliação guardada com sucesso!");
+              navigate("/");
+            }).catch((error) => {
+              toast.error(`Erro ao guardar suspeitos: ${error.message}`);
+            });
+          } else {
+            toast.success("Avaliação guardada com sucesso!");
+            navigate("/");
+          }
+        }).catch((error) => {
+          toast.error(`Erro ao deletar suspeitos: ${error.message}`);
+        });
+      } else {
+        toast.success("Avaliação guardada com sucesso!");
+        navigate("/");
       }
-      toast.success("Avaliação guardada com sucesso!");
-      navigate("/");
     },
     onError: (error) => {
       toast.error(`Erro ao guardar: ${error.message}`);
@@ -204,7 +216,7 @@ export default function EditEvaluation() {
   }, [evaluation, form]);
 
   useEffect(() => {
-    if (suspectsList && suspectsList.length > 0) {
+    if (suspectsList) {
       setSuspects(suspectsList.map(s => ({
         id: s.id,
         nome: s.nome || "",
@@ -226,6 +238,7 @@ export default function EditEvaluation() {
     if (!form || !id) return;
     try {
       setIsSaving(true);
+      // Guardar a avaliação e os suspeitos
       await updateMutation.mutateAsync({
         id: parseInt(id),
         ...form,
@@ -251,6 +264,8 @@ export default function EditEvaluation() {
         outrasObservacoes: form.outrasObservacoes,
         neopManual: form.neopManual || "",
       });
+    } catch (error) {
+      console.error("Erro ao guardar:", error);
     } finally {
       setIsSaving(false);
     }
