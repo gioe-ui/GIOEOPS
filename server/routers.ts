@@ -94,7 +94,7 @@ function calcScore(d: {
     ? d.tipoCriminal.split(',').map(t => t.trim()).filter(Boolean)
     : [d.tipoCriminal ?? 'outro'];
   const crimeScores = tiposCriminais.map(tipo => TIPO_SCORES[tipo] ?? 4);
-  s += crimeScores.length > 0 ? Math.max(...crimeScores) : 4;
+  s += crimeScores.length > 0 ? crimeScores.reduce((a, b) => a + b, 0) : 4;
   if (d.antecedentesContraPessoas) s += 8;
   if (d.antecedentesContraPatrimonio) s += 5;
   if (d.antecedentesOutros) s += 3;

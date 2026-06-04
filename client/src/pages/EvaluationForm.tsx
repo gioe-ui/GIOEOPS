@@ -182,7 +182,12 @@ export default function EvaluationForm() {
 
 
 
-  const suspectsMutation = trpc.suspects.createBatch.useMutation();
+  const suspectsMutation = trpc.suspects.createBatch.useMutation({
+    onError: (error: any) => {
+      console.error("[Suspects Error]", error);
+      toast.error("Erro ao guardar suspeitos: " + (error?.message || "Erro desconhecido"));
+    },
+  });
 
   const createMutation = trpc.evaluations.create.useMutation({
     onSuccess: (result: any) => {
@@ -191,13 +196,13 @@ export default function EvaluationForm() {
         suspectsMutation.mutate({
           evaluationId: result.evaluationId,
           suspects: suspects.map(s => ({
-            nome: s.nome,
-            dataNascimento: s.dataNascimento,
-            nacionalidade: s.nacionalidade,
-            nif: s.nif,
-            cc: s.cc,
-            morada: s.morada,
-            observacoes: s.observacoes,
+            nome: s.nome || undefined,
+            dataNascimento: s.dataNascimento || undefined,
+            nacionalidade: s.nacionalidade || undefined,
+            nif: s.nif || undefined,
+            cc: s.cc || undefined,
+            morada: s.morada || undefined,
+            observacoes: s.observacoes || undefined,
           })),
         });
       }
