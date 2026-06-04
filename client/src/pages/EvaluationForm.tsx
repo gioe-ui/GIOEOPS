@@ -77,7 +77,7 @@ function calcScore(f: FormState): { pontuacao: number; neop: string; complexidad
   if (f.modalidadeAssociacao) s += 8;
   // Somar pontos de todos os tipos de crime selecionados
   const crimeScores = f.tipoCriminal.map(tipo => TIPO_SCORES[tipo] ?? 4);
-  s += crimeScores.length > 0 ? Math.max(...crimeScores) : 4;
+  s += crimeScores.length > 0 ? crimeScores.reduce((a, b) => a + b, 0) : 4;
   if (f.antecedentesContraPessoas) s += 8;
   if (f.antecedentesContraPatrimonio) s += 5;
   if (f.antecedentesOutros) s += 3;

@@ -88,7 +88,13 @@ function calcScore(d: {
   s += QTD_SCORES[d.quantidadeSuspeitos ?? "1"] ?? 1;
   if (d.modalidadeIsolado) s += 2;
   if (d.modalidadeAssociacao) s += 8;
-  s += TIPO_SCORES[d.tipoCriminal ?? "outro"] ?? 4;
+  
+  // Processar múltiplos tipos de crime (podem vir como string separada por vírgulas)
+  const tiposCriminais = typeof d.tipoCriminal === 'string' 
+    ? d.tipoCriminal.split(',').map(t => t.trim()).filter(Boolean)
+    : [d.tipoCriminal ?? 'outro'];
+  const crimeScores = tiposCriminais.map(tipo => TIPO_SCORES[tipo] ?? 4);
+  s += crimeScores.length > 0 ? Math.max(...crimeScores) : 4;
   if (d.antecedentesContraPessoas) s += 8;
   if (d.antecedentesContraPatrimonio) s += 5;
   if (d.antecedentesOutros) s += 3;
@@ -124,7 +130,11 @@ function calcScore(d: {
   const temArmaProbavel = d.posseArma === "provavel";
   const temUsoArma = d.usoArma === "haRegisto";
   const temAntecedentesContraFSS = d.antecedentesFSS === "sim";
-  const temCrimeGrave = ["homicidio", "sequestro", "violencia"].includes(d.tipoCriminal ?? "");
+  // Verificar se há algum crime grave nos múltiplos tipos de crime
+  const tiposCriminaisCheck = typeof d.tipoCriminal === 'string' 
+    ? d.tipoCriminal.split(',').map(t => t.trim()).filter(Boolean)
+    : [d.tipoCriminal ?? 'outro'];
+  const temCrimeGrave = tiposCriminaisCheck.some(tipo => ["homicidio", "sequestro", "violencia"].includes(tipo));
   
   // Elevação 1: Associação criminosa + Posse/Probabilidade de armas de fogo
   if (temAssociacaoCriminosa && (temArmaRegistada || temArmaProbavel)) {
