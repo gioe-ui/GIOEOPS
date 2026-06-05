@@ -196,14 +196,14 @@ export default function EvaluationForm() {
         suspectsMutation.mutate({
           evaluationId: result.evaluationId,
           suspects: suspects.map(s => ({
-            nome: s.nome || undefined,
-            dataNascimento: s.dataNascimento || undefined,
-            nacionalidade: s.nacionalidade || undefined,
-            nif: s.nif || undefined,
-            cc: s.cc || undefined,
-            morada: s.morada || undefined,
-            observacoes: s.observacoes || undefined,
-          })),
+            nome: s.nome ? s.nome : undefined,
+            dataNascimento: s.dataNascimento ? s.dataNascimento : undefined,
+            nacionalidade: s.nacionalidade ? s.nacionalidade : undefined,
+            nif: s.nif ? s.nif : undefined,
+            cc: s.cc ? s.cc : undefined,
+            morada: s.morada ? s.morada : undefined,
+            observacoes: s.observacoes ? s.observacoes : undefined,
+          })) as any,
         });
       }
       toast.success("Avaliação guardada com sucesso!");
