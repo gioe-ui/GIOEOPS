@@ -39,8 +39,8 @@ import {
   deleteSuspectsByEvaluationId,
 } from "./db";
 import { TRPCError } from "@trpc/server";
-import { users } from "../drizzle/schema";
-import { eq, sql } from "drizzle-orm";
+import { users, suspects } from "../drizzle/schema";
+import { eq, sql, and } from "drizzle-orm";
 import { operations, evaluations } from "../drizzle/schema";
 
 
@@ -735,6 +735,175 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await deleteSuspectsByEvaluationId(input.evaluationId);
         return { success: true };
+      }),
+  }),
+
+  // ─── Suspect Profiles ───────────────────────────────────────────────────────
+  suspectProfiles: router({
+    list: protectedProcedure
+      .input(z.object({
+        limit: z.number().int().default(50),
+        offset: z.number().int().default(0),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+
+        try {
+          // Get all suspects
+          const allSuspects = await db.select().from(suspects);
+          
+          // Group by unique suspect (by nome + nif + cc)
+          const uniqueSuspects = new Map<string, typeof allSuspects[0]>();
+          allSuspects.forEach(suspect => {
+            const key = `${suspect.nome}-${suspect.nif}-${suspect.cc}`;
+            if (!uniqueSuspects.has(key)) {
+              uniqueSuspects.set(key, suspect);
+            }
+          });
+
+          // Get stats for each suspect
+          const results = await Promise.all(
+            Array.from(uniqueSuspects.values())
+              .slice(input.offset, input.offset + input.limit)
+              .map(async (suspect) => {
+                const relatedEvals = await db.select({ neop: evaluations.neop })
+                  .from(evaluations)
+                  .innerJoin(suspects, eq(suspects.evaluationId, evaluations.id))
+                  .where(eq(suspects.nome, suspect.nome || ''));
+
+                return {
+                  id: suspect.id,
+                  nome: suspect.nome,
+                  nif: suspect.nif,
+                  cc: suspect.cc,
+                  nacionalidade: suspect.nacionalidade,
+                  totalOperations: relatedEvals.length,
+                  neop4Count: relatedEvals.filter(e => e.neop === '4º NEOP').length,
+                };
+              })
+          );
+
+          return results;
+        } catch (error) {
+          console.error('Failed to get suspect profiles:', error);
+          return [];
+        }
+      }),
+
+    getById: protectedProcedure
+      .input(z.object({ suspectId: z.number().int() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+
+        try {
+          const suspect = await db.select()
+            .from(suspects)
+            .where(eq(suspects.id, input.suspectId))
+            .limit(1)
+            .then(rows => rows[0] || null);
+
+          if (!suspect) return null;
+
+          // Get related evaluations
+          const relatedEvals = await db.select({
+            id: evaluations.id,
+            pontuacao: evaluations.pontuacao,
+            neop: evaluations.neop,
+            dataAvaliacao: evaluations.dataAvaliacao,
+            tipoCriminal: evaluations.tipoCriminal,
+          })
+            .from(evaluations)
+            .where(eq(evaluations.id, suspect.evaluationId));
+
+          return {
+            suspect,
+            evaluations: relatedEvals,
+            stats: {
+              totalOperations: relatedEvals.length,
+              averageScore: relatedEvals.length > 0
+                ? Math.round((relatedEvals.reduce((sum, e) => sum + e.pontuacao, 0) / relatedEvals.length) * 100) / 100
+                : 0,
+              neop4Count: relatedEvals.filter(e => e.neop === '4º NEOP').length,
+            },
+          };
+        } catch (error) {
+          console.error('Failed to get suspect profile:', error);
+          return null;
+        }
+      }),
+  }),
+
+  // ─── Operation Analysis ─────────────────────────────────────────────────────
+  operationAnalysis: router({
+    summary: protectedProcedure
+      .query(async () => {
+        const db = await getDb();
+        if (!db) return null;
+
+        try {
+          const allEvals = await db.select().from(evaluations);
+          
+          const byNeop: Record<string, number> = {};
+          const byCter: Record<string, number> = {};
+          let totalScore = 0;
+
+          allEvals.forEach(evaluation => {
+            byNeop[evaluation.neop] = (byNeop[evaluation.neop] || 0) + 1;
+            if (evaluation.cterRequerente) {
+              byCter[evaluation.cterRequerente] = (byCter[evaluation.cterRequerente] || 0) + 1;
+            }
+            totalScore += evaluation.pontuacao;
+          });
+
+          return {
+            totalOperations: allEvals.length,
+            averageScore: allEvals.length > 0 ? Math.round((totalScore / allEvals.length) * 100) / 100 : 0,
+            byNeop,
+            byCter,
+            neop4Percentage: allEvals.length > 0
+              ? Math.round((byNeop['4º NEOP'] || 0) / allEvals.length * 100)
+              : 0,
+          };
+        } catch (error) {
+          console.error('Failed to get operation analysis:', error);
+          return null;
+        }
+      }),
+
+    filtered: protectedProcedure
+      .input(z.object({
+        neop: z.string().optional(),
+        cterRequerente: z.string().optional(),
+        limit: z.number().int().default(50),
+        offset: z.number().int().default(0),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+
+        try {
+          let query = db.select().from(evaluations);
+          const conditions = [];
+
+          if (input.neop) {
+            conditions.push(eq(evaluations.neop, input.neop));
+          }
+          if (input.cterRequerente) {
+            conditions.push(eq(evaluations.cterRequerente, input.cterRequerente));
+          }
+
+          if (conditions.length > 0) {
+            query = query.where(and(...conditions));
+          }
+
+          const results = await query.limit(input.limit).offset(input.offset);
+          return results;
+        } catch (error) {
+          console.error('Failed to get filtered operations:', error);
+          return [];
+        }
       }),
   }),
 });

@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import MilitarDashboard from "./pages/MilitarDashboard";
 import { OperationDetail } from "./pages/OperationDetail";
 import AdminMigration from "./pages/AdminMigration";
+import SuspectProfiles from "./pages/SuspectProfiles";
+import OperationAnalysis from "./pages/OperationAnalysis";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -27,6 +29,8 @@ function Router() {
       <Route path="/edit-evaluation/:id" component={EditEvaluation} />
       <Route path="/print-operation/:id" component={PrintOperation} />
       <Route path="/operation-detail/:id" component={OperationDetail} />
+      <Route path="/suspect-profiles" component={SuspectProfiles} />
+      <Route path="/operation-analysis" component={OperationAnalysis} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -2,23 +2,27 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { LogOut, FileText, BarChart2, PieChart, Users, CheckCircle, User } from "lucide-react";
+import { LogOut, FileText, BarChart2, PieChart, Users, CheckCircle, User, TrendingUp, UserSearch } from "lucide-react";
 import { Link } from "wouter";
 import EvaluationForm from "./EvaluationForm";
 import Dashboard from "./Dashboard";
 import { StatisticsPage } from "./Statistics";
 import UsersPage from "./UsersPage";
 import UserApprovals from "./UserApprovals";
+import SuspectProfiles from "./SuspectProfiles";
+import OperationAnalysis from "./OperationAnalysis";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663511663974/bkxrxh5szwZfcvrDKi6FHK/gioe_logo_960e9077.webp";
 
-type Tab = "form" | "dashboard" | "statistics" | "users" | "approvals";
+type Tab = "form" | "dashboard" | "statistics" | "users" | "approvals" | "suspects" | "analysis";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
   { id: "form", label: "Novo Formulário", icon: <FileText className="w-4 h-4" /> },
   { id: "dashboard", label: "Dashboard", icon: <BarChart2 className="w-4 h-4" /> },
   { id: "statistics", label: "Estatísticas", icon: <PieChart className="w-4 h-4" /> },
+  { id: "suspects", label: "Perfis de Suspeitos", icon: <UserSearch className="w-4 h-4" /> },
+  { id: "analysis", label: "Análise de Operações", icon: <TrendingUp className="w-4 h-4" /> },
   { id: "users", label: "Utilizadores", icon: <Users className="w-4 h-4" />, adminOnly: true },
   { id: "approvals", label: "Aprovações", icon: <CheckCircle className="w-4 h-4" />, adminOnly: true },
 ];
@@ -108,6 +112,8 @@ export default function AppLayout() {
         {activeTab === "form" && <EvaluationForm />}
         {activeTab === "dashboard" && <Dashboard />}
         {activeTab === "statistics" && <StatisticsPage />}
+        {activeTab === "suspects" && <SuspectProfiles />}
+        {activeTab === "analysis" && <OperationAnalysis />}
         {activeTab === "users" && user?.role === "admin" && <UsersPage />}
         {activeTab === "approvals" && user?.role === "admin" && <UserApprovals />}
       </main>
