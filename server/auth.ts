@@ -75,7 +75,7 @@ export const authRouter = router({
       phoneNumber: input.phoneNumber,
       mecanographicNumber: input.mecanographicNumber,
       rank: input.rank,
-      lastSignedIn: new Date(),
+      lastSignedIn: new Date().toISOString(),
     });
 
     const user = await getUserByOpenId(openId);
@@ -114,7 +114,7 @@ export const authRouter = router({
     // Atualizar lastSignedIn
     await upsertUser({
       openId: user.openId,
-      lastSignedIn: new Date(),
+      lastSignedIn: new Date().toISOString(),
     });
 
     return { success: true, user };

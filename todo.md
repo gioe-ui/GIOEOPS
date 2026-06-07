@@ -427,3 +427,31 @@
   - [x] Atualizar PrintEvaluation para exibir múltiplos tipos
   - [x] Testar persistência de múltiplos tipos de atividade
   - [x] Verificar exibição em PDF - CONFIRMADO: todos os tipos aparecem corretamente no PDF
+
+
+## Sprint 6 - Área de Perfis de Suspeitos e Análise de Operações
+
+### Perfis de Suspeitos
+- [ ] Criar tabela de perfis de suspeitos com histórico de operações
+- [ ] Criar página de gestão de perfis de suspeitos (SuspectProfiles.tsx)
+- [ ] Implementar visualização de suspeitos com filtros (nome, NIF, CC, nacionalidade)
+- [ ] Implementar ligação entre suspeitos e operações (histórico)
+- [ ] Criar página de detalhe de suspeito com análise de padrões criminais
+- [ ] Implementar gráficos de atividade criminal por suspeito
+- [ ] Adicionar estatísticas: total de operações, NEOP médio, tipos de crime mais frequentes
+- [ ] Testar funcionalidade completa de perfis de suspeitos
+
+### Análise de Operações
+- [ ] Criar página de análise de operações (OperationAnalysis.tsx)
+- [ ] Implementar filtros avançados: data, NEOP, CTer, tipo de crime, resultado
+- [ ] Criar visualizações: timeline de operações, mapa de operações por CTer
+- [ ] Implementar comparação de operações (antes/depois, sucesso/insucesso)
+- [ ] Adicionar métricas: taxa de sucesso, tempo médio de operação, recursos utilizados
+- [ ] Criar relatórios exportáveis em PDF/Excel
+- [ ] Testar funcionalidade completa de análise de operações
+
+### Integração com Navegação
+- [ ] Adicionar menu "Perfis de Suspeitos" na navegação principal
+- [ ] Adicionar menu "Análise de Operações" na navegação principal
+- [ ] Atualizar App.tsx com novas rotas
+- [ ] Testar navegação e acesso às novas páginas

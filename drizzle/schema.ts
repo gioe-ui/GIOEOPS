@@ -151,6 +151,15 @@ export const suspects = mysqlTable("suspects", {
 export type Suspect = typeof suspects.$inferSelect;
 export type InsertSuspect = typeof suspects.$inferInsert;
 
+export type Operation = typeof operations.$inferSelect;
+export type InsertOperation = typeof operations.$inferInsert;
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
+export type Evaluation = typeof evaluations.$inferSelect;
+export type InsertEvaluation = typeof evaluations.$inferInsert;
+
 export const users = mysqlTable("users", {
 	id: int().autoincrement().notNull(),
 	openId: varchar({ length: 64 }).notNull(),

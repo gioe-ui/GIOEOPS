@@ -257,7 +257,7 @@ export const appRouter = router({
             pontuacao,
             neop,
             updatedBy,
-            updatedAt: new Date(),
+            updatedAt: new Date().toISOString(),
           })
           .where(eq(evaluations.id, id))
         

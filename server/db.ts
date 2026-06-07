@@ -1,6 +1,6 @@
-import { and, desc, eq, gte, like, lte, inArray, or, isNotNull } from "drizzle-orm";
+import { and, desc, eq, gte, like, lte, inArray, or, isNotNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation, notifications, Notification, suspects, InsertSuspect, Suspect } from "../drizzle/schema";
+import { evaluations, InsertEvaluation, InsertUser, users, operations, InsertOperation, notifications, suspects, InsertSuspect, Suspect } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -56,8 +56,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.approved = 1;
       updateSet.approved = 1;
     }
-    if (!values.lastSignedIn) values.lastSignedIn = new Date();
-    if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
+    if (!values.lastSignedIn) values.lastSignedIn = new Date().toISOString();
+    if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date().toISOString();
 
     await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
   } catch (error) {
@@ -460,7 +460,7 @@ export async function markNotificationAsSent(notificationId: number): Promise<vo
   if (!db) return;
   
   await db.update(notifications)
-    .set({ sent: 1, sentAt: new Date() })
+    .set({ sent: 1, sentAt: new Date().toISOString() })
     .where(eq(notifications.id, notificationId));
 }
 
@@ -511,7 +511,7 @@ export async function flagIncompleteOperations(): Promise<number> {
     await db.update(operations)
       .set({
         flaggedForCompletion: 1,
-        flaggedAt: new Date(),
+        flaggedAt: new Date().toISOString(),
       })
       .where(eq(operations.id, op.id));
   }
@@ -612,4 +612,322 @@ export async function deleteSuspectsByEvaluationId(evaluationId: number): Promis
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(suspects).where(eq(suspects.evaluationId, evaluationId));
+}
+
+
+// ============ Suspect Profiles ============
+
+export async function getSuspectProfiles(filters?: {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<Array<{
+  id: number;
+  nome: string | null;
+  dataNascimento: string | null;
+  nacionalidade: string | null;
+  nif: string | null;
+  cc: string | null;
+  totalOperations: number;
+  averageNeop: number;
+  crimeTypes: string[];
+  lastOperationDate: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const limit = filters?.limit || 50;
+    const offset = filters?.offset || 0;
+    const searchTerm = filters?.search ? `%${filters.search}%` : null;
+
+    // Get unique suspects with operation count and stats
+    const query = db.select({
+      id: suspects.id,
+      nome: suspects.nome,
+      dataNascimento: suspects.dataNascimento,
+      nacionalidade: suspects.nacionalidade,
+      nif: suspects.nif,
+      cc: suspects.cc,
+    })
+    .from(suspects)
+    .limit(limit)
+    .offset(offset);
+
+    const suspectsList = await query;
+
+    // Enrich with operation data
+    const enriched = await Promise.all(suspectsList.map(async (suspect) => {
+      const operationsData = await db.select({
+        neop: evaluations.neop,
+        tipoCriminal: evaluations.tipoCriminal,
+        dataAvaliacao: evaluations.dataAvaliacao,
+      })
+      .from(evaluations)
+      .innerJoin(suspects, eq(suspects.evaluationId, evaluations.id))
+      .where(eq(suspects.id, suspect.id));
+
+      const neops = operationsData.map(op => {
+        if (op.neop === '4º NEOP') return 4;
+        if (op.neop === '3º NEOP') return 3;
+        if (op.neop === '2º NEOP') return 2;
+        return 1;
+      });
+
+      const crimeTypes = operationsData
+        .map(op => op.tipoCriminal)
+        .filter(Boolean)
+        .flatMap(t => t?.split(',') || [])
+        .map(t => t.trim())
+        .filter((v, i, a) => a.indexOf(v) === i);
+
+      const dates = operationsData
+        .map(op => op.dataAvaliacao)
+        .filter(Boolean)
+        .sort()
+        .reverse();
+
+      return {
+        ...suspect,
+        totalOperations: operationsData.length,
+        averageNeop: neops.length > 0 ? neops.reduce((a, b) => a + b, 0) / neops.length : 0,
+        crimeTypes,
+        lastOperationDate: dates[0] || null,
+      };
+    }));
+
+    return enriched;
+  } catch (error) {
+    console.error("[Database] Failed to get suspect profiles:", error);
+    return [];
+  }
+}
+
+export async function getSuspectProfile(suspectId: number): Promise<{
+  suspect: Suspect | null;
+  operations: Array<{
+    id: number;
+    evaluationId: number;
+    pontuacao: number;
+    neop: string;
+    dataAvaliacao: string | null;
+    tipoCriminal: string | null;
+    cterRequerente: string | null;
+  }>;
+  statistics: {
+    totalOperations: number;
+    averageScore: number;
+    mostFrequentCrime: string | null;
+    neop4Count: number;
+  };
+} | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const suspect = await db.select()
+      .from(suspects)
+      .where(eq(suspects.id, suspectId))
+      .limit(1)
+      .then(rows => rows[0] || null);
+
+    if (!suspect) return null;
+
+    const operationsData = await db.select({
+      id: evaluations.id,
+      evaluationId: evaluations.id,
+      pontuacao: evaluations.pontuacao,
+      neop: evaluations.neop,
+      dataAvaliacao: evaluations.dataAvaliacao,
+      tipoCriminal: evaluations.tipoCriminal,
+      cterRequerente: evaluations.cterRequerente,
+    })
+    .from(evaluations)
+    .where(eq(evaluations.id, suspect.evaluationId));
+
+    const totalOps = operationsData.length;
+    const avgScore = totalOps > 0
+      ? operationsData.reduce((sum, op) => sum + op.pontuacao, 0) / totalOps
+      : 0;
+
+    const crimeTypes = operationsData
+      .map(op => op.tipoCriminal)
+      .filter(Boolean)
+      .flatMap(t => t?.split(',') || [])
+      .map(t => t.trim());
+
+    const crimeFreq = crimeTypes.reduce((acc, crime) => {
+      acc[crime] = (acc[crime] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const mostFrequentCrime = Object.entries(crimeFreq)
+      .sort(([, a], [, b]) => b - a)[0]?.[0] || null;
+
+    const neop4Count = operationsData.filter(op => op.neop === '4º NEOP').length;
+
+    return {
+      suspect,
+      operations: operationsData,
+      statistics: {
+        totalOperations: totalOps,
+        averageScore: Math.round(avgScore * 100) / 100,
+        mostFrequentCrime,
+        neop4Count,
+      },
+    };
+  } catch (error) {
+    console.error("[Database] Failed to get suspect by ID:", error);
+    return null;
+  }
+}
+
+// ============ Operation Analysis ============
+
+export async function getOperationAnalysis(filters?: {
+  startDate?: string;
+  endDate?: string;
+  neop?: string;
+  cterRequerente?: string;
+  minScore?: number;
+  maxScore?: number;
+  limit?: number;
+  offset?: number;
+}): Promise<Array<{
+  id: number;
+  nuipc: string | null;
+  pontuacao: number;
+  neop: string;
+  dataAvaliacao: string | null;
+  cterRequerente: string | null;
+  tipoCriminal: string | null;
+  suspectCount: number;
+  operationStatus: string;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const limit = filters?.limit || 50;
+    const offset = filters?.offset || 0;
+
+    let query = db.select({
+      id: evaluations.id,
+      nuipc: evaluations.nuipc,
+      pontuacao: evaluations.pontuacao,
+      neop: evaluations.neop,
+      dataAvaliacao: evaluations.dataAvaliacao,
+      cterRequerente: evaluations.cterRequerente,
+      tipoCriminal: evaluations.tipoCriminal,
+    })
+    .from(evaluations);
+
+    const conditions = [];
+
+    if (filters?.startDate) {
+      conditions.push(gte(evaluations.dataAvaliacao, filters.startDate));
+    }
+    if (filters?.endDate) {
+      conditions.push(lte(evaluations.dataAvaliacao, filters.endDate));
+    }
+    if (filters?.neop) {
+      conditions.push(eq(evaluations.neop, filters.neop));
+    }
+    if (filters?.cterRequerente) {
+      conditions.push(eq(evaluations.cterRequerente, filters.cterRequerente));
+    }
+    if (filters?.minScore !== undefined) {
+      conditions.push(gte(evaluations.pontuacao, filters.minScore));
+    }
+    if (filters?.maxScore !== undefined) {
+      conditions.push(lte(evaluations.pontuacao, filters.maxScore));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    const results = await query.limit(limit).offset(offset);
+
+    // Enrich with suspect count and operation status
+    const enriched = await Promise.all(results.map(async (evaluation) => {
+      const suspectCount = await db.select({ count: sql`COUNT(*)` })
+        .from(suspects)
+        .where(eq(suspects.evaluationId, evaluation.id))
+        .then(rows => (rows[0]?.count as number) || 0);
+
+      const operation = await db.select()
+        .from(operations)
+        .where(eq(operations.evaluationId, evaluation.id))
+        .limit(1)
+        .then(rows => rows[0] || null);
+
+      const operationStatus = operation
+        ? operation.operacaoPreenchida ? 'Completa' : 'Incompleta'
+        : 'Sem Operação';
+
+      return {
+        ...evaluation,
+        suspectCount,
+        operationStatus,
+      };
+    }));
+
+    return enriched;
+  } catch (error) {
+    console.error("[Database] Failed to get operation analysis:", error);
+    return [];
+  }
+}
+
+export async function getOperationComparisonStats(): Promise<{
+  totalOperations: number;
+  byNeop: Record<string, number>;
+  byCter: Record<string, number>;
+  averageScore: number;
+  neop4Percentage: number;
+}> {
+  const db = await getDb();
+  if (!db) return {
+    totalOperations: 0,
+    byNeop: {},
+    byCter: {},
+    averageScore: 0,
+    neop4Percentage: 0,
+  };
+
+  try {
+    const allEvals = await db.select().from(evaluations);
+
+    const byNeop: Record<string, number> = {};
+    const byCter: Record<string, number> = {};
+    let totalScore = 0;
+    let neop4Count = 0;
+
+    allEvals.forEach(evaluation => {
+      byNeop[evaluation.neop] = (byNeop[evaluation.neop] || 0) + 1;
+      if (evaluation.cterRequerente) {
+        byCter[evaluation.cterRequerente] = (byCter[evaluation.cterRequerente] || 0) + 1;
+      }
+      totalScore += evaluation.pontuacao;
+      if (evaluation.neop === '4º NEOP') neop4Count++;
+    });
+
+    return {
+      totalOperations: allEvals.length,
+      byNeop,
+      byCter,
+      averageScore: allEvals.length > 0 ? Math.round((totalScore / allEvals.length) * 100) / 100 : 0,
+      neop4Percentage: allEvals.length > 0 ? Math.round((neop4Count / allEvals.length) * 100) : 0,
+    };
+  } catch (error) {
+    console.error("[Database] Failed to get operation comparison stats:", error);
+    return {
+      totalOperations: 0,
+      byNeop: {},
+      byCter: {},
+      averageScore: 0,
+      neop4Percentage: 0,
+    };
+  }
 }
