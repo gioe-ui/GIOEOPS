@@ -552,9 +552,9 @@ export async function getOperationWithAssignedUser(operationId: number): Promise
 export async function createSuspect(data: InsertSuspect): Promise<Suspect | null> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  // Filter out undefined values to avoid DEFAULT in SQL
+  // Filter out undefined and null values to avoid DEFAULT in SQL
   const cleanData = Object.fromEntries(
-    Object.entries(data).filter(([_, v]) => v !== undefined)
+    Object.entries(data).filter(([_, v]) => v !== undefined && v !== null)
   ) as InsertSuspect;
   const result = await db.insert(suspects).values(cleanData) as any;
   

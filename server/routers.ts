@@ -679,13 +679,13 @@ export const appRouter = router({
       .input(z.object({
         evaluationId: z.number().int(),
         suspects: z.array(z.object({
-          nome: z.string().optional(),
-          dataNascimento: z.string().optional(),
-          nacionalidade: z.string().optional(),
-          nif: z.string().optional(),
-          cc: z.string().optional(),
-          morada: z.string().optional(),
-          observacoes: z.string().optional(),
+          nome: z.string().nullable().optional(),
+          dataNascimento: z.string().nullable().optional(),
+          nacionalidade: z.string().nullable().optional(),
+          nif: z.string().nullable().optional(),
+          cc: z.string().nullable().optional(),
+          morada: z.string().nullable().optional(),
+          observacoes: z.string().nullable().optional(),
         })),
       }))
       .mutation(async ({ input }) => {
