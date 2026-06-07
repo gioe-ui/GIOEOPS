@@ -132,7 +132,7 @@ export async function getEvaluations(filters?: { neop?: string; avaliador?: stri
             antecedentesContraPessoas: evaluations.antecedentesContraPessoas,
             antecedentesContraPatrimonio: evaluations.antecedentesContraPatrimonio,
             antecedentesOutros: evaluations.antecedentesOutros,
-            antecedentesFSS: evaluations.antecedentesFSS,
+            antecedentesFss: evaluations.antecedentesFss,
             posseArma: evaluations.posseArma,
             usoArma: evaluations.usoArma,
             tipologiaApartamento: evaluations.tipologiaApartamento,
@@ -185,7 +185,7 @@ export async function getEvaluations(filters?: { neop?: string; avaliador?: stri
             antecedentesContraPessoas: evaluations.antecedentesContraPessoas,
             antecedentesContraPatrimonio: evaluations.antecedentesContraPatrimonio,
             antecedentesOutros: evaluations.antecedentesOutros,
-            antecedentesFSS: evaluations.antecedentesFSS,
+            antecedentesFss: evaluations.antecedentesFss,
             posseArma: evaluations.posseArma,
             usoArma: evaluations.usoArma,
             tipologiaApartamento: evaluations.tipologiaApartamento,
@@ -552,11 +552,22 @@ export async function getOperationWithAssignedUser(operationId: number): Promise
 export async function createSuspect(data: InsertSuspect): Promise<Suspect | null> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  // Filter out undefined and null values to avoid DEFAULT in SQL
-  const cleanData = Object.fromEntries(
-    Object.entries(data).filter(([_, v]) => v !== undefined && v !== null)
-  ) as InsertSuspect;
-  const result = await db.insert(suspects).values(cleanData) as any;
+  
+  // Build insert data with only non-null/non-undefined values
+  const insertData: any = {
+    evaluationId: data.evaluationId,
+  };
+  
+  // Only add fields that have actual values
+  if (data.nome !== undefined && data.nome !== null) insertData.nome = data.nome;
+  if (data.dataNascimento !== undefined && data.dataNascimento !== null) insertData.dataNascimento = data.dataNascimento;
+  if (data.nacionalidade !== undefined && data.nacionalidade !== null) insertData.nacionalidade = data.nacionalidade;
+  if (data.nif !== undefined && data.nif !== null) insertData.nif = data.nif;
+  if (data.cc !== undefined && data.cc !== null) insertData.cc = data.cc;
+  if (data.morada !== undefined && data.morada !== null) insertData.morada = data.morada;
+  if (data.observacoes !== undefined && data.observacoes !== null) insertData.observacoes = data.observacoes;
+  
+  const result = await db.insert(suspects).values(insertData) as any;
   
   let insertedId = null;
   if (result.insertId) {

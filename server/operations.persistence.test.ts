@@ -20,7 +20,7 @@ describe("Operations Persistence", () => {
       dterOperacao: "DTER Teste",
       pterZaOperacao: "PTER Teste",
       gdhInicioOperacao: "10:00",
-      gdhChegadaUIOperacao: "12:00",
+      gdhChegadaUiOperacao: "12:00",
       cmdtForcaOperacao: "Cmdt Força",
       indicativoRadioOperacao: "Indicativo",
       efetivTotalOperacao: "20",
@@ -29,9 +29,9 @@ describe("Operations Persistence", () => {
       viaturasEspeciaisOperacao: 1,
       kmTotaisOperacao: "150",
       municoesArmasAuto762: 10,
-      municoesArmasAuto9mm: 5,
+      municoesArmasAuto9Mm: 5,
       taserCargaX26: 3,
-      obsSECOp: "Observação de teste",
+      obsSecOp: "Observação de teste",
       apontamentosNotas: "Apontamentos de teste",
       operacaoPreenchida: 1,
       consumosPreenchidos: 1,
@@ -58,7 +58,7 @@ describe("Operations Persistence", () => {
     expect(operation?.dterOperacao).toBe("DTER Teste");
     expect(operation?.pterZaOperacao).toBe("PTER Teste");
     expect(operation?.gdhInicioOperacao).toBe("10:00");
-    expect(operation?.gdhChegadaUIOperacao).toBe("12:00");
+    expect(operation?.gdhChegadaUiOperacao).toBe("12:00");
     expect(operation?.cmdtForcaOperacao).toBe("Cmdt Força");
     expect(operation?.indicativoRadioOperacao).toBe("Indicativo");
     expect(operation?.efetivTotalOperacao).toBe("20");
@@ -67,9 +67,9 @@ describe("Operations Persistence", () => {
     expect(operation?.viaturasEspeciaisOperacao).toBe(1);
     expect(operation?.kmTotaisOperacao).toBe("150");
     expect(operation?.municoesArmasAuto762).toBe(10);
-    expect(operation?.municoesArmasAuto9mm).toBe(5);
+    expect(operation?.municoesArmasAuto9Mm).toBe(5);
     expect(operation?.taserCargaX26).toBe(3);
-    expect(operation?.obsSECOp).toBe("Observação de teste");
+    expect(operation?.obsSecOp).toBe("Observação de teste");
     expect(operation?.apontamentosNotas).toBe("Apontamentos de teste");
     expect(operation?.operacaoPreenchida).toBe(1);
     expect(operation?.consumosPreenchidos).toBe(1);
